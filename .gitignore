@@ -16,9 +16,11 @@ multiClass/ldaTrain.model
 multiClass/ldaTrain.model.expElogbeta.npy
 multiClass/ldaTrain.model.id2word
 multiClass/ldaTrain.model.state
-multiClass/PredictiveModelingChallengeGensimBigrams.ipynb
-multiClass/PredictiveModelingExerciseWordEmbeddingsLSTM.ipynb
+multiClass/PredictiveModelingChallengeUsingGloVeWordEmbedding.ipynb
 multiClass/*.joblib
 multiClass/*.pdf
 multiClass/*.png
 multiClass/*.svg
+styleTransfer/*.ipynb
+styleTransfer/*.jpg
+styleTransfer/*.png
