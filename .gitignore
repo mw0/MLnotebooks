@@ -19,7 +19,6 @@ multiClass/ldaTrain.model.state
 multiClass/PredictiveModelingChallengeUsingGloVeWordEmbedding.ipynb
 multiClass/*.joblib
 multiClass/*.pdf
-multiClass/*.png
 multiClass/*.svg
 styleTransfer/*.ipynb
 styleTransfer/*.jpg
