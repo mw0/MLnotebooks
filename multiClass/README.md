@@ -9,9 +9,9 @@
   * [Class splits and balancing](#class-splits-and-balancing)
   * [TF-IDF features](#tf-idf-features)
 * [Basic model results](#basic-model-results)
-  * [analyses of confusion matrices](AnalysesOfConfusionMatrices.md)
+  * ([analyses of confusion matrices](AnalysesOfConfusionMatrices.md))
 * [Topic model feature results](#topic-model-feature-results)
-  * [topic model visualizations](TopicModelVisualizations.md)
+  * ([topic model visualizations](TopicModelVisualizations.md))
 
 ### Initial look
 
@@ -77,6 +77,6 @@ Model 4 in the table above is substantially different from models 0-3. I was cur
 I used `gensim`s Latent Dirichlet Allocation model to get topic and document weights from the TF-IDF encoded messages.
 Starting with a guess of 10 topics, the `pyLDAvis` inter-topic distance visualizations showed a couple cases of overlapping classes. This lead me to reduce the topic count to 8, which look good in the [topic model visualizations](TopicModelVisualizations.md).
 
-In the end, the separation into what appeared to be well-separated LDA topics mattered little.
-The logistic regression classifier obtained relatively poor results.
+In the end, the separation into what appeared to be well-separated LDA topics was anything but an improvement; the logistic regression classifier obtained relatively poor results.
 
+*As an initial guess, I would say that the substantial reduction in dimensionality to 9 features from 13k resulted in too much information loss.*
