@@ -4,7 +4,7 @@
 
 * The classes represented by the 56 FDA codes were severely imbalanced, with 4 having fewer than 65 instances, and 4 having greater than 100k. (Minimum: 27, maximum: 171,202.)
 
-![FDA code frequencies](fda_q_fixed frequenciesFdaCodeFrequencies.png "FDA code frequencies")
+![FDA code frequencies](fda_q_fixedFrequenciesFdaCodeFrequencies.png "FDA code frequencies")
 
 * Four classes (7, 26, 27 & 29) were always critical violations, while four (30, 32, 34 & 46) never were critical violations. The `FDAISCRITICAL` boolean therefore is predictive, and should be included.
 
