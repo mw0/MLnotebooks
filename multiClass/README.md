@@ -2,6 +2,19 @@
 
 * The challenge was to build a classifier to select appropriate FDA food inspection violation codes from text descriptions, and from a boolean indicating whether the violation was critical.
 
+### Contents
+
+* [Initial look](#initial-look)
+* [Preprocessing and feature construction](#preprocessing-and-feature-construction)
+  * [Class splits and balancing](#class-splits-and-balancing)
+  * [TF-IDF features](#tf-idf-features)
+* [Basic model results](#basic-model-results)
+  * [analyses of confusion matrices](AnalysesOfConfusionMatrices.md)
+* [Topic model feature results](#topic-model-feature-results)
+  * [topic model visualizations](TopicModelVisualizations.md)
+
+### Initial look
+
 * The classes represented by the 56 FDA codes were severely imbalanced, with 4 having fewer than 65 instances, and 4 having greater than 100k. (Minimum: 27, maximum: 171,202.)
 
 ![FDA code frequencies](fda_q_fixedFrequenciesFdaCodeFrequencies.png "FDA code frequencies")
@@ -46,10 +59,24 @@ In cases where f<sub>1</sub> ~ 0.79 is acceptable, the training effort makes thi
 
 <table>
 <tr><th rowspan=2>Model</th><th rowspan=2>Classifier</th><th colspan=2>Text Features</th><th colspan=3>Metrics</th><th rowspan=2>Minutes to train</th></tr>
-<tr><th>TF-IDF</th><th>Topic model</th><th>precision</th><th>recall</th><th>f<sup>1</sup></th></tr>
+<tr><th>TF-IDF</th><th>Topic model</th><th>precision</th><th>recall</th><th>f<sub>1</sub></th></tr>
 <tr><td>0</td><td>LR</td><td>&check;</td><td>&cross;</td><td>0.87</td><td>0.86</td><td>0.86</td><td>23</td></tr>
 <tr><td>1</td><td>RF</td><td>&check;</td><td>&cross;</td><td>0.89</td><td>0.89</td><td>0.89</td><td>190</td></tr>
 <tr><td>2</td><td>LSVC</td><td>&check;</td><td>&cross;</td><td>0.86</td><td>0.86</td><td>0.86</td><td>42</td></tr>
 <tr><td>3</td><td>CNB</td><td>&check;</td><td>&cross;</td><td>0.80</td><td>0.79</td><td>0.79</td><td>0.05</td></tr>
 <tr><td>4</td><td>LR</td><td>&cross;</td><td>&check;</td><td>0.42</td><td>0.40</td><td>0.38</td><td>128 + 7</td></tr>
 </table>
+
+Overall, the results from the 4 models using TF-IDF features (and the `FDAISCRITICAL` boolean) provide compelling results on the test data;
+for each class, there are 55 incorrect classifications.
+(But see the [analyses of confusion matrices](AnalysesOfConfusionMatrices.md).)
+
+### Topic model feature results
+
+Model 4 in the table above is substantially different from models 0-3. I was curious to see if topic model weights could be used as features for a logistic regression classifier.
+I used `gensim`s Latent Dirichlet Allocation model to get topic and document weights from the TF-IDF encoded messages.
+Starting with a guess of 10 topics, the `pyLDAvis` inter-topic distance visualizations showed a couple cases of overlapping classes. This lead me to reduce the topic count to 8, which look good in the [topic model visualizations](TopicModelVisualizations.md).
+
+In the end, the separation into what appeared to be well-separated LDA topics mattered little.
+The logistic regression classifier obtained relatively poor results.
+
