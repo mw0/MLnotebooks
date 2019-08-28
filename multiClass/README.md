@@ -41,6 +41,8 @@ After constructing the features (as one-hot encodings), the models used were lin
 Linear regression and linear support vector machine results were identical, while random forest performed moderately better.
 Random forest used default parameters, except `n_estimators=180` and `max_depth=250`.
 Due to swapping during  training (to flash, fortunately), the random forest results came at the expense of a training time that was multiples of those for the other two.
+The complement naive Bayes model produces worse results than the three above it, but the training time is a very speedy 3 seconds.
+In cases where f<sub>1</sub> ~ 0.79 is acceptable, the training effort makes this a winner.
 
 <table>
 <tr><th rowspan=2>Model</th><th rowspan=2>Classifier</th><th colspan=2>Text Features</th><th colspan=3>Metrics</th><th rowspan=2>Minutes to train</th></tr>
