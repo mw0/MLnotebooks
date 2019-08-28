@@ -20,6 +20,8 @@ multiClass/PredictiveModelingChallengeUsingGloVeWordEmbedding.ipynb
 multiClass/*.joblib
 multiClass/*.pdf
 multiClass/*.svg
+multiClass/HazelAnalyticsSummary.pdf
+multiClass/SupplementalNotes.pdf
 styleTransfer/*.ipynb
 styleTransfer/*.jpg
 styleTransfer/*.png
