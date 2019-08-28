@@ -26,8 +26,8 @@ See [Examples](#examples) for illustrations of the results.
 
 #### Woman and man under umbrella, stylized by Renoir's *The two sisters on the terrace*
 
-In this example, Renoir's *The two sisters on the terrace* is the style file.
-The content file is a stock photo of a woman and a man under an umbrella.
+* In this example, Renoir's *The two sisters on the terrace* is the style file.
+* The content file is a stock photo of a woman and a man under an umbrella.
 
 |Style file|Content file|
 |-------------|------------|
@@ -35,12 +35,12 @@ The content file is a stock photo of a woman and a man under an umbrella.
 |Generated image|Animation|
 |![Woman and man under umbrella, stylized by Renoir](WomanManUmbrellaStylizedRenoirTheTwoSisters512x512at0750.png "Woman and man under umbrella, stylized by Renoir")|![Animation showing progression of noise image to final form](AnimatedCoupleWithUmbrellaRenoirStylized.gif "Animation showing progression of noise image to final form")|
 
-It's interesting how the stylized version seems to have flowers from the younger sister's basket where the original content file has a road.
+It's interesting how the generated image (stylized version) seems to have flowers from the younger sister's basket where the original content file has a road.
 
 The animation shows how, through a series of 750 iterations, a third image, starting as random noise, is transformed into the final form as the algorithm tries to minimize the difference between the large-scale features in the content file and the style features of the style file.
 (Reload the page if you want to see the  animation again after it has stopped.)
 
-*In actuality, the generated images are only 256 &times; 256 pixels. My GPU only has 2 GB of memory, and even those dimensions were a stretch for it.*
+*In actuality, the generated images are only 256 &times; 256 pixels. My GPU only has 2 GB of memory, and even those dimensions were a stretch for it. A consequence of this is that the details are not well rendered.*
 
 ### About the code
 
