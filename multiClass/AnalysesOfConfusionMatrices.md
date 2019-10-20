@@ -31,14 +31,14 @@ which is the definition of recall.
 ![Recall Confusion Matrix, Random Forest (160 estimators, maximum depth 250)](ConfusionMatrixRecallRandomForest160EstimatorsMaxDepth-250.png "Recall Confusion Matrix, Random Forest (160 estimators, maximum depth 250)")
 
 In this form, it's easy to spot low-precision scores as those diagonal elements far from red in color.
-The contributions to these lower scores are seen as the same-r elements that have relatively high values.
+The contributions to these lower scores are seen as the same-row elements that have relatively high values.
 
-Class 30 has a very low recall score (0.12), due to twice as many instances being classified by the model as class 21, and large mis-assignments to classes 28, 39 and 37.
+Class 30 has a very low recall score (0.12), due to many instances being classified by the model as class 21, and other large mis-assignments to classes 28, 39 and 37.
 
 ### Precision
 
 This form of the confusion matrix is obtained by normalizing each *column* of the original matrix.
-Those counts above or below a given diagonal element show modelpredictions for the corresponding class that belong to some other class, which is to say that they are false positives.
+Those counts above or below a given diagonal element show model predictions for the corresponding class that labels indicate belong to some other class, which is to say that they are false positives.
 The normalization by column then means dividing counts by all counts the model attributes to the class &mdash; true positives and false positives.
 Each *diagonal* element then contains:
 
@@ -53,3 +53,4 @@ The contributions to these lower scores are seen as the same-column elements tha
 
 Most conspicuous here are classes 27 and 34, which have dismal precisions on account of misclassifications from classes 24 and 38, respectively.
 (Class 7 has a modest precision on account of model mis-classifications from both class 5 and class 8.)
+Note that classes 24 and 38 have respectable recalls, but due to their large sizes a small misclassification error can overwhelm true positives in much smaller classes.
