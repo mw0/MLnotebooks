@@ -4,7 +4,7 @@ The best-seeming LDA topic model results (from all of two attempts) arose when s
 The visualizations below were obtained using `pyLDAvis`.
 
 The first panel represents all topics in an inter-topic distance visualization, using dominant principle component axes.
-These show very good inter-topic separation &mdash; which is surprising, given that I would expect food inspection report comments to have many overlapping terms.
+These show very good inter-topic separation &mdash; which is surprising, given that I would expect food inspection report comments to have many overlapping terms. Of course, projections onto less-significant PCA components would reveal overlap not seen here.
 
 ![All topics, overall word frequencies](Topic0.png "All topics, overall word frequencies")
 

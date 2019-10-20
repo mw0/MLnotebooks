@@ -19,7 +19,7 @@
 
 ![FDA code frequencies](fda_q_fixedFrequenciesFdaCodeFrequencies.png "FDA code frequencies")
 
-* Four classes (7, 26, 27 & 29) were always critical violations, while four (30, 32, 34 & 46) never were critical violations. The `FDAISCRITICAL` boolean therefore is predictive, and should be included.
+* Four classes (7, 26, 27 & 29) were always critical violations, while four (30, 32, 34 & 46) never were critical violations. The `FDAISCRITICAL` boolean therefore is strongly predictive, at least for these classes, and should be included in models.
 
 * Work was done on a notebook computer with 12 GB of memory, which was somewhat marginal for random forest models.
 
@@ -48,7 +48,7 @@ By restricting bigrams to common occurrences, the total feature count was dramat
 
 ### Basic model results
 
-Results for the notebook [PredictiveModelingChallenge.ipynb](https://github.com/mw0/MLnotebooks/blob/master/multiClass/PredictiveModelingChallenge.ipynb) are shown for the first 4 lines of the table below.
+Results obtained using the notebook [PredictiveModelingChallenge.ipynb](https://github.com/mw0/MLnotebooks/blob/master/multiClass/PredictiveModelingChallenge.ipynb) are shown in the first 4 lines of the table below.
 After constructing the features (as one-hot encodings), the models used were linear regression, random forest, linear support vector machine, and complement naive Bayes.
 
 Linear regression and linear support vector machine results were identical, while random forest performed moderately better.
@@ -67,14 +67,13 @@ In cases where f<sub>1</sub> ~ 0.79 is acceptable, the training effort makes thi
 <tr><td>4</td><td>LR</td><td>&cross;</td><td>&check;</td><td>0.42</td><td>0.40</td><td>0.38</td><td>128 + 7</td></tr>
 </table>
 
-Overall, the results from the 4 models using TF-IDF features (and the `FDAISCRITICAL` boolean) provide compelling results on the test data;
-for each class, there are 55 incorrect classifications.
+Overall, the results from the 4 models using TF-IDF features, and the `FDAISCRITICAL` boolean, provide compelling results on the test data, when keeping in mind that for each class there are 55 *incorrect* classifications.
 (But see the [analyses of confusion matrices](AnalysesOfConfusionMatrices.md).)
 
 ### Topic model feature results
 
 Model 4 in the table above is substantially different from models 0-3. I was curious to see if topic model weights could be used as features for a logistic regression classifier.
-I used `gensim`s Latent Dirichlet Allocation model to get topic and document weights from the TF-IDF encoded messages.
+I used `gensim`'s Latent Dirichlet Allocation model to get topic and document weights from the TF-IDF encoded messages.
 Starting with a guess of 10 topics, the `pyLDAvis` inter-topic distance visualizations showed a couple cases of overlapping classes. This lead me to reduce the topic count to 8, which look good in the [topic model visualizations](TopicModelVisualizations.md).
 
 In the end, the separation into what appeared to be well-separated LDA topics was anything but an improvement; the logistic regression classifier obtained relatively poor results.
