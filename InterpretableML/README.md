@@ -30,8 +30,10 @@ Examples
 
 <sup>&ddagger;</sup>[Ribeiro, Marco Tulio, Sameer Singh, and Carlos Guestrin. “Why should I trust you?: Explaining the predictions of any classifier.” Proceedings of the 22nd ACM SIGKDD international conference on knowledge discovery and data mining. ACM (2016)](https://www.kdd.org/kdd2016/papers/files/rfp0573-ribeiroA.pdf)
 
-These examples are modified from a Jupyter notebook provided by Domino Data Lab, described in their 14 Aug 2019 webinar.
-Refer to [SHAPandLIME.ipynb](SHAPandLIME.ipynb) Jupyter notebook for details:
+These examples are from a modified Jupyter notebook provided by Domino Data Lab, described in their 14 Aug 2019 webinar.
+Refer to [SHAPandLIME.ipynb](SHAPandLIME.ipynb) Jupyter notebook for additional plots and details.
+
+#### Highlights:
 
 * For the k-nearest neighbors model, computing Shapley values is prohibitive, due to the *k'(k' - 1)/2* distances that must be computed for each permutation of features left out; instead k-means values weighted by cluster size are supplied to `shap.KernelExplainer()`.
 * Here, we provide a solution to a problem involving the XGBoost `.predict()` medthod. It requires DMatrix inputs, so a wrapper function inserting the data into a DMatrix is invoked when generating LIME plots.
