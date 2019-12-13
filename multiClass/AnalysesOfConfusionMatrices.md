@@ -48,9 +48,8 @@ Each *diagonal* element then contains:
 <!--
 $$ \dfrac{TP}{TP + FP} $$
 -->
-<span style="padding-left: 72px; display:block">
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;![](precisionFormula.png)
-</span>
+
 
 which is the definition of precision.
 
