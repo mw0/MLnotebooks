@@ -27,9 +27,9 @@ Each *diagonal* element then contains:
 <!--
 $$ \dfrac{TP}{TP + FN} $$
 -->
-<p style="margin-left:72px;">
+<span style="padding-left: 72px; display:block">
 <img src="recallFormula.png">
-</p>
+</span>
 
 which is the definition of recall.
 
@@ -50,9 +50,9 @@ Each *diagonal* element then contains:
 <!--
 $$ \dfrac{TP}{TP + FP} $$
 -->
-<p style="margin-left:72px;">
+<span style="padding-left: 72px; display:block">
 <img src="precisionFormula.png">
-</p>
+</span>
 
 which is the definition of precision.
 
