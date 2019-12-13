@@ -27,9 +27,11 @@ Each *diagonal* element then contains:
 <!--
 $$ \dfrac{TP}{TP + FN} $$
 -->
-<span style="padding-left: 72px; display:block">
-<img src="recallFormula.png">
-</span>
+    <img src="recallFormula.png">
+
+junk
+
+    ![](recallFormula.png)
 
 which is the definition of recall.
 
