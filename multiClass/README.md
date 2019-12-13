@@ -61,11 +61,13 @@ In cases where f<sub>1</sub> ~ 0.79 is acceptable, the training effort makes thi
 <tr><th rowspan=2>Model</th><th rowspan=2>Classifier</th><th colspan=2>Text Features</th><th colspan=3>Metrics</th><th rowspan=2>Minutes to train</th></tr>
 <tr><th>TF-IDF</th><th>Topic model</th><th>precision</th><th>recall</th><th>f<sub>1</sub></th></tr>
 <tr><td>0</td><td>LR</td><td>&check;</td><td>&cross;</td><td>0.87</td><td>0.86</td><td>0.86</td><td>23</td></tr>
-<tr><td>1</td><td>RF</td><td>&check;</td><td>&cross;</td><td>0.89</td><td>0.89</td><td>0.89</td><td>190</td></tr>
+<tr><td>1</td><td>RF</td><td>&check;</td><td>&cross;</td><td>0.89</td><td>0.89</td><td>0.89</td><td>190<sup>&ddagger;</sup></td></tr>
 <tr><td>2</td><td>LSVC</td><td>&check;</td><td>&cross;</td><td>0.86</td><td>0.86</td><td>0.86</td><td>42</td></tr>
 <tr><td>3</td><td>CNB</td><td>&check;</td><td>&cross;</td><td>0.80</td><td>0.79</td><td>0.79</td><td>0.05</td></tr>
 <tr><td>4</td><td>LR</td><td>&cross;</td><td>&check;</td><td>0.42</td><td>0.40</td><td>0.38</td><td>128 + 7</td></tr>
 </table>
+
+<sup>&ddagger;</sup>Swapping to flash drive slowed down this training substantially.
 
 Overall, the results from the 4 models using TF-IDF features, and the `FDAISCRITICAL` boolean, provide compelling results on the test data, when keeping in mind that for each class there are 55 *incorrect* classifications.
 (But see the [analyses of confusion matrices](AnalysesOfConfusionMatrices.md).)
