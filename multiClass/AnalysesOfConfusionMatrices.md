@@ -24,7 +24,10 @@ Those counts to the left or right of a given diagonal element show predictions f
 The normalization by row then means dividing counts by all actual positives for the class &mdash; true positives and false negatives.
 Each *diagonal* element then contains:
 
+<!--
 $$ \dfrac{TP}{TP + FN} $$
+-->
+![](recallFormula.png)
 
 which is the definition of recall.
 
@@ -42,7 +45,10 @@ Those counts above or below a given diagonal element show model predictions for 
 The normalization by column then means dividing counts by all counts the model attributes to the class &mdash; true positives and false positives.
 Each *diagonal* element then contains:
 
+<!--
 $$ \dfrac{TP}{TP + FP} $$
+-->
+![](precisionFormula.png)
 
 which is the definition of precision.
 
