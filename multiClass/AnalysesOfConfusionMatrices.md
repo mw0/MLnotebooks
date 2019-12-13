@@ -27,7 +27,7 @@ Each *diagonal* element then contains:
 <!--
 $$ \dfrac{TP}{TP + FN} $$
 -->
-<p style="margin-left: 36px;">
+<p style="margin-left:72px;">
 <img src="recallFormula.png">
 </p>
 
@@ -50,7 +50,7 @@ Each *diagonal* element then contains:
 <!--
 $$ \dfrac{TP}{TP + FP} $$
 -->
-<p style="margin-left: 36px;">
+<p style="margin-left:72px;">
 <img src="precisionFormula.png">
 </p>
 
