@@ -5,7 +5,7 @@
 ### Shapley values
 
 Shapley values <sup>&dagger;</sup> originate from cooperative game theory, and represent the contributions of a single player to the total payout of a game. This is computed for player *i* by examining the average of payouts for the games played by all coalitions (permutations) that can be formed by *excluding* player *i*.
-(A simple example outside of game theory is the [Airport problem](https://en.wikipedia.org/wiki/Airport_problem.)
+(A simple example outside of game theory is the [Airport problem](https://en.wikipedia.org/wiki/Airport_problem).)
 For the purposes of machine learning interpretation, make the substitutions: players ⟶ features, and payouts ⟶ model results.
 The Shapley score then becomes a matter of computing the contribution of a feature *i* to a model result, by averaging results for the permutations of features where j ≠ i.
 For examples, refer to &sect;5.9 of Christoph Molnar's [Interpretable Machine Learning](https://christophm.github.io/interpretable-ml-book/shapley.html#fn41).
