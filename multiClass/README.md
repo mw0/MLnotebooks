@@ -49,9 +49,9 @@ By restricting bigrams to common occurrences, the total feature count was dramat
 ### Basic model results
 
 Results obtained using the notebook [PredictiveModelingChallenge.ipynb](https://github.com/mw0/MLnotebooks/blob/master/multiClass/PredictiveModelingChallenge.ipynb) are shown in the first 4 lines of the table below.
-After constructing the features (as one-hot encodings), the models used were linear regression, random forest, linear support vector machine, and complement naive Bayes.
+After constructing the features (as one-hot encodings), the models used were logistic regression, random forest, linear support vector machine, and complement naive Bayes.
 
-Linear regression and linear support vector machine results were identical, while random forest performed moderately better.
+Logistic regression and linear support vector machine results were identical, while random forest performed moderately better.
 Random forest used default parameters, except `n_estimators=180` and `max_depth=250`.
 Due to swapping during  training (to flash, fortunately), the random forest results came at the expense of a training time that was multiples of those for the other two.
 The complement naive Bayes model produces worse results than the three above it, but the training time is a very speedy 3 seconds.
