@@ -33,7 +33,7 @@
 
 #### Class splits and balancing
 
-The very small classes had insufficient instances for statistically robust training or testing. The best possible is a 50-50 split. However, if the splitting is done randomly from the entire data set, there are no guarantees that the small classes would be evenly split. (There would be a 12% chance that random assignment would place more than 18 of 27 instances of the smallest class in the same test-train split.) For this reason, the splits were done individually for each class.
+The very small classes had insufficient instances for statistically robust training or testing. The best possible is a 50-50 split. However, if the splitting is done randomly from the entire data set, there are no guarantees that the small classes would be evenly split. (There would be a 12% chance that random assignment would place more than 18 of 27 instances of the smallest class in the same test-train split.) For this reason, the splits were done individually for each class (stratified sampling).
 
 Manual balancing of classes was not needed, since the model algorithms each had a `class_weight='balanced'` option.
 
