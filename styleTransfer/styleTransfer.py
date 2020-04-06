@@ -12,6 +12,9 @@ from keras.applications import VGG16 as vgg16
 from keras.applications.vgg16 import preprocess_input
 from keras import backend as K
 
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+
 descr = 'Neural style transfer with Keras.'
 parser = argparse.ArgumentParser(description=descr)
 parser.add_argument('base_image_path', metavar='base', type=str,
