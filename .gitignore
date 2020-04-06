@@ -31,7 +31,6 @@ Trupanion/
 USnames/
 UberReprise/*
 firstGAN/
-multiClass/
 multiClass/#*#
 multiClass/*.joblib
 multiClass/*.pdf
