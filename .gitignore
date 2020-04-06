@@ -11,6 +11,8 @@ InterpretableML/data.csv
 InterpretableML/heartbeat.zip
 InterpretableML/heartbeatDataSource.txt
 InterpretableML/ieee-fraud-detection.zip
+ImplicitLast.fm/*
+LightFMMovieLens/*
 KaggleWeather/city_attributes.csv
 KaggleWeather/historical-hourly-weather-data.zip
 KaggleWeather/pressure.csv
@@ -24,8 +26,9 @@ MaskR-CNN/
 SoccerRankingCollabFiltering/
 SparkProjects/
 SparkProjects/*
+TFWALS/*
 Trupanion/
-UberReprise/
+USnames/
 UberReprise/*
 firstGAN/
 multiClass/
