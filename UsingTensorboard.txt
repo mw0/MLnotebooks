@@ -1,0 +1,42 @@
+# Define callbacks for model checkpoints and TensorBoard:
+
+checkpointDir = './checkpoints'
+
+tensorBoardLogDir = './tensorBoardLogs'
+os.makedirs(tensorBoardLogDir, exist_ok=True)
+
+modelInstanceDir = (f"vocabCt{maxVocabCt:06d}maxCommentLen{maxCommentWords:03d}"
+		    + f"auxFeaturesCt{auxFeaturesCt:02d}classCt{classCt:02d}"
+		    + f"embedDim{embeddingDim:03d}"
+		    + f"LSTMlayerSz{LSTMlayerUnits:03d}batchSz{batchSz:03d}"
+		    + f"dropoutFrac{dropoutFrac:4.2f}"
+		    + f"LSTMdropoutFrac{dropoutFrac:4.2f}")
+
+logsDir = os.path.join(tensorBoardLogDir, modelInstanceDir)
+
+checkpointPrefix = os.path.join(checkpointDir, modelInstanceDir,
+				"ckpt{epoch:03d}")
+checkpointCallback=ModelCheckpoint(filepath=checkpointPrefix,
+                                    save_weights_only=True)
+
+
+os.makedirs(logsDir, exist_ok=True)
+tensorboardCallback = TensorBoard(log_dir=logsDir, histogram_freq=1)
+
+# Then in model.fit(), include callbacks for checkpoints and TensorBoard:
+
+history = modelLSTM.fit(x=[XcommentsTr, XauxTr],
+                        y= FDAcodesTr,
+                        epochs=epochCt, batch_size=batchSz,
+                        shuffle=True,
+                        class_weight=classWeights,
+                        validation_split=0.2,
+                        callbacks=[checkpoint_callback, tensorboard_callback],
+			verbose=1)
+
+# Finally, set up a tunnel, if needed, to the server where TensorBoard is
+# served via port 6006, by executing on command line:
+
+ssh -NL 6006:localhost:6006 mark@rustytrephine.rip
+
+# In browser on local machine. open http://127.0.0.1:6006/
