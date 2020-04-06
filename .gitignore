@@ -22,6 +22,21 @@ multiClass/*.pdf
 multiClass/*.svg
 multiClass/HazelAnalyticsSummary.pdf
 multiClass/SupplementalNotes.pdf
+<<<<<<< HEAD
+FederalistPapers/*
+GAN-tutorial/*
+InterpretableML/data.csv
+InterpretableML/breast-cancer-wisconsin-data.zip
+InterpretableML/ieee-fraud-detection.zip
+InterpretableML/heartbeat.zip
+InterpretableML/heartbeatDataSource.txt
+MaskR-CNN/
+SoccerRankingCollabFiltering/
+Trupanion/
+firstGAN/
+multiClass/#*#
+=======
+>>>>>>> 7a374198d625a199acb16119aa69babcf79a1dd9
 styleTransfer/*.ipynb
 styleTransfer/*.jpg
 styleTransfer/ChildrenKolkataIndiaByLorenJosephOnUnsplash*.png
