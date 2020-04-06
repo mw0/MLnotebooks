@@ -129,17 +129,18 @@ import scipy.sparse as sp
 
 skVersion = None
 from sklearn import __version__ as skVersion
-from sklearn.feature_extraction import text
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_selection import chi2
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
+# from sklearn.feature_extraction import text
+# from sklearn.feature_extraction.text import TfidfVectorizer
+# from sklearn.feature_selection import chi2
+# from sklearn.linear_model import LogisticRegression
+# from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
-from sklearn import metrics
-from sklearn.svm import LinearSVC, SVC
-from sklearn.naive_bayes import ComplementNB
+# from sklearn import metrics
+# from sklearn.svm import LinearSVC, SVC
+# from sklearn.naive_bayes import ComplementNB
+from sklearn.utils import class_weight
 
 tfVersion = None
 from tensorflow import __version__ as tfVersion
@@ -727,6 +728,22 @@ modelLSTM = buildModel(maxCommentWords, maxVocabCt, auxFeaturesCt,
 modelLSTM.summary()
 
 
+# ### Compute weights for each class
+
+# In[ ]:
+
+
+dfTr.fda_q_fixed.unique() - 1
+
+
+# In[ ]:
+
+
+classWeights = class_weight.compute_class_weight('balanced',
+                                                 dfTr.fda_q_fixed.unique() - 1,
+                                                 dfTr.fda_q_fixed - 1)
+
+
 # ### Define callbacks for model checkpoints and TensorBoard
 
 # In[47]:
@@ -768,11 +785,12 @@ modelLSTM.compile(optimizer='rmsprop',
 
 
 history = modelLSTM.fit(x=[XcommentsTr, XauxTr],
-                    y= FDAcodesTr,
-                    epochs=epochCt, batch_size=batchSz,
-                    shuffle=True,
-                    validation_split=0.2,
-                    callbacks=[checkpoint_callback, tensorboard_callback], verbose=1)
+                        y= FDAcodesTr,
+                        epochs=epochCt, batch_size=batchSz,
+                        shuffle=True,
+                        class_weight=classWeights,
+                        validation_split=0.2,
+                        callbacks=[checkpoint_callback, tensorboard_callback], verbose=1)
 
 
 # In[ ]:
