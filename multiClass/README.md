@@ -10,6 +10,7 @@
   * [TF-IDF features](#tf-idf-features)
 * [Basic model results](#basic-model-results)
   * ([analyses of confusion matrices](AnalysesOfConfusionMatrices.md))
+* [Bidirectional LSTM](https://github.com/mw0/MLnotebooks/blob/master/multiClass/BidirectionalLSTM.md)
 * [Topic model feature results](#topic-model-feature-results)
   * ([topic model visualizations](TopicModelVisualizations.md))
 
@@ -59,7 +60,7 @@ In cases where f<sub>1</sub> ~ 0.79 is acceptable, the training effort makes thi
 Intermediate in results is a early version of a bidirectional LSTM model.
 To date, only 4 experiments have been run, varying maximum words per comment, and dropout fractions.
 There are many ways to modify the model architecture, and tune macro-parameters.
-For more information, see [bidirectional LSTM](Bidirectional.md).
+For more information, see [bidirectional LSTM](https://github.com/mw0/MLnotebooks/blob/master/multiClass/BidirectionalLSTM.md).
 
 <table>
 <tr><th rowspan=2>Model</th><th rowspan=2>Classifier</th><th colspan=2>Text Features</th><th colspan=3>Metrics</th><th rowspan=2>Minutes to train</th></tr>
