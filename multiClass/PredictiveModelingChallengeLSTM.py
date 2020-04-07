@@ -462,13 +462,13 @@ if __name__ == "__main__":
 
     testFrac = 0.4
     maxVocabCt = 80000
-    maxCommentWords = 40
+    maxCommentWords = 60		# 40|60
     LSTMlayerUnits = 64
     embeddingDim = 64
     auxFeaturesCt = 1
     classCt = 56
-    dropoutFrac = 0.30
-    LSTMdropoutFrac = 0.5
+    dropoutFrac = 0.20			# 0.20|0.30
+    LSTMdropoutFrac = 0.50		# 0.35|0.50
     batchSz = 64
     epochCt = 10
     denseLayerDim = 64
@@ -487,7 +487,7 @@ if __name__ == "__main__":
          + f"embedDim{embeddingDim:03d}"
          + f"LSTMlayerSz{LSTMlayerUnits:03d}batchSz{batchSz:03d}"
          + f"dropoutFrac{dropoutFrac:4.2f}"
-         + f"LSTMdropoutFrac{dropoutFrac:4.2f}")
+         + f"LSTMdropoutFrac{LSTMdropoutFrac:4.2f}")
 
     # Redirect stdout to modelInstanceDir/stdout:
 
@@ -656,7 +656,7 @@ if __name__ == "__main__":
     #                         {'main_output': FDAcodes},
     #                         epochs=5, batch_size=batchSz)
 
-    # modelLSTM.save(logsDir + '/save', save_format='tf')
+    modelLSTM.save(logsDir + '/save.h5')
 
     # ### Do inference on test
 
