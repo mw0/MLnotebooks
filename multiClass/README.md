@@ -70,7 +70,7 @@ For more information, see [bidirectional LSTM](https://github.com/mw0/MLnotebook
 <tr><td>2</td><td>LSVC</td><td>&check;</td><td>&cross;</td><td>0.86</td><td>0.86</td><td>0.86</td><td>42</td></tr>
 <tr><td>3</td><td>CNB</td><td>&check;</td><td>&cross;</td><td>0.80</td><td>0.79</td><td>0.79</td><td>0.05</td></tr>
 <tr><td>4</td><td>LR</td><td>&cross;</td><td>&check;</td><td>0.42</td><td>0.40</td><td>0.38</td><td>128 + 7</td></tr>
-<tr><td>5</td><td>LSTM</td><td>&cross;</td><td>&check;</td><td>0.84</td><td>0.84</td><td>0.84</td><td>7.5 h</td></tr>
+<tr><td>5</td><td>LSTM</td><td>&cross;</td><td>&cross;</td><td>0.84</td><td>0.84</td><td>0.84</td><td>7.5 h</td></tr>
 </table>
 
 <sup>&ddagger;</sup>Swapping to flash drive slowed down this training substantially.
