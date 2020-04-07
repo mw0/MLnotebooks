@@ -1,10 +1,10 @@
 ## Bidirectional LSTM Model
 
-As previously, word sequences from comments are tokenized and down-cased, and a dictionary of word indices is created.
+As with the bag of words techniques, word sequences from comments are tokenized and down-cased, and a dictionary of word indices is created.
 In this case the maximum vocabulary is set to some maxVocabCt (default: 80k), and low-frequency occurrences are removed.
 
-Comments are truncated at some maximum length, maxCommentWords (default: 40), and pre-padded with 0s (not assigned to any word in dictionary) if shorter.
-These vectors are fed into an embedding layer of size embeddingDim (default: 64), which in principle are learned as the model is trained.
+Comments are truncated at some maximum length, maxCommentWords (default: 40), and pre-padded with 0s (not assigned to any word in dictionary) if shorter. EDA has shown that 99% of the comments have fewer than 140 word, 5% have fewer than 80, and 15% have fewer than 47 words. I have tried maxCommentWords of 140, and it may make sense to try 80 ...
+These vectors are fed into an embedding layer of size embeddingDim (default: 64), in which word representations are learned, in principle, as the model is trained.
 
 Outputs from the embedding layer are passed to a bidirectional LSTM layer having internal activation layers of length LSTMlayerUnits (default: 64), and in the model design shown below, to a second LSTM layer.
 

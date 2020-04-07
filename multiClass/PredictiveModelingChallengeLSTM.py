@@ -63,7 +63,7 @@ from sklearn import __version__ as skVersion
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
-# from sklearn import metrics
+from sklearn import metrics
 # from sklearn.svm import LinearSVC, SVC
 # from sklearn.naive_bayes import ComplementNB
 from sklearn.utils import class_weight
