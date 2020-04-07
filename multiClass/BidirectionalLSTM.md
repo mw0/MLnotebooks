@@ -18,4 +18,3 @@ During backpropagation the model should learn how much to weight the booleans vs
 
 The concatenated vector + boolean, are passed to two dense layers of size denseLayerDim (default: 64).
 Final outputs pass through a softmax layer with 56 outputs, which produces predicted probabilities for each class.
-
