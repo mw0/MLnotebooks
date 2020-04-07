@@ -10,6 +10,7 @@
   * [TF-IDF features](#tf-idf-features)
 * [Basic model results](#basic-model-results)
   * ([analyses of confusion matrices](AnalysesOfConfusionMatrices.md))
+* [Bidirectional LSTM](https://github.com/mw0/MLnotebooks/blob/master/multiClass/BidirectionalLSTM.md)
 * [Topic model feature results](#topic-model-feature-results)
   * ([topic model visualizations](TopicModelVisualizations.md))
 
@@ -59,7 +60,7 @@ In cases where f<sub>1</sub> ~ 0.79 is acceptable, the training effort makes thi
 Intermediate in results is a early version of a bidirectional LSTM model.
 To date, only 4 experiments have been run, varying maximum words per comment, and dropout fractions.
 There are many ways to modify the model architecture, and tune macro-parameters.
-For more information, see [bidirectional LSTM](Bidirectional.md).
+For more information, see [bidirectional LSTM](https://github.com/mw0/MLnotebooks/blob/master/multiClass/BidirectionalLSTM.md).
 
 <table>
 <tr><th rowspan=2>Model</th><th rowspan=2>Classifier</th><th colspan=2>Text Features</th><th colspan=3>Metrics</th><th rowspan=2>Minutes to train</th></tr>
@@ -69,7 +70,7 @@ For more information, see [bidirectional LSTM](Bidirectional.md).
 <tr><td>2</td><td>LSVC</td><td>&check;</td><td>&cross;</td><td>0.86</td><td>0.86</td><td>0.86</td><td>42</td></tr>
 <tr><td>3</td><td>CNB</td><td>&check;</td><td>&cross;</td><td>0.80</td><td>0.79</td><td>0.79</td><td>0.05</td></tr>
 <tr><td>4</td><td>LR</td><td>&cross;</td><td>&check;</td><td>0.42</td><td>0.40</td><td>0.38</td><td>128 + 7</td></tr>
-<tr><td>5</td><td>LSTM</td><td>&cross;</td><td>&check;</td><td>0.84</td><td>0.84</td><td>0.84</td><td>7.5 h</td></tr>
+<tr><td>5</td><td>LSTM</td><td>&cross;</td><td>&cross;</td><td>0.84</td><td>0.84</td><td>0.84</td><td>7.5 h</td></tr>
 </table>
 
 <sup>&ddagger;</sup>Swapping to flash drive slowed down this training substantially.
