@@ -58,7 +58,7 @@ Due to swapping during  training (to flash, fortunately), the random forest resu
 The complement naive Bayes model produces worse results than the three above it, but the training time is a very speedy 3 seconds.
 In cases where f<sub>1</sub> ~ 0.79 is acceptable, the training effort makes this a winner.
 Intermediate in results is a early version of a bidirectional LSTM model.
-To date, only 4 experiments have been run, varying maximum words per comment, and dropout fractions.
+To date, only 6 experiments have been run, varying maximum words per comment, and dropout fractions.
 There are many ways to modify the model architecture, and tune macro-parameters.
 For more information, see [bidirectional LSTM](https://github.com/mw0/MLnotebooks/blob/master/multiClass/BidirectionalLSTM.md).
 

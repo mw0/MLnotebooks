@@ -364,7 +364,7 @@ def buildModel0(sequence_length, vocabSz, auxFeatureCount,
     lstm_out = Bidirectional(LSTM(LSTMinternalLayerSz,
                                   dropout=dropoutFrac,
                                   recurrent_dropout=LSTMdropoutFrac,
-                                  return_sequences=True,
+                                  return_sequences=False,
                                   name='BidirectionalLSTM'))(x)
     print(f"lstm_out.shape: {lstm_out.shape}")
 
