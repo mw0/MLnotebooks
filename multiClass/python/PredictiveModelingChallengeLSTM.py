@@ -481,7 +481,7 @@ if __name__ == "__main__":
 
     testFrac = 0.4
     maxVocabCt = 80000
-    maxCommentWords = 60		# 40|60
+    maxCommentWords = 40		# 40|60|80|140
     LSTMlayerUnits = 64
     embeddingDim = 64
     auxFeaturesCt = 1

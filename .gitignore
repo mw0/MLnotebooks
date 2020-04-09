@@ -67,3 +67,6 @@ styleTransfer/ChildrenKolkataIndiaByLorenJosephOnUnsplash*.png
 styleTransfer/PortraitOfManHuggingHappyWomanUnderUmbrella.png
 styleTransfer/PortraitOfManHuggingHappyWomanUnderUmbrella256*
 styleTransfer/PortraitOfManHuggingHappyWomanUnderUmbrella512x.png
+*.svg
+pdf
+.ipynb_checkpoints
