@@ -11,7 +11,7 @@ This classifier model includes analyses of errors with the aid of three types of
 This is a standard confusion matrix, with actual counts assigned to each class by the ground-truth target variable (`fda_q_fixed`) shown in rows, and model class predictions in columns.
 Counts of true positives, with predicted and actual classes in agreement, are along the diagonal.
 
-![Counts Confusion Matrix, Random Forest (160 estimators, maximum depth 250)](ConfusionMatrixCountsRandomForest160EstimatorsMaxDepth-250.png "Counts Confusion Matrix, Random Forest (160 estimators, maximum depth 250)")
+![Counts Confusion Matrix, Random Forest (160 estimators, maximum depth 250)](images/ConfusionMatrixCountsRandomForest160EstimatorsMaxDepth-250.png "Counts Confusion Matrix, Random Forest (160 estimators, maximum depth 250)")
 
 Direct application of this form of the confusion matrix is not very helpful, since it is dominated by the diagonal elements of the 4 largest classes &mdash; due to the strongly un-balanced classes.
 After reviewing the Precision and Recall versions, we can use this to read-off counts for mis-classifications.
@@ -27,11 +27,11 @@ Each *diagonal* element then contains:
 <!--
 $$ \dfrac{TP}{TP + FN} $$
 -->
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;![](recallFormula.png)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;![](images/recallFormula.png)
 
 which is the definition of recall.
 
-![Recall Confusion Matrix, Random Forest (160 estimators, maximum depth 250)](ConfusionMatrixRecallRandomForest160EstimatorsMaxDepth-250.png "Recall Confusion Matrix, Random Forest (160 estimators, maximum depth 250)")
+![Recall Confusion Matrix, Random Forest (160 estimators, maximum depth 250)](images/ConfusionMatrixRecallRandomForest160EstimatorsMaxDepth-250.png "Recall Confusion Matrix, Random Forest (160 estimators, maximum depth 250)")
 
 In this form, it's easy to spot low-precision scores as those diagonal elements far from red in color.
 The contributions to these lower scores are seen as the same-row elements that have relatively high values.
@@ -48,12 +48,12 @@ Each *diagonal* element then contains:
 <!--
 $$ \dfrac{TP}{TP + FP} $$
 -->
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;![](precisionFormula.png)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;![](images/precisionFormula.png)
 
 
 which is the definition of precision.
 
-![Precision Confusion Matrix, Random Forest (160 estimators, maximum depth 250)](ConfusionMatrixPrecisionRandomForest160EstimatorsMaxDepth-250.png "Precision Confusion Matrix, Random Forest (160 estimators, maximum depth 250)")
+![Precision Confusion Matrix, Random Forest (160 estimators, maximum depth 250)](images/ConfusionMatrixPrecisionRandomForest160EstimatorsMaxDepth-250.png "Precision Confusion Matrix, Random Forest (160 estimators, maximum depth 250)")
 
 In this form, it's easy to spot low-precision scores as those diagonal elements far from red in color.
 The contributions to these lower scores are seen as the same-column elements that have relatively high values.
