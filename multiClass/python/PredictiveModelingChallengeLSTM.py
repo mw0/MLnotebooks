@@ -172,13 +172,6 @@ if 'utility' in sys.modules:
 
 print(asctime(gmtime()))
 
-# Δt = time() - t0
-# print(f"\n\nΔt: {Δt: 4.1f}s.")
-
-# ### Helper functions
-
-# #### `tokenize()`
-
 def tokenize(corpus, vocabSz):
     """
     Generates the vocabulary and the list of list of integers for the input
@@ -221,7 +214,7 @@ def tokenize(corpus, vocabSz):
     return listOfIndexLists, sentenceTokenizer
 
 
-def preprocessDatums(df, classColumn, testFrac):
+def preprocessDatums(df, classColumn, testFrac, myRandomState=None):
 
     """
 
@@ -250,8 +243,9 @@ def preprocessDatums(df, classColumn, testFrac):
     **
     """
 
-    randomState = 0
-    myRandomState = np.random.RandomState(randomState)
+    if myRandomState is None:
+        randomState = 0
+        myRandomState = np.random.RandomState(randomState)
 
     dfTr, dfTe = util.splitDataFrameByClasses(df, classColumn,
                                               testFrac=testFrac,
@@ -315,19 +309,12 @@ def preprocessDatums(df, classColumn, testFrac):
     return (dfTr, XcommentsTr, XauxTr, FDAcodesTr,
             dfTe, XcommentsTe, XauxTe, FDAcodesTe, myRandomState)
 
+
 # Model time
 
 # ### Define the model
 
-# This follows, to some degree, [Keras Multi-Input and multi-output models]
-# (https://keras.io/getting-started/...
-#  .../functional-api-guide/#multi-input-and-multi-output-models)
-
-# * In this case, we only have a single output
-# * Here, Bidirectional LSTMs are used, but no secondary LSTM layer
-
-
-def buildModel0(sequence_length, vocabSz, auxFeatureCount,
+def buildModel0(sequenceLength, vocabSz, auxFeatureCount,
                 LSTMinternalLayerSz, embedLayerDim,
                 LSTMdropoutFrac=0.40,
                 denseLayerDim=64,
@@ -335,8 +322,9 @@ def buildModel0(sequence_length, vocabSz, auxFeatureCount,
                 softMaxCt=16):
 
     """
+
     INPUTS:
-    sequence_length		int, number of LSTM units
+    sequenceLength		int, number of LSTM units
     vocabSz			int, size of vocabulary
     auxFeatureCount		int, count of auxiliary (side) features
     LSTMinternalLayerSz		int, size of layers within LSTM units
@@ -345,46 +333,61 @@ def buildModel0(sequence_length, vocabSz, auxFeatureCount,
     softMaxCt			int, dimension of softmax output, default: 16
     dropoutFrac			int, dropout rate, default: 0.15
     LSTMdropoutFrac		int, dropout rate for LSTMs, default: 0.40
+
+    This follows, to some degree, [Keras Multi-Input and multi-output models]
+    (https://keras.io/getting-started/.
+    ./functional-api-guide/#multi-input-and-multi-output-models)
+
+    • In this case, we only have a single output
+    • Here, Bidirectional LSTMs are used, but no secondary LSTM layer
     """
 
-    # Headline input: meant to receive sequences of *sequence_length* integers,
-    #  between 1 and *vocabSz*.
-    # Note that we can name any layer by passing it a "name" argument.
-    main_input = Input(shape=(sequence_length,), dtype='int32',
+    # • MainInput: meant to receive sequences of `sequenceLength` integers,
+    #   between 1 and `vocabSz`. (O index reserved for padding.)
+    # • Note that we can name any layer by passing it a "name" argument.
+
+    mainInput = Input(shape=(sequenceLength,), dtype='int32',
                        name='MainInput')
 
     # This embedding layer will encode the input sequence
     # into a sequence of dense 64-dimensional vectors.
+
     x = Embedding(output_dim=embedLayerDim, input_dim=vocabSz,
-                  input_length=sequence_length, trainable=True,
-                  name='EmbedLayer')(main_input)
+                  input_length=sequenceLength, trainable=True,
+                  name='EmbedLayer')(mainInput)
 
     # A LSTM will transform the vector sequence into a single vector,
     # containing information about the entire sequence
-    lstm_out = Bidirectional(LSTM(LSTMinternalLayerSz,
+
+    LSTMout = Bidirectional(LSTM(LSTMinternalLayerSz,
                                   dropout=dropoutFrac,
                                   recurrent_dropout=LSTMdropoutFrac,
                                   return_sequences=False,
                                   name='BidirectionalLSTM'))(x)
-    print(f"lstm_out.shape: {lstm_out.shape}")
+    print(f"LSTMout.shape: {LSTMout.shape}")
 
-    auxiliary_input = Input(shape=(auxFeatureCount,), name='NumericalFeatures')
-    x = concatenate([lstm_out, auxiliary_input])
+    # • NumericalFeatures: 'side features' to be concatenated with
+    #   `LSTMinternalLayerSz` features coming out of LSTM layer.
 
-    # We stack a deep densely-connected network on top
+    auxiliaryInput = Input(shape=(auxFeatureCount,), name='NumericalFeatures')
+    x = concatenate([LSTMout, auxiliaryInput])
+
+    # We stack a shallow densely-connected network on top
+
     x = Dense(denseLayerDim, activation='relu')(x)
     x = Dense(denseLayerDim, activation='relu')(x)
 
-    # And finally we add the main logistic regression layer
+    # Finish with a softmax layer to predict classes
+
     main_output = Dense(denseLayerDim, activation='softmax',
                         name='SoftmaxOutput')(x)
-    model = Model(inputs=[main_input, auxiliary_input], outputs=main_output)
+    model = Model(inputs=[mainInput, auxiliaryInput], outputs=main_output)
 
     return model
 
 
 # This version adds a second LSTM layer
-def buildModel1(sequence_length, vocabSz, auxFeatureCount,
+def buildModel1(sequenceLength, vocabSz, auxFeatureCount,
                 LSTMinternalLayerSz, embedLayerDim,
                 LSTMdropoutFrac=0.40,
                 denseLayerDim=64,
@@ -393,7 +396,7 @@ def buildModel1(sequence_length, vocabSz, auxFeatureCount,
 
     """
     INPUTS:
-    sequence_length		int, number of LSTM units
+    sequenceLength		int, number of LSTM units
     vocabSz			int, size of vocabulary
     auxFeatureCount		int, count of auxiliary (side) features
     LSTMinternalLayerSz		int, size of layers within LSTM units
@@ -402,45 +405,61 @@ def buildModel1(sequence_length, vocabSz, auxFeatureCount,
     softMaxCt			int, dimension of softmax output, default: 16
     dropoutFrac			int, dropout rate, default: 0.15
     LSTMdropoutFrac		int, dropout rate for LSTMs, default: 0.40
+
+    This follows, to some degree, [Keras Multi-Input and multi-output models]
+    (https://keras.io/getting-started/.
+    ./functional-api-guide/#multi-input-and-multi-output-models)
+
+    • In this case, we only have a single output
+    • Here, Bidirectional LSTMs are used, as well as a secondary LSTM layer
     """
 
-    # Headline input: meant to receive sequences of *sequence_length* integers,
-    #  between 1 and *vocabSz*.
-    # Note that we can name any layer by passing it a "name" argument.
-    main_input = Input(shape=(sequence_length,), dtype='int32',
-                       name='MainInput')
+    # • MainInput: meant to receive sequences of `sequenceLength` integers,
+    #   between 1 and `vocabSz`. (O index reserved for padding.)
+    # • Note that we can name any layer by passing it a "name" argument.
+
+    mainInput = Input(shape=(sequenceLength,), dtype='int32',
+                      name='MainInput')
 
     # This embedding layer will encode the input sequence
     # into a sequence of dense 64-dimensional vectors.
+
     x = Embedding(output_dim=embedLayerDim, input_dim=vocabSz,
-                  input_length=sequence_length, trainable=True,
-                  name='EmbedLayer')(main_input)
+                  input_length=sequenceLength, trainable=True,
+                  name='EmbedLayer')(mainInput)
 
-    # A LSTM will transform the vector sequence into a single vector,
-    # containing information about the entire sequence
-    lstm_out_1 = Bidirectional(LSTM(LSTMinternalLayerSz,
-                                    dropout=dropoutFrac,
-                                    recurrent_dropout=LSTMdropoutFrac,
-                                    return_sequences=True,
-                                    name='BidirectionalLSTM'))(x)
-    print(f"lstm_out_1.shape: {lstm_out_1.shape}")
-    lstm_out = LSTM(LSTMinternalLayerSz,
-                    dropout=dropoutFrac,
-                    recurrent_dropout=LSTMdropoutFrac,
-                    name='LSTM2')(lstm_out_1)
-    print(f"lstm_out.shape: {lstm_out.shape}")
+    # A LSTM can transform the vector sequence into a single vector,
+    # containing information about the entire sequence. In the first instance
+    # a transformed *sequence* is passed along to the second LSTM.
 
-    auxiliary_input = Input(shape=(auxFeatureCount,), name='NumericalFeatures')
-    x = concatenate([lstm_out, auxiliary_input])
+    LSTMbidir = Bidirectional(LSTM(LSTMinternalLayerSz,
+                                   dropout=dropoutFrac,
+                                   recurrent_dropout=LSTMdropoutFrac,
+                                   return_sequences=True,
+                                   name='BidirectionalLSTM'))(x)
+    print(f"LSTMbidir.shape: {LSTMbidir.shape}")
+    LSTMout = LSTM(LSTMinternalLayerSz,
+                   dropout=dropoutFrac,
+                   recurrent_dropout=LSTMdropoutFrac,
+                   name='LSTM2')(LSTMbidir)
+    print(f"LSTMout.shape: {LSTMout.shape}")
 
-    # We stack a deep densely-connected network on top
+    # • NumericalFeatures: 'side features' to be concatenated with
+    #   `LSTMinternalLayerSz` features coming out of LSTM layer.
+
+    auxiliaryInput = Input(shape=(auxFeatureCount,), name='NumericalFeatures')
+    x = concatenate([LSTMout, auxiliaryInput])
+
+    # We stack a shallow densely-connected network on top
+
     x = Dense(denseLayerDim, activation='relu')(x)
     x = Dense(denseLayerDim, activation='relu')(x)
 
-    # And finally we add the main logistic regression layer
+    # Finish with a softmax layer to predict classes
+
     main_output = Dense(denseLayerDim, activation='softmax',
                         name='SoftmaxOutput')(x)
-    model = Model(inputs=[main_input, auxiliary_input], outputs=main_output)
+    model = Model(inputs=[mainInput, auxiliaryInput], outputs=main_output)
 
     return model
 
@@ -467,14 +486,14 @@ if __name__ == "__main__":
     embeddingDim = 64
     auxFeaturesCt = 1
     classCt = 56
+    dropoutFrac = 0.20			# 0.20|0.30
     LSTMdropoutFrac = 0.50		# 0.35|0.50
-    dropoutFrac = 0.30			# 0.20|0.30
     batchSz = 64
     epochCt = 10
     denseLayerDim = 64
 
     classColumn = 'fda_q_fixed'
-    useModel = 0
+    useModel = 1
 
     tensorBoardLogDir = './tensorBoardLogs'
     os.makedirs(tensorBoardLogDir, exist_ok=True)
@@ -651,9 +670,9 @@ if __name__ == "__main__":
                             x=[XcommentsTr, XauxTr],
                             y=FDAcodesTr)
 
-    # history = modelLSTM.fit({'main_input': paddedSequences,
-    #                          'numerical_input': bools},
-    #                         {'main_output': FDAcodes},
+    # history = modelLSTM.fit({'MainInput': paddedSequences,
+    #                          'NumericalFeatures': bools},
+    #                         {'SoftmaxOutput': FDAcodes},
     #                         epochs=5, batch_size=batchSz)
 
     modelLSTM.save(logsDir + '/save.h5')
