@@ -14,7 +14,7 @@ From the exploratory data analysis, it became clear that for 8 codes these boole
 This is accomplished by merging the boolean values after getting output features from the LSTM layer(s).
 During backpropagation the model should learn how much to weight the booleans vs. the LSTM state vector values.
 
-![Example TensorFlow model graph](modelGraph.png)
+![Example TensorFlow model graph](images/modelGraph.png)
 
 The concatenated vector + boolean, are passed to two dense layers of size denseLayerDim (default: 64).
 Final outputs pass through a softmax layer with 56 outputs, which produces predicted probabilities for each class.

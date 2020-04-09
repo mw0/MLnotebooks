@@ -18,7 +18,7 @@
 
 * The classes represented by the 56 FDA codes were severely imbalanced, with 4 having fewer than 65 instances, and 4 having greater than 100k. (Minimum: 27, maximum: 171,202.)
 
-![FDA code frequencies](fda_q_fixedFrequenciesFdaCodeFrequencies.png "FDA code frequencies")
+![FDA code frequencies](images/fda_q_fixedFrequenciesFdaCodeFrequencies.png "FDA code frequencies")
 
 * Four classes (7, 26, 27 & 29) were always critical violations, while four (30, 32, 34 & 46) never were critical violations. The `FDAISCRITICAL` boolean therefore is strongly predictive, at least for these classes, and should be included in models.
 
@@ -28,7 +28,7 @@
 
 * Comments varied in length from 0 to 844 words (mode of 8) but only 1% had more than 140 words.
 
-![Message word counts](WordCountsHistWordCountsMax844Mode8.png "Message word counts")
+![Message word counts](images/WordCountsHistWordCountsMax844Mode8.png "Message word counts")
 
 ### Preprocessing and feature construction
 
@@ -49,7 +49,7 @@ By restricting bigrams to common occurrences, the total feature count was dramat
 
 ### Basic model results
 
-Results obtained using the notebook [PredictiveModelingChallenge.ipynb](https://github.com/mw0/MLnotebooks/blob/master/multiClass/PredictiveModelingChallenge.ipynb) are shown in the first 4 lines of the table below.
+Results obtained using the notebook [PredictiveModelingChallenge.ipynb](https://github.com/mw0/MLnotebooks/blob/master/multiClass/notebooks/PredictiveModelingChallenge.ipynb) are shown in the first 4 lines of the table below.
 After constructing the features (as one-hot encodings), the models used were logistic regression, random forest, linear support vector machine, and complement naive Bayes.
 
 Logistic regression and linear support vector machine results were identical, while random forest performed moderately better.
@@ -60,7 +60,7 @@ In cases where f<sub>1</sub> ~ 0.79 is acceptable, the training effort makes thi
 Intermediate in results is a early version of a bidirectional LSTM model.
 To date, only 6 experiments have been run, varying maximum words per comment, and dropout fractions.
 There are many ways to modify the model architecture, and tune macro-parameters.
-For more information, see [bidirectional LSTM](https://github.com/mw0/MLnotebooks/blob/master/multiClass/BidirectionalLSTM.md).
+For more information, see [bidirectional LSTM](https://github.com/mw0/MLnotebooks/blob/master/multiClass/notebooks/BidirectionalLSTM.md).
 
 <table>
 <tr><th rowspan=2>Model</th><th rowspan=2>Classifier</th><th colspan=2>Text Features</th><th colspan=3>Metrics</th><th rowspan=2>Minutes to train</th></tr>
