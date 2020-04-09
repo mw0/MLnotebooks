@@ -467,14 +467,14 @@ if __name__ == "__main__":
     embeddingDim = 64
     auxFeaturesCt = 1
     classCt = 56
-    dropoutFrac = 0.20			# 0.20|0.30
     LSTMdropoutFrac = 0.50		# 0.35|0.50
+    dropoutFrac = 0.30			# 0.20|0.30
     batchSz = 64
     epochCt = 10
     denseLayerDim = 64
 
     classColumn = 'fda_q_fixed'
-    useModel = 1
+    useModel = 0
 
     tensorBoardLogDir = './tensorBoardLogs'
     os.makedirs(tensorBoardLogDir, exist_ok=True)
