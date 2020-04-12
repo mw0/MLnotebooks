@@ -11,7 +11,15 @@ InterpretableML/data.csv
 InterpretableML/heartbeat.zip
 InterpretableML/heartbeatDataSource.txt
 InterpretableML/ieee-fraud-detection.zip
-ImplicitLast.fm/*
+<<<<<<< HEAD
+Implicit/similar-artists-360k-als.tsv
+Implicit/similarItems-als-lastfm.tsv
+Implicit/similarItems-bm25-lastfm.tsv
+Implicit/similarItems-cosine-lastfm.tsv
+Implicit/similarItems-lmf-lastfm.tsv
+Implicit/similarItems-tfidf-lastfm.tsv
+=======
+>>>>>>> 63988a7d8cc9bd3504653f773bafc0d8fc897e61
 LightFMMovieLens/*
 KaggleWeather/city_attributes.csv
 KaggleWeather/historical-hourly-weather-data.zip
