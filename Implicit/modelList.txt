@@ -1,0 +1,42 @@
+./lastfmV2.py --model als
+./lastfmV2.py --model annoy_als
+./lastfmV2.py --model tfidf
+./lastfmV2.py --model bpr
+./lastfmV2.py --model bm25
+
+./lastfmV2.py --recommend --model als 
+./lastfmV2.py --recommend --model annoy_als
+./lastfmV2.py --recommend --model tfidf
+./lastfmV2.py --recommend --model bpr
+./lastfmV2.py --recommend --model bm25
+
+./lastfmV2.py --model als 
+./lastfmV2.py --model annoy_als
+./lastfmV2.py --model tfidf
+./lastfmV2.py --model bpr
+./lastfmV2.py --model bm25
+
+./lastfmV2.py --model als 
+./lastfmV2.py --model annoy_als
+./lastfmV2.py --model tfidf
+./lastfmV2.py --model bpr
+./lastfmV2.py --model bm25
+
+2nd window
+./lastfmV2.py --model nmslib_als
+./lastfmV2.py --model faiss_als
+./lastfmV2.py --model cosine
+./lastfmV2.py --model lmf
+./lastfmV2.py --model 
+
+./lastfmV2.py --recommend --model nmslib_als
+./lastfmV2.py --recommend --model faiss_als
+./lastfmV2.py --recommend --model cosine
+./lastfmV2.py --recommend --model lmf
+./lastfmV2.py --recommend --model 
+
+./lastfmV2.py --model nmslib_als
+./lastfmV2.py --model faiss_als
+./lastfmV2.py --model cosine
+./lastfmV2.py --model lmf
+./lastfmV2.py --model 
