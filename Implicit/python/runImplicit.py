@@ -298,8 +298,6 @@ def getModel(modelName, volubility=1, params=None):
         else:
             params = {}
 
-    # params['use_gpu'] = True	(Seems to figure this out)
-
     if volubility > 1:
         print(modelName.title)
 
@@ -472,11 +470,14 @@ if __name__ == "__main__":
     parser.add_argument('--useGPU', type=bool, default=True,
                         dest='useGPU', help=helpStr)
     helpStr = "λ (regularization constant)"
-    parser.add_argument('--lambda', type=float, default=100.0,
+    parser.add_argument('--lambda', type=float, default=0.01,
                         dest='λ', help=helpStr)
     helpStr = "α (rating ⟶ confidence multiplier)"
     parser.add_argument('--alpha', type=float, default=40.0,
                         dest='α', help=helpStr)
+    helpStr = "training iterations"
+    parser.add_argument('--iterations', type=int, default=15,
+                        dest='iterations', help=helpStr)
     helpStr = "show progress bar while training"
     parser.add_argument('--progressBar', type=bool, default=False,
                         dest='progressBar', help=helpStr)
@@ -496,8 +497,14 @@ if __name__ == "__main__":
     if args.outputfile:
         outFile = args.outputfile
     else:
-        outFile = (f"{args.model}-{args.dataset}-k{args.k:02d}-factors"
-                   f"{args.factors:03d}-λ{args.λ:04.0f}-α{args.α:04.0f}")
+        if args.models == 'als':
+            outFile = (f"{args.model}-{args.dataset}-k{args.k:02d}-factors"
+                       f"{args.factors:03d}-λ{args.λ:06.3f}"
+                       f"-iters{args.iterations:03d}")
+        else:
+            outFile = (f"{args.model}-{args.dataset}-k{args.k:02d}-factors"
+                       f"{args.factors:03d}-λ{args.λ:06.3f}-α{args.α:04.0f}"
+                       f"-iters{args.iterations:03d}")
     print(f"Writing output to {outFile}")
 
     # Redirect stderr to modelInstanceDir/stderr:
@@ -506,10 +513,17 @@ if __name__ == "__main__":
 
     # logging.basicConfig(level=logging.DEBUG)
 
-    myParams = {'factors': args.factors,
-                'regularization': args.λ,
-                'alpha': args.α,
-                'use_gpu': args.useGPU}
+    if args.model == 'als':
+        myParams = {'factors': args.factors,
+                    'regularization': args.λ,
+                    'iterations': args.iterations,
+                    'use_gpu': args.useGPU}
+    else:
+        myParams = {'factors': args.factors,
+                    'regularization': args.λ,
+                    'iterations': args.iterations,
+                    'alpha': args.α,
+                    'use_gpu': args.useGPU}
 
     model = getModel(args.model, volubility=2, params=myParams)
 
