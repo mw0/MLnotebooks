@@ -564,7 +564,7 @@ if __name__ == "__main__":
     pAtK = precision_at_k(model, trainTscr, testTscr, K=k,
                           show_progress=args.progressBar,
                           num_threads=args.numThreads)
-    MAPAtK = mean_average_precision_at_k(model, trainTscr, testTscr, K=k,
+    MAPatK = mean_average_precision_at_k(model, trainTscr, testTscr, K=k,
                                          show_progress=args.progressBar,
                                          num_threads=args.numThreads)
     NDCGatK = ndcg_at_k(model, trainTscr, testTscr, K=k,
