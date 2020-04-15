@@ -3,12 +3,12 @@
 
 # Using `Implicit` and Bayesian Personalized Ranking (BPR) for Recommendations
 
-# This follow's Ben Frederickson's [Finding Similar Music using Matrix Factorization](https://www.benfrederickson.com/matrix-factorization/).
+# This follow's Ben Frederickson's [Finding Similar Music using Matrix
+#  Factorization](https://www.benfrederickson.com/matrix-factorization/).
 
 # ### Python imports
 
 import sys
-sys.path.append('/usr/local/lib/python3.6/dist-packages/implicit-0.4.0-py3.6-linux-x86_64.egg')
 
 import argparse
 import codecs
@@ -26,6 +26,7 @@ from sklearn.metrics import mean_squared_error
 
 import tqdm
 
+# sys.path.append('/usr/local/lib/python3.6/dist-packages/implicit-0.4.0-py3.6-linux-x86_64.egg')
 from implicit.als import AlternatingLeastSquares
 from implicit.approximate_als import (AnnoyAlternatingLeastSquares,
                                       FaissAlternatingLeastSquares,
@@ -155,7 +156,7 @@ os.environ['OPENBLAS_NUM_THREADS'] = '1'
 #         labels = ratings.getrow(user).indices
 #         precision = float(len(set(topK) & set(labels))) / float(k)
 #         precisions.append(precision)
-#     return np.mean(precisions) 
+#     return np.mean(precisions)
 
 
 def calculateSimilarArtists(outputFilename, dataset, modelName="als"):
@@ -309,7 +310,7 @@ def fetchDataset(dataset, volubility=1):
     """
     If not already in cache directory, /data1/mark/implicit_datasets,
     fetches a data set, storing copy in cache.
-    
+
     INPUT:
         dataset		str, one of ['lastfm', 'movielens', 'reddit',
                         'sketchfab', 'million_song']
@@ -363,8 +364,8 @@ def printLog(row, header=False, spacing=12, outFile=None):
 
 def learningCurve(model, train, test, epochs, outFile=None,
                   k=5, showProgress=True, numThreads=12):
-#     if not userIndex:
-#         userIndex = range(train.shape[0])
+    # if not userIndex:
+    #     userIndex = range(train.shape[0])
     prevEpoch = 0
 
     pAtK = []
@@ -442,12 +443,13 @@ def gridSearchLearningCurve(modelName, train, test, paramGrid, numThreads=12,
     return curves
 
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
+
     myDescription = ("Trains model from Implicit package, returning"
                      " evaluation metrics.")
-    parser =         argparse.ArgumentParser(description=myDescription,
-                                             formatter_class=argparse
-                                             .ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(description=myDescription,
+                                     formatter_class=argparse
+                                     .ArgumentDefaultsHelpFormatter)
 
     helpStr = 'Output file name. (Omit to go with parameter-based naming)'
     parser.add_argument('--output-base', type=str,
@@ -475,6 +477,15 @@ def gridSearchLearningCurve(modelName, train, test, paramGrid, numThreads=12,
     helpStr = "α (rating ⟶ confidence multiplier)"
     parser.add_argument('--alpha', type=float, default=40.0,
                         dest='α', help=helpStr)
+    helpStr = "show progress bar while training"
+    parser.add_argument('--progressBar', type=bool, default=False,
+                        dest='progressBar', help=helpStr)
+    helpStr = "k (for metrics@k)"
+    parser.add_argument('--k', type=int, default=6,
+                        dest='k', help=helpStr)
+    helpStr = "number of threads (0, use all)"
+    parser.add_argument('--numThreads', type=int, default=0,
+                        dest='numThreads', help=helpStr)
     helpStr = "Parameters to pass to the model, formatted as 'KEY=VALUE"
     parser.add_argument('--param', action='append',
                         help=helpStr)
@@ -485,12 +496,12 @@ def gridSearchLearningCurve(modelName, train, test, paramGrid, numThreads=12,
     if args.outputfile:
         outFile = args.outputfile
     else:
-        outFile = f"{args.model}-{args.dataset}-factors{factors:3d}"
-        f"-λ{λ:4.0f}-α{α:4.0f}.tsv"
+        outFile = (f"{args.model}-{args.dataset}-k{args.k:02d}-factors"
+                   f"{args.factors:03d}-λ{args.λ:04.0f}-α{args.α:04.0f}")
     print(f"Writing output to {outFile}")
 
     # Redirect stderr to modelInstanceDir/stderr:
-    stderrFile = os.path.join(outFile + '.stderr', 'stderr')
+    stderrFile = os.path.join(outFile + '.stderr')
     sys.stderr = open(stderrFile, 'w')
 
     # logging.basicConfig(level=logging.DEBUG)
@@ -498,6 +509,7 @@ def gridSearchLearningCurve(modelName, train, test, paramGrid, numThreads=12,
     artists, users, plays = fetchDataset(args.dataset, volubility=2)
 
     print(artists.shape, users.shape, plays.shape)
+
     if issubclass(model.__class__, AlternatingLeastSquares):
         # lets weight these models by bm25weight.
         print("weighting matrix by bm25_weight")
@@ -506,9 +518,6 @@ def gridSearchLearningCurve(modelName, train, test, paramGrid, numThreads=12,
         # also disable building approximate recommend index
         model.approximate_recommend = False
 
-    print("args:\n", args)
-    sys.exit(1)
-
     print(asctime(localtime))
     t0 = time()
     plays = plays.tocsr()
@@ -516,87 +525,108 @@ def gridSearchLearningCurve(modelName, train, test, paramGrid, numThreads=12,
 
     train, test = train_test_split(plays, train_percentage=0.8)
 
-    paramGrid = {'factors': myFactors,
-                 'regularization': myλ}
+    myParams = {'factors': args.factors,
+                'regularization': args.λ,
+                'alpha': args.α,
+                'use_gpu': args.useGPU}
 
-    modelName = args.model
-    myEpochs = range(9, 36, 2)
+    model = getModel(args.model, volubility=2, params=myParams)
 
-    k = 6
-    curves = gridSearchLearningCurve(modelName, train, test, paramGrid,
-                                     numThreads=8, showProgress=False, k=k,
-                                     epochs=myEpochs, LCfile=myLCfile)
+    print("Training model")
+    print(asctime(localtime))
+    t0 = time()
 
-    print(curves[0])
+    model.fit(train, show_progress=args.progressBar)
+    print(f"Δt: {time() - t0:5.1f}s")
 
-    thang = [curves[x]["params"] for x in range(len(curves))]
-    df0 = pd.DataFrame(thang)
+    trainTscr = Train.T.tocsr()
+    testTscr = Test.T.tocsr()
 
-    blah = [curves[x][f"p@{k}"] for x in range(len(curves))]
-    df1 = pd.DataFrame(blah)
+    k = args.k
 
-    blah = [curves[x][f"MAP@{k}"] for x in range(len(curves))]
-    df2 = pd.DataFrame(blah)
+    pAtK = precision_at_k(model, trainTcsr, testTcsr, K=k,
+                          show_progress=args.progressBar,
+                          num_threads=args.numThreads)
+    MAPAtK = mean_average_precision_at_k(model, trainTcsr, testTcsr, K=k,
+                                         show_progress=args.progressBar,
+                                         num_threads=args.numThreads)
+    NDCGatK = ndcg_at_k(model, trainTcsr, testTcsr, K=k,
+                        show_progress=args.progressBar,
+                        num_threads=args.numThreads)
+    AUCatK = AUC_at_k(model, trainTcsr, testTcsr, K=k,
+                      show_progress=args.progressBar,
+                      num_threads=args.numThreads)
 
-    blah = [curves[x][f"NDCG@{k}"] for x in range(len(curves))]
-    df3 = pd.DataFrame(blah)
+    print(f"p@{k}: {pAtK:6.4f}, MAP@{k}: {MAPatK:6.4f}"
+          f"NDCG@{k}: {NDCGatK:6.4f}, AUC@{k}: {AUCatK:6.4f}")
 
-    blah = [curves[x][f"AUC@{k}"] for x in range(len(curves))]
-    df4 = pd.DataFrame(blah)
+    # thang = [curves[x]["params"] for x in range(len(curves))]
+    # df0 = pd.DataFrame(thang)
 
-    df = pd.concat([df0, df1, df2, df3,df4], axis=1)
-    df.head()
-    df.tail()
+    # blah = [curves[x][f"p@{k}"] for x in range(len(curves))]
+    # df1 = pd.DataFrame(blah)
 
-    df.set_index(["factors", "regularization", "alpha"], inplace=True)
-    df.head()
-    df.tail()
+    # blah = [curves[x][f"MAP@{k}"] for x in range(len(curves))]
+    # df2 = pd.DataFrame(blah)
 
-    metrics = [f"p@{k}", f"MAP@{k}", f"NDCG@{k}", f"AUC@{k}"]
-    df.columns = pd.MultiIndex.from_product([metrics, myEpochs])
-    df.head(8)
-    df.tail(8)
+    # blah = [curves[x][f"NDCG@{k}"] for x in range(len(curves))]
+    # df3 = pd.DataFrame(blah)
 
-    indices = df.index
+    # blah = [curves[x][f"AUC@{k}"] for x in range(len(curves))]
+    # df4 = pd.DataFrame(blah)
 
-    # Find best `p@{k}` for each epoch
+    # df = pd.concat([df0, df1, df2, df3, df4], axis=1)
+    # df.head()
+    # df.tail()
 
-    cmaxs = df[f"p@{k}"].max()
-    print(f"     epoch  factors\t      λ\t       α\tind\t    p@{k}")
-    for e in myEpochs:
-        ind = np.argmax(df[(f"p@{k}", e)] == cmaxs[e])
-        (factors, regularization, alpha) = indices[ind]
-        print(f"\t{e:2d}\t{factors:3d}\t{regularization:7.3f}\t "
-              f"{alpha:7.3f}\t{ind:3d}\t{cmaxs[e]:7.5f}")
+    # df.set_index(["factors", "regularization", "alpha"], inplace=True)
+    # df.head()
+    # df.tail()
 
-    # Find best `MAP@{k}` for each epoch
+    # metrics = [f"p@{k}", f"MAP@{k}", f"NDCG@{k}", f"AUC@{k}"]
+    # df.columns = pd.MultiIndex.from_product([metrics, myEpochs])
+    # df.head(8)
+    # df.tail(8)
 
-    cmaxs = df[f"MAP@{k}"].max()
-    print(f"     epoch  factors\t      λ\t       α\tind\t  MAP@{k}")
-    for e in myEpochs:
-        ind = np.argmax(df[(f"MAP@{k}", e)] == cmaxs[e])
-        (factors, regularization, alpha) = indices[ind]
-        print(f"\t{e:2d}\t{factors:3d}\t{regularization:7.3f}\t "
-              f"{alpha:7.3f}\t{ind:3d}\t{cmaxs[e]:7.5f}")
+    # indices = df.index
 
+    # # Find best `p@{k}` for each epoch
 
-    # Find best `NDCG@{k}` for each epoch
+    # cmaxs = df[f"p@{k}"].max()
+    # print(f"     epoch  factors\t      λ\t       α\tind\t    p@{k}")
+    # for e in myEpochs:
+    #     ind = np.argmax(df[(f"p@{k}", e)] == cmaxs[e])
+    #     (factors, regularization, alpha) = indices[ind]
+    #     print(f"\t{e:2d}\t{factors:3d}\t{regularization:7.3f}\t "
+    #           f"{alpha:7.3f}\t{ind:3d}\t{cmaxs[e]:7.5f}")
 
-    cmaxs = df[f"NDCG@{k}"].max()
-    print(f"     epoch  factors\t      λ\t       α\tind\t NDCG@{k}")
-    for e in myEpochs:
-        ind = np.argmax(df[(f"NDCG@{k}", e)] == cmaxs[e])
-        (factors, regularization, alpha) = indices[ind]
-        print(f"\t{e:2d}\t{factors:3d}\t{regularization:7.3f}\t "
-              f"{alpha:7.3f}\t{ind:3d}\t{cmaxs[e]:7.5f}")
+    # # Find best `MAP@{k}` for each epoch
 
-    # Find best `AUC@{k}` for each epoch
+    # cmaxs = df[f"MAP@{k}"].max()
+    # print(f"     epoch  factors\t      λ\t       α\tind\t  MAP@{k}")
+    # for e in myEpochs:
+    #     ind = np.argmax(df[(f"MAP@{k}", e)] == cmaxs[e])
+    #     (factors, regularization, alpha) = indices[ind]
+    #     print(f"\t{e:2d}\t{factors:3d}\t{regularization:7.3f}\t "
+    #           f"{alpha:7.3f}\t{ind:3d}\t{cmaxs[e]:7.5f}")
 
-    cmaxs = df[f"AUC@{k}"].max()
-    print(f"     epoch  factors\t      λ\t       α\tind\t  AUC@{k}")
-    for e in myEpochs:
-        ind = np.argmax(df[(f"AUC@{k}", e)] == cmaxs[e])
-        (factors, regularization, alpha) = indices[ind]
-        print(f"\t{e:2d}\t{factors:3d}\t{regularization:7.3f}\t "
-              f"{alpha:7.3f}\t{ind:3d}\t{cmaxs[e]:7.5f}")
+    # # Find best `NDCG@{k}` for each epoch
+
+    # cmaxs = df[f"NDCG@{k}"].max()
+    # print(f"     epoch  factors\t      λ\t       α\tind\t NDCG@{k}")
+    # for e in myEpochs:
+    #     ind = np.argmax(df[(f"NDCG@{k}", e)] == cmaxs[e])
+    #     (factors, regularization, alpha) = indices[ind]
+    #     print(f"\t{e:2d}\t{factors:3d}\t{regularization:7.3f}\t "
+    #           f"{alpha:7.3f}\t{ind:3d}\t{cmaxs[e]:7.5f}")
+
+    # # Find best `AUC@{k}` for each epoch
+
+    # cmaxs = df[f"AUC@{k}"].max()
+    # print(f"     epoch  factors\t      λ\t       α\tind\t  AUC@{k}")
+    # for e in myEpochs:
+    #     ind = np.argmax(df[(f"AUC@{k}", e)] == cmaxs[e])
+    #     (factors, regularization, alpha) = indices[ind]
+    #     print(f"\t{e:2d}\t{factors:3d}\t{regularization:7.3f}\t "
+    #           f"{alpha:7.3f}\t{ind:3d}\t{cmaxs[e]:7.5f}")
 
