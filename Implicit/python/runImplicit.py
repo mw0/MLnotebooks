@@ -506,6 +506,13 @@ if __name__ == "__main__":
 
     # logging.basicConfig(level=logging.DEBUG)
 
+    myParams = {'factors': args.factors,
+                'regularization': args.λ,
+                'alpha': args.α,
+                'use_gpu': args.useGPU}
+
+    model = getModel(args.model, volubility=2, params=myParams)
+
     artists, users, plays = fetchDataset(args.dataset, volubility=2)
 
     print(artists.shape, users.shape, plays.shape)
@@ -524,13 +531,6 @@ if __name__ == "__main__":
     print(f"Δt: {time() - t0:5.1f}s")
 
     train, test = train_test_split(plays, train_percentage=0.8)
-
-    myParams = {'factors': args.factors,
-                'regularization': args.λ,
-                'alpha': args.α,
-                'use_gpu': args.useGPU}
-
-    model = getModel(args.model, volubility=2, params=myParams)
 
     print("Training model")
     print(asctime(localtime))
