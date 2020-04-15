@@ -539,7 +539,7 @@ if __name__ == "__main__":
         # also disable building approximate recommend index
         model.approximate_recommend = False
 
-    print(asctime(localtime))
+    print(asctime(localtime()))
     t0 = time()
     plays = plays.tocsr()
     print(f"Δt: {time() - t0:5.1f}s")
