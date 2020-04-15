@@ -507,7 +507,10 @@ if __name__ == "__main__":
                        f"-iters{args.iterations:03d}")
     print(f"Writing output to {outFile}")
 
-    # Redirect stderr to modelInstanceDir/stderr:
+    # Redirect stdout to outFile:
+    sys.stdout = open(outFile, 'w')
+
+    # Redirect stderr to {outFile}.stderr:
     stderrFile = os.path.join(outFile + '.stderr')
     sys.stderr = open(stderrFile, 'w')
 
@@ -553,8 +556,8 @@ if __name__ == "__main__":
     model.fit(train, show_progress=args.progressBar)
     print(f"Δt: {time() - t0:5.1f}s")
 
-    trainTscr = Train.T.tocsr()
-    testTscr = Test.T.tocsr()
+    trainTscr = train.T.tocsr()
+    testTscr = test.T.tocsr()
 
     k = args.k
 
