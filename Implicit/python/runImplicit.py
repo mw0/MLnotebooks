@@ -497,7 +497,7 @@ if __name__ == "__main__":
     if args.outputfile:
         outFile = args.outputfile
     else:
-        if args.models == 'als':
+        if args.model == 'als':
             outFile = (f"{args.model}-{args.dataset}-k{args.k:02d}-factors"
                        f"{args.factors:03d}-λ{args.λ:06.3f}"
                        f"-iters{args.iterations:03d}")
