@@ -539,15 +539,15 @@ if __name__ == "__main__":
         # also disable building approximate recommend index
         model.approximate_recommend = False
 
-    print(asctime(localtime()))
-    t0 = time()
+    # print(asctime(localtime()))
+    # t0 = time()
     plays = plays.tocsr()
-    print(f"Δt: {time() - t0:5.1f}s")
+    # print(f"Δt: {time() - t0:5.1f}s")
 
     train, test = train_test_split(plays, train_percentage=0.8)
 
     print("Training model")
-    print(asctime(localtime))
+    print(asctime(localtime()))
     t0 = time()
 
     model.fit(train, show_progress=args.progressBar)
