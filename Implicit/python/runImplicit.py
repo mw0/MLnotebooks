@@ -561,16 +561,16 @@ if __name__ == "__main__":
 
     k = args.k
 
-    pAtK = precision_at_k(model, trainTcsr, testTcsr, K=k,
+    pAtK = precision_at_k(model, trainTscr, testTscr, K=k,
                           show_progress=args.progressBar,
                           num_threads=args.numThreads)
-    MAPAtK = mean_average_precision_at_k(model, trainTcsr, testTcsr, K=k,
+    MAPAtK = mean_average_precision_at_k(model, trainTscr, testTscr, K=k,
                                          show_progress=args.progressBar,
                                          num_threads=args.numThreads)
-    NDCGatK = ndcg_at_k(model, trainTcsr, testTcsr, K=k,
+    NDCGatK = ndcg_at_k(model, trainTscr, testTscr, K=k,
                         show_progress=args.progressBar,
                         num_threads=args.numThreads)
-    AUCatK = AUC_at_k(model, trainTcsr, testTcsr, K=k,
+    AUCatK = AUC_at_k(model, trainTscr, testTscr, K=k,
                       show_progress=args.progressBar,
                       num_threads=args.numThreads)
 
