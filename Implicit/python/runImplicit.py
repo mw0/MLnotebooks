@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/python3
 # coding: utf-8
 
 # Using `Implicit` and Bayesian Personalized Ranking (BPR) for Recommendations
