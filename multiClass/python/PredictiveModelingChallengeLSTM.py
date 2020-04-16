@@ -481,20 +481,12 @@ if __name__ == "__main__":
 
     testFrac = 0.4
     maxVocabCt = 80000
-<<<<<<< HEAD
-    maxCommentWords = 80		# 40|60|80|140
-=======
     maxCommentWords = 40		# 40|60|80|140
->>>>>>> 63988a7d8cc9bd3504653f773bafc0d8fc897e61
     LSTMlayerUnits = 64
     embeddingDim = 64
     auxFeaturesCt = 1
     classCt = 56
-<<<<<<< HEAD
-    dropoutFrac = 0.30			# 0.20|0.30
-=======
     dropoutFrac = 0.20			# 0.20|0.30
->>>>>>> 63988a7d8cc9bd3504653f773bafc0d8fc897e61
     LSTMdropoutFrac = 0.50		# 0.35|0.50
     batchSz = 64
     epochCt = 10
