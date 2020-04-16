@@ -492,7 +492,7 @@ if __name__ == "__main__":
                         help=helpStr)
 
     args = parser.parse_args()
-    print("args:\n", args)
+    print("args:\n", args, flush=True)
 
     if args.outputfile:
         outFile = args.outputfile
@@ -532,7 +532,7 @@ if __name__ == "__main__":
 
     artists, users, plays = fetchDataset(args.dataset, volubility=2)
 
-    print(artists.shape, users.shape, plays.shape)
+    print(artists.shape, users.shape, plays.shape, flush=True)
 
     if issubclass(model.__class__, AlternatingLeastSquares):
         # lets weight these models by bm25weight.
@@ -550,32 +550,41 @@ if __name__ == "__main__":
     train, test = train_test_split(plays, train_percentage=0.8)
 
     print("Training model")
-    print(asctime(localtime()))
+    print(asctime(localtime()), flush=True)
     t0 = time()
 
     model.fit(train, show_progress=args.progressBar)
-    print(f"Δt: {time() - t0:5.1f}s")
+    print(f"Δt: {time() - t0:5.1f}s", flush=True)
 
     trainTscr = train.T.tocsr()
     testTscr = test.T.tocsr()
 
     k = args.k
 
+    print(f"Computing p@{k} ...", flush=True)
+    t0 = time()
     pAtK = precision_at_k(model, trainTscr, testTscr, K=k,
                           show_progress=args.progressBar,
                           num_threads=args.numThreads)
+    print(f"Δt: {time() - t0:5.1f}s")
+    print(f"Computing MAP@{k} ...", flush=True)
+    t0 = time()
     MAPatK = mean_average_precision_at_k(model, trainTscr, testTscr, K=k,
                                          show_progress=args.progressBar,
                                          num_threads=args.numThreads)
+    print(f"Δt: {time() - t0:5.1f}s")
+    print(f"Computing NDCG@{k} ...", flush=True)
+    t0 = time()
     NDCGatK = ndcg_at_k(model, trainTscr, testTscr, K=k,
                         show_progress=args.progressBar,
                         num_threads=args.numThreads)
     AUCatK = AUC_at_k(model, trainTscr, testTscr, K=k,
                       show_progress=args.progressBar,
                       num_threads=args.numThreads)
+    print(f"Δt: {time() - t0:5.1f}s")
 
     print(f"p@{k}: {pAtK:6.4f}, MAP@{k}: {MAPatK:6.4f}"
-          f"NDCG@{k}: {NDCGatK:6.4f}, AUC@{k}: {AUCatK:6.4f}")
+          f"NDCG@{k}: {NDCGatK:6.4f}, AUC@{k}: {AUCatK:6.4f}", flush=True)
 
     # thang = [curves[x]["params"] for x in range(len(curves))]
     # df0 = pd.DataFrame(thang)
