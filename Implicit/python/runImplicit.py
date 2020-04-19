@@ -556,10 +556,8 @@ if __name__ == "__main__":
     model.fit(train, show_progress=args.progressBar)
     print(f"Δt: {time() - t0:5.1f}s", flush=True)
 
-    # trainTscr = train.T.tocsr()
-    # testTscr = test.T.tocsr()
-    trainTscr = train.tocsr()
-    testTscr = test.tocsr()
+    trainTscr = train.T.tocsr()
+    testTscr = test.T.tocsr()
 
     k = args.k
 
