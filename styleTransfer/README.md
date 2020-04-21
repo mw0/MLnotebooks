@@ -31,9 +31,9 @@ See [Examples](#examples) for illustrations of the results.
 
 |Style file|Content file|
 |-------------|------------|
-|![The two sisters on the terrace](1024pxRenoirPierre-AugusteTheTwoSistersOnTheTerrace512x512.png "The two sisters on the terrace")|![A woman and a man under an umbrella](PortraitOfManHuggingHappyWomanUnderUmbrella512x512.png "A woman and a man under an umbrella")|
+|![The two sisters on the terrace](images/1024pxRenoirPierre-AugusteTheTwoSistersOnTheTerrace512x512.png "The two sisters on the terrace")|![A woman and a man under an umbrella](images/PortraitOfManHuggingHappyWomanUnderUmbrella512x512.png "A woman and a man under an umbrella")|
 |Generated image|Animation|
-|![Woman and man under umbrella, stylized by Renoir](WomanManUmbrellaStylizedRenoirTheTwoSisters512x512at0750.png "Woman and man under umbrella, stylized by Renoir")|![Animation showing progression of noise image to final form](AnimatedCoupleWithUmbrellaRenoirStylized.gif "Animation showing progression of noise image to final form")|
+|![Woman and man under umbrella, stylized by Renoir](images/WomanManUmbrellaStylizedRenoirTheTwoSisters512x512at0750.png "Woman and man under umbrella, stylized by Renoir")|![Animation showing progression of noise image to final form](images/AnimatedCoupleWithUmbrellaRenoirStylized.gif "Animation showing progression of noise image to final form")|
 
 It's interesting how the generated image (stylized version) seems to have flowers from the younger sister's basket where the original content file has a road.
 
