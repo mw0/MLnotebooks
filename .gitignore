@@ -17,6 +17,9 @@ Implicit/similarItems-bm25-lastfm.tsv
 Implicit/similarItems-cosine-lastfm.tsv
 Implicit/similarItems-lmf-lastfm.tsv
 Implicit/similarItems-tfidf-lastfm.tsv
+Implicit/*.stderr
+Implicit/wTranspose/*.stderr
+Implicit/*iters*
 LightFMMovieLens/*
 KaggleWeather/city_attributes.csv
 KaggleWeather/historical-hourly-weather-data.zip
