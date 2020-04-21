@@ -17,7 +17,7 @@
   * Includes a primer on the use of wavelet scaleograms
 * PredictDriverConversion
   * binary classifier based upon time &Delta;s from driver sign-up date to different actions, and upon make and model of vehicle.
-* SoccerRankingCollabFiltering
+* SoccerRankingMatrixFactorization
   Given a sparse matrix of points scored in actual recent matches:
   * applies double instances of matrix factorization to predict points for play between pairs of all teams
   * sums outcomes to determine overall rankings
