@@ -57,8 +57,7 @@ multiClass/rawVIOCOMMENTS.txt
 multiClass/regexedComments.txt
 multiClass/tensorBoardLogs/
 multiClass/tokenSymSpelledComments.txt
-styleTransfer/*.ipynb
-styleTransfer/images/*.jpg
+styleTransfer/images/*.png
 styleTransfer/images/1024pxRenoirPierre-AugusteTheTwoSistersOnTheTerrace256x.png
 styleTransfer/images/1024pxRenoirPierre-AugusteTheTwoSistersOnTheTerrace256x256.png
 styleTransfer/images/1024pxRenoirPierre-AugusteTheTwoSistersOnTheTerrace512x.png
