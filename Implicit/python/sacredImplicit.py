@@ -484,35 +484,25 @@ def cfg():
                 'iterations': 15,
                 'progressBar': True,
                 'useGPU': True,
-                'threadCt': 0
-               }
-
-    if myConfig[model] == 'als':
-        myConfig['outFile'] = (f"{args.model}-{args.dataset}-k{args.k:02d}"
-                               f"-factors{args.factors:03d}-λ{args.λ:06.3f}"
-                               f"-iters{args.iterations:03d}")
-        myParams = {'factors': args.factors,
-                    'regularization': args.λ,
-                    'iterations': args.iterations,
-                    'use_gpu': args.useGPU}
-    else:
-        myConfig['outFile'] = (f"{args.model}-{args.dataset}-k{args.k:02d}"
-                               f"-factors{args.factors:03d}-λ{args.λ:06.3f}"
-                               f"-α{args.α:04.0f}"
-                               f"-iters{args.iterations:03d}")
-        myParams = {'factors': args.factors,
-                    'regularization': args.λ,
-                    'iterations': args.iterations,
-                    'alpha': args.α,
-                    'use_gpu': args.useGPU}
-    myConfig['params'] = myParams
+                'threadCt': 0}
 
 
 @ex.automain
 def run(myConfig):
 
-    model = getModel(myConfig['model'], volubility=2,
-                     params=myConfig['params'])
+    if myConfig['model'] == 'als':
+        model = getModel(myConfig['model'], volubility=2,
+                         params={'factors': myConfig['factors'],
+                                 'regularization': myConfig['λ'],
+                                 'iterations': myConfig['iterations'],
+                                 'use_gpu': myConfig['useGPU']})
+    else:
+        model = getModel(myConfig['model'], volubility=2,
+                         params={'factors': myConfig['factors'],
+                                 'regularization': myConfig['λ'],
+                                 'iterations': myConfig['iterations'],
+                                 'alpha': myConfig['α'],
+                                 'use_gpu': myConfig['useGPU']})
 
     artists, users, plays = fetchDataset(myConfig['dataset'], volubility=2)
 

@@ -24,6 +24,8 @@ import itertools
 import copy
 from sklearn.metrics import mean_squared_error
 
+import tqdm
+
 # sys.path.append('/usr/local/lib/python3.6/dist-packages/implicit-0.4.0-py3.6-linux-x86_64.egg')
 from implicit.als import AlternatingLeastSquares
 from implicit.approximate_als import (AnnoyAlternatingLeastSquares,
@@ -40,11 +42,6 @@ from implicit.datasets.million_song_dataset import get_msd_taste_profile
 from implicit.lmf import LogisticMatrixFactorization
 from implicit.nearest_neighbours import (BM25Recommender, CosineRecommender,
                                          TFIDFRecommender, bm25_weight)
-
-
-import tqdm
-
-from sacred import Experiment
 
 # ### Global dicts
 
@@ -444,117 +441,6 @@ def gridSearchLearningCurve(modelName, train, test, paramGrid, numThreads=12,
     return curves
 
 
-ex = Experiment('Implicit models testing')
-
-
-@ex.config
-def cfg(args):
-
-    if args.outputfile:
-        outFile = args.outputfile
-    else:
-        if args.model == 'als':
-            outFile = (f"{args.model}-{args.dataset}-k{args.k:02d}-factors"
-                       f"{args.factors:03d}-λ{args.λ:06.3f}"
-                       f"-iters{args.iterations:03d}")
-        else:
-            outFile = (f"{args.model}-{args.dataset}-k{args.k:02d}-factors"
-                       f"{args.factors:03d}-λ{args.λ:06.3f}-α{args.α:04.0f}"
-                       f"-iters{args.iterations:03d}")
-    print(f"Writing output to {outFile}")
-
-    # Redirect stdout to outFile:
-    sys.stdout = open(outFile, 'w')
-
-    # Redirect stderr to {outFile}.stderr:
-    stderrFile = os.path.join(outFile + '.stderr')
-    sys.stderr = open(stderrFile, 'w')
-
-    # logging.basicConfig(level=logging.DEBUG)
-
-    if args.model == 'als':
-        myParams = {'factors': args.factors,
-                    'regularization': args.λ,
-                    'iterations': args.iterations,
-                    'use_gpu': args.useGPU}
-    else:
-        myParams = {'factors': args.factors,
-                    'regularization': args.λ,
-                    'iterations': args.iterations,
-                    'alpha': args.α,
-                    'use_gpu': args.useGPU}
-    myModel = args.model
-    myData = args.dataset
-    myProgress = args.progressBar
-    myK = args.k
-    myThreadCt = args.numThreads
-
-
-@ex.automain
-def run():
-
-    model = getModel(myModel, volubility=2, params=myParams)
-
-    artists, users, plays = fetchDataset(myData, volubility=2)
-
-    print(artists.shape, users.shape, plays.shape, flush=True)
-
-    if issubclass(model.__class__, AlternatingLeastSquares):
-        # lets weight these models by bm25weight.
-        print("weighting matrix by bm25_weight")
-        plays = bm25_weight(plays, K1=100, B=0.8)
-
-        # also disable building approximate recommend index
-        model.approximate_recommend = False
-
-    # print(asctime(localtime()))
-    # t0 = time()
-    plays = plays.tocsr()
-    # print(f"Δt: {time() - t0:5.1f}s")
-
-    train, test = train_test_split(plays, train_percentage=0.8)
-
-    print("Training model")
-    print(asctime(localtime()), flush=True)
-    t0 = time()
-
-    model.fit(train, show_progress=myProgress)
-    print(f"Δt: {time() - t0:5.1f}s", flush=True)
-
-    trainTscr = train.T.tocsr()
-    testTscr = test.T.tocsr()
-
-    k = myK
-
-    print(f"Computing p@{k} ...", flush=True)
-    t0 = time()
-    pAtK = precision_at_k(model, trainTscr, testTscr, K=k,
-                          show_progress=myProgress,
-                          num_threads=myThreadCt)
-    ex.log_scalar(f"p@{k}: {pAtK:6.4f})
-    print(f"Δt: {time() - t0:5.1f}s")
-    print(f"Computing MAP@{k} ...", flush=True)
-    t0 = time()
-    MAPatK = mean_average_precision_at_k(model, trainTscr, testTscr, K=k,
-                                         show_progress=myProgress,
-                                         num_threads=myThreadCt)
-    ex.log_scalar(f"MAP@{k}: {MAPatK:6.4f})
-    print(f"Δt: {time() - t0:5.1f}s")
-    print(f"Computing NDCG@{k} ...", flush=True)
-    t0 = time()
-    NDCGatK = ndcg_at_k(model, trainTscr, testTscr, K=k,
-                        show_progress=myProgress,
-                        num_threads=myThreadCt)
-    ex.log_scalar(f"NDCG@{k}: {NDCGatK:6.4f})
-    AUCatK = AUC_at_k(model, trainTscr, testTscr, K=k,
-                      show_progress=myProgress,
-                      num_threads=myThreadCt)
-    ex.log_scalar(f"AUC@{k}: {AUCatK:6.4f})
-    print(f"Δt: {time() - t0:5.1f}s")
-    print(f"p@{k}: {pAtK:6.4f}, MAP@{k}: {MAPatK:6.4f}"
-          f"NDCG@{k}: {NDCGatK:6.4f}, AUC@{k}: {AUCatK:6.4f}", flush=True)
-
-
 if __name__ == "__main__":
 
     myDescription = ("Trains model from Implicit package, returning"
@@ -607,4 +493,166 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     print("args:\n", args, flush=True)
+
+    if args.outputfile:
+        outFile = args.outputfile
+    else:
+        if args.model == 'als':
+            outFile = (f"{args.model}-{args.dataset}-k{args.k:02d}-factors"
+                       f"{args.factors:03d}-λ{args.λ:06.3f}"
+                       f"-iters{args.iterations:03d}")
+        else:
+            outFile = (f"{args.model}-{args.dataset}-k{args.k:02d}-factors"
+                       f"{args.factors:03d}-λ{args.λ:06.3f}-α{args.α:04.0f}"
+                       f"-iters{args.iterations:03d}")
+    print(f"Writing output to {outFile}")
+
+    # Redirect stdout to outFile:
+    sys.stdout = open(outFile, 'w')
+
+    # Redirect stderr to {outFile}.stderr:
+    stderrFile = os.path.join(outFile + '.stderr')
+    sys.stderr = open(stderrFile, 'w')
+
+    # logging.basicConfig(level=logging.DEBUG)
+
+    if args.model == 'als':
+        myParams = {'factors': args.factors,
+                    'regularization': args.λ,
+                    'iterations': args.iterations,
+                    'use_gpu': args.useGPU}
+    else:
+        myParams = {'factors': args.factors,
+                    'regularization': args.λ,
+                    'iterations': args.iterations,
+                    'alpha': args.α,
+                    'use_gpu': args.useGPU}
+
+    model = getModel(args.model, volubility=2, params=myParams)
+
+    artists, users, plays = fetchDataset(args.dataset, volubility=2)
+
+    print(artists.shape, users.shape, plays.shape, flush=True)
+
+    if issubclass(model.__class__, AlternatingLeastSquares):
+        # lets weight these models by bm25weight.
+        print("weighting matrix by bm25_weight")
+        plays = bm25_weight(plays, K1=100, B=0.8)
+
+        # also disable building approximate recommend index
+        model.approximate_recommend = False
+
+    # print(asctime(localtime()))
+    # t0 = time()
+    plays = plays.tocsr()
+    # print(f"Δt: {time() - t0:5.1f}s")
+
+    train, test = train_test_split(plays, train_percentage=0.8)
+
+    print("Training model")
+    print(asctime(localtime()), flush=True)
+    t0 = time()
+
+    model.fit(train, show_progress=args.progressBar)
+    print(f"Δt: {time() - t0:5.1f}s", flush=True)
+
+    trainTscr = train.T.tocsr()
+    testTscr = test.T.tocsr()
+
+    k = args.k
+
+    print(f"Computing p@{k} ...", flush=True)
+    t0 = time()
+    pAtK = precision_at_k(model, trainTscr, testTscr, K=k,
+                          show_progress=args.progressBar,
+                          num_threads=args.numThreads)
+    print(f"Δt: {time() - t0:5.1f}s")
+    print(f"Computing MAP@{k} ...", flush=True)
+    t0 = time()
+    MAPatK = mean_average_precision_at_k(model, trainTscr, testTscr, K=k,
+                                         show_progress=args.progressBar,
+                                         num_threads=args.numThreads)
+    print(f"Δt: {time() - t0:5.1f}s")
+    print(f"Computing NDCG@{k} ...", flush=True)
+    t0 = time()
+    NDCGatK = ndcg_at_k(model, trainTscr, testTscr, K=k,
+                        show_progress=args.progressBar,
+                        num_threads=args.numThreads)
+    AUCatK = AUC_at_k(model, trainTscr, testTscr, K=k,
+                      show_progress=args.progressBar,
+                      num_threads=args.numThreads)
+    print(f"Δt: {time() - t0:5.1f}s")
+
+    print(f"p@{k}: {pAtK:6.4f}, MAP@{k}: {MAPatK:6.4f}"
+          f"NDCG@{k}: {NDCGatK:6.4f}, AUC@{k}: {AUCatK:6.4f}", flush=True)
+
+    # thang = [curves[x]["params"] for x in range(len(curves))]
+    # df0 = pd.DataFrame(thang)
+
+    # blah = [curves[x][f"p@{k}"] for x in range(len(curves))]
+    # df1 = pd.DataFrame(blah)
+
+    # blah = [curves[x][f"MAP@{k}"] for x in range(len(curves))]
+    # df2 = pd.DataFrame(blah)
+
+    # blah = [curves[x][f"NDCG@{k}"] for x in range(len(curves))]
+    # df3 = pd.DataFrame(blah)
+
+    # blah = [curves[x][f"AUC@{k}"] for x in range(len(curves))]
+    # df4 = pd.DataFrame(blah)
+
+    # df = pd.concat([df0, df1, df2, df3, df4], axis=1)
+    # df.head()
+    # df.tail()
+
+    # df.set_index(["factors", "regularization", "alpha"], inplace=True)
+    # df.head()
+    # df.tail()
+
+    # metrics = [f"p@{k}", f"MAP@{k}", f"NDCG@{k}", f"AUC@{k}"]
+    # df.columns = pd.MultiIndex.from_product([metrics, myEpochs])
+    # df.head(8)
+    # df.tail(8)
+
+    # indices = df.index
+
+    # # Find best `p@{k}` for each epoch
+
+    # cmaxs = df[f"p@{k}"].max()
+    # print(f"     epoch  factors\t      λ\t       α\tind\t    p@{k}")
+    # for e in myEpochs:
+    #     ind = np.argmax(df[(f"p@{k}", e)] == cmaxs[e])
+    #     (factors, regularization, alpha) = indices[ind]
+    #     print(f"\t{e:2d}\t{factors:3d}\t{regularization:7.3f}\t "
+    #           f"{alpha:7.3f}\t{ind:3d}\t{cmaxs[e]:7.5f}")
+
+    # # Find best `MAP@{k}` for each epoch
+
+    # cmaxs = df[f"MAP@{k}"].max()
+    # print(f"     epoch  factors\t      λ\t       α\tind\t  MAP@{k}")
+    # for e in myEpochs:
+    #     ind = np.argmax(df[(f"MAP@{k}", e)] == cmaxs[e])
+    #     (factors, regularization, alpha) = indices[ind]
+    #     print(f"\t{e:2d}\t{factors:3d}\t{regularization:7.3f}\t "
+    #           f"{alpha:7.3f}\t{ind:3d}\t{cmaxs[e]:7.5f}")
+
+    # # Find best `NDCG@{k}` for each epoch
+
+    # cmaxs = df[f"NDCG@{k}"].max()
+    # print(f"     epoch  factors\t      λ\t       α\tind\t NDCG@{k}")
+    # for e in myEpochs:
+    #     ind = np.argmax(df[(f"NDCG@{k}", e)] == cmaxs[e])
+    #     (factors, regularization, alpha) = indices[ind]
+    #     print(f"\t{e:2d}\t{factors:3d}\t{regularization:7.3f}\t "
+    #           f"{alpha:7.3f}\t{ind:3d}\t{cmaxs[e]:7.5f}")
+
+    # # Find best `AUC@{k}` for each epoch
+
+    # cmaxs = df[f"AUC@{k}"].max()
+    # print(f"     epoch  factors\t      λ\t       α\tind\t  AUC@{k}")
+    # for e in myEpochs:
+    #     ind = np.argmax(df[(f"AUC@{k}", e)] == cmaxs[e])
+    #     (factors, regularization, alpha) = indices[ind]
+    #     print(f"\t{e:2d}\t{factors:3d}\t{regularization:7.3f}\t "
+    #           f"{alpha:7.3f}\t{ind:3d}\t{cmaxs[e]:7.5f}")
 
