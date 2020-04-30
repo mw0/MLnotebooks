@@ -1,3 +1,7 @@
+!!! Helpful GPU hint? !!!
+tf.keras.backend.clear_session()
+
+
 # Define callbacks for model checkpoints and TensorBoard:
 
 checkpointDir = './checkpoints'

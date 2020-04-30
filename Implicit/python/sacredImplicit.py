@@ -44,7 +44,7 @@ from implicit.nearest_neighbours import (BM25Recommender, CosineRecommender,
 
 import tqdm
 
-from sacred import Experiment
+from sacred import Experiment, host_info_gatherer
 
 # ### Global dicts
 
@@ -444,58 +444,77 @@ def gridSearchLearningCurve(modelName, train, test, paramGrid, numThreads=12,
     return curves
 
 
-ex = Experiment('Implicit models testing')
+@host_info_gatherer('host IP address')
+def ip():
+    import socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    ip = s.getsockname()[0]
+    s.close()
+    return ip
+
+
+ex = Experiment('Implicit models testing',
+                additional_host_info=[ip])
 
 
 @ex.config
-def cfg(args):
+def cfg():
+    """
+    # Default configuration values:
+    'model': 'als'
+    'dataset': 'lastfm',
+    'factors': 64,
+    'k': 6,
+    'λ': 0.01,
+    'α': 40.0,
+    'iterations': 15,
+    'progressBar': True,
+    'useGPU': True,
+    'threadCt': 0
+    """
 
-    if args.outputfile:
-        outFile = args.outputfile
-    else:
-        if args.model == 'als':
-            outFile = (f"{args.model}-{args.dataset}-k{args.k:02d}-factors"
-                       f"{args.factors:03d}-λ{args.λ:06.3f}"
-                       f"-iters{args.iterations:03d}")
-        else:
-            outFile = (f"{args.model}-{args.dataset}-k{args.k:02d}-factors"
-                       f"{args.factors:03d}-λ{args.λ:06.3f}-α{args.α:04.0f}"
-                       f"-iters{args.iterations:03d}")
-    print(f"Writing output to {outFile}")
+    # Default configuration values:
+    myConfig = {'model': 'als',
+                'dataset': 'lastfm',
+                'factors': 64,
+                'k': 6,
+                'λ': 0.01,
+                'α': 40.0,
+                'iterations': 15,
+                'progressBar': True,
+                'useGPU': True,
+                'threadCt': 0
+               }
 
-    # Redirect stdout to outFile:
-    sys.stdout = open(outFile, 'w')
-
-    # Redirect stderr to {outFile}.stderr:
-    stderrFile = os.path.join(outFile + '.stderr')
-    sys.stderr = open(stderrFile, 'w')
-
-    # logging.basicConfig(level=logging.DEBUG)
-
-    if args.model == 'als':
+    if myConfig[model] == 'als':
+        myConfig['outFile'] = (f"{args.model}-{args.dataset}-k{args.k:02d}"
+                               f"-factors{args.factors:03d}-λ{args.λ:06.3f}"
+                               f"-iters{args.iterations:03d}")
         myParams = {'factors': args.factors,
                     'regularization': args.λ,
                     'iterations': args.iterations,
                     'use_gpu': args.useGPU}
     else:
+        myConfig['outFile'] = (f"{args.model}-{args.dataset}-k{args.k:02d}"
+                               f"-factors{args.factors:03d}-λ{args.λ:06.3f}"
+                               f"-α{args.α:04.0f}"
+                               f"-iters{args.iterations:03d}")
         myParams = {'factors': args.factors,
                     'regularization': args.λ,
                     'iterations': args.iterations,
                     'alpha': args.α,
                     'use_gpu': args.useGPU}
-    myModel = args.model
-    myData = args.dataset
-    myProgress = args.progressBar
-    myK = args.k
-    myThreadCt = args.numThreads
+    myConfig['params'] = myParams
 
 
 @ex.automain
-def run():
+def run(myConfig):
 
-    model = getModel(myModel, volubility=2, params=myParams)
+    model = getModel(myConfig['model'], volubility=2,
+                     params=myConfig['params'])
 
-    artists, users, plays = fetchDataset(myData, volubility=2)
+    artists, users, plays = fetchDataset(myConfig['dataset'], volubility=2)
 
     print(artists.shape, users.shape, plays.shape, flush=True)
 
@@ -518,7 +537,7 @@ def run():
     print(asctime(localtime()), flush=True)
     t0 = time()
 
-    model.fit(train, show_progress=myProgress)
+    model.fit(train, show_progress=myParams['progressBar'])
     print(f"Δt: {time() - t0:5.1f}s", flush=True)
 
     trainTscr = train.T.tocsr()
@@ -529,82 +548,27 @@ def run():
     print(f"Computing p@{k} ...", flush=True)
     t0 = time()
     pAtK = precision_at_k(model, trainTscr, testTscr, K=k,
-                          show_progress=myProgress,
+                          show_progress=myParams['progressBar'],
                           num_threads=myThreadCt)
-    ex.log_scalar(f"p@{k}: {pAtK:6.4f})
+    ex.log_scalar(f"p@{k}: {pAtK:6.4f}")
     print(f"Δt: {time() - t0:5.1f}s")
     print(f"Computing MAP@{k} ...", flush=True)
     t0 = time()
     MAPatK = mean_average_precision_at_k(model, trainTscr, testTscr, K=k,
-                                         show_progress=myProgress,
+                                         show_progress=myParams['progressBar'],
                                          num_threads=myThreadCt)
-    ex.log_scalar(f"MAP@{k}: {MAPatK:6.4f})
+    ex.log_scalar(f"MAP@{k}: {MAPatK:6.4f}")
     print(f"Δt: {time() - t0:5.1f}s")
     print(f"Computing NDCG@{k} ...", flush=True)
     t0 = time()
     NDCGatK = ndcg_at_k(model, trainTscr, testTscr, K=k,
-                        show_progress=myProgress,
+                        show_progress=myParams['progressBar'],
                         num_threads=myThreadCt)
-    ex.log_scalar(f"NDCG@{k}: {NDCGatK:6.4f})
+    ex.log_scalar(f"NDCG@{k}: {NDCGatK:6.4f}")
     AUCatK = AUC_at_k(model, trainTscr, testTscr, K=k,
-                      show_progress=myProgress,
+                      show_progress=myParams['progressBar'],
                       num_threads=myThreadCt)
-    ex.log_scalar(f"AUC@{k}: {AUCatK:6.4f})
+    ex.log_scalar(f"AUC@{k}: {AUCatK:6.4f}")
     print(f"Δt: {time() - t0:5.1f}s")
     print(f"p@{k}: {pAtK:6.4f}, MAP@{k}: {MAPatK:6.4f}"
           f"NDCG@{k}: {NDCGatK:6.4f}, AUC@{k}: {AUCatK:6.4f}", flush=True)
-
-
-if __name__ == "__main__":
-
-    myDescription = ("Trains model from Implicit package, returning"
-                     " evaluation metrics.")
-    parser = argparse.ArgumentParser(description=myDescription,
-                                     formatter_class=argparse
-                                     .ArgumentDefaultsHelpFormatter)
-
-    helpStr = 'Output file name. (Omit to go with parameter-based naming)'
-    parser.add_argument('--output-base', type=str,
-                        dest='outputfile', help=helpStr)
-    helpStr = f"model to calculate ({', '.join(models.keys())})"
-    parser.add_argument('--model', type=str, default='als',
-                        dest='model', help=helpStr)
-    helpStr = f"dataset ({', '.join(dataSets.keys())})"
-    parser.add_argument('--dataset', type=str, default='lastfm',
-                        dest='dataset', help=helpStr)
-    # helpStr = ("Recommend items for each user rather than calculate "
-    #            "similar_items")
-    # parser.add_argument('--recommend',
-    #                     help=helpStr,
-    #                     action="store_true")
-    helpStr = "factors (latent feature count)"
-    parser.add_argument('--factors', type=int, default=64,
-                        dest='factors', help=helpStr)
-    helpStr = "use_gpu (if available)"
-    parser.add_argument('--useGPU', type=bool, default=True,
-                        dest='useGPU', help=helpStr)
-    helpStr = "λ (regularization constant)"
-    parser.add_argument('--lambda', type=float, default=0.01,
-                        dest='λ', help=helpStr)
-    helpStr = "α (rating ⟶ confidence multiplier)"
-    parser.add_argument('--alpha', type=float, default=40.0,
-                        dest='α', help=helpStr)
-    helpStr = "training iterations"
-    parser.add_argument('--iterations', type=int, default=15,
-                        dest='iterations', help=helpStr)
-    helpStr = "show progress bar while training"
-    parser.add_argument('--progressBar', type=bool, default=False,
-                        dest='progressBar', help=helpStr)
-    helpStr = "k (for metrics@k)"
-    parser.add_argument('--k', type=int, default=6,
-                        dest='k', help=helpStr)
-    helpStr = "number of threads (0, use all)"
-    parser.add_argument('--numThreads', type=int, default=0,
-                        dest='numThreads', help=helpStr)
-    helpStr = "Parameters to pass to the model, formatted as 'KEY=VALUE"
-    parser.add_argument('--param', action='append',
-                        help=helpStr)
-
-    args = parser.parse_args()
-    print("args:\n", args, flush=True)
-
