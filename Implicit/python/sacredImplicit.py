@@ -533,7 +533,7 @@ def run(myConfig):
     trainTscr = train.T.tocsr()
     testTscr = test.T.tocsr()
 
-    k = myK
+    k = myConfig['k']
 
     print(f"Computing p@{k} ...", flush=True)
     t0 = time()
