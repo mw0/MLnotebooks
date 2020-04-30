@@ -539,25 +539,25 @@ def run(myConfig):
     t0 = time()
     pAtK = precision_at_k(model, trainTscr, testTscr, K=k,
                           show_progress=myConfig['progressBar'],
-                          num_threads=myThreadCt)
+                          num_threads=myConfig['threadCt'])
     ex.log_scalar(f"p@{k}: {pAtK:6.4f}")
     print(f"Δt: {time() - t0:5.1f}s")
     print(f"Computing MAP@{k} ...", flush=True)
     t0 = time()
     MAPatK = mean_average_precision_at_k(model, trainTscr, testTscr, K=k,
                                          show_progress=myConfig['progressBar'],
-                                         num_threads=myThreadCt)
+                                         num_threads=myConfig['threadCt'])
     ex.log_scalar(f"MAP@{k}: {MAPatK:6.4f}")
     print(f"Δt: {time() - t0:5.1f}s")
     print(f"Computing NDCG@{k} ...", flush=True)
     t0 = time()
     NDCGatK = ndcg_at_k(model, trainTscr, testTscr, K=k,
                         show_progress=myConfig['progressBar'],
-                        num_threads=myThreadCt)
+                        num_threads=myConfig['threadCt'])
     ex.log_scalar(f"NDCG@{k}: {NDCGatK:6.4f}")
     AUCatK = AUC_at_k(model, trainTscr, testTscr, K=k,
                       show_progress=myConfig['progressBar'],
-                      num_threads=myThreadCt)
+                      num_threads=myConfig['threadCt'])
     ex.log_scalar(f"AUC@{k}: {AUCatK:6.4f}")
     print(f"Δt: {time() - t0:5.1f}s")
     print(f"p@{k}: {pAtK:6.4f}, MAP@{k}: {MAPatK:6.4f}"
