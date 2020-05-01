@@ -45,6 +45,8 @@ from implicit.nearest_neighbours import (BM25Recommender, CosineRecommender,
 import tqdm
 
 from sacred import Experiment, host_info_gatherer
+from sacred.observers import MongoObserver
+from sacred.utils import apply_backspaces_and_linefeeds
 
 # ### Global dicts
 
@@ -475,36 +477,37 @@ def cfg():
     """
 
     # Default configuration values:
-    myConfig = {'model': 'als',
-                'dataset': 'lastfm',
-                'factors': 64,
-                'k': 6,
-                'λ': 0.01,
-                'α': 40.0,
-                'iterations': 15,
-                'progressBar': True,
-                'useGPU': True,
-                'threadCt': 0}
+    modelName = 'als'
+    datasetName = 'lastfm'
+    factorCt = 64
+    k = 6
+    λ = 0.01
+    α = 40.0
+    maxIters = 15
+    showProgress = True
+    useGPU = True
+    threadCt = 0
 
 
 @ex.automain
-def run(myConfig):
+def run(modelName, datasetName, factorCt, k, λ, α,
+        maxIters, showProgress, useGPU, threadCt):
 
     if myConfig['model'] == 'als':
-        model = getModel(myConfig['model'], volubility=2,
-                         params={'factors': myConfig['factors'],
-                                 'regularization': myConfig['λ'],
-                                 'iterations': myConfig['iterations'],
-                                 'use_gpu': myConfig['useGPU']})
+        model = getModel(modelName, volubility=2,
+                         params={'factors': factorCt,
+                                 'regularization': λ,
+                                 'iterations': maxIters,
+                                 'use_gpu': useGPU})
     else:
-        model = getModel(myConfig['model'], volubility=2,
-                         params={'factors': myConfig['factors'],
-                                 'regularization': myConfig['λ'],
-                                 'iterations': myConfig['iterations'],
-                                 'alpha': myConfig['α'],
-                                 'use_gpu': myConfig['useGPU']})
+        model = getModel(modelName, volubility=2,
+                         params={'factors': factorCt,
+                                 'regularization': λ,
+                                 'alpha': α,
+                                 'iterations': maxIters,
+                                 'use_gpu': useGPU})
 
-    artists, users, plays = fetchDataset(myConfig['dataset'], volubility=2)
+    artists, users, plays = fetchDataset(datasetName, volubility=2)
 
     print(artists.shape, users.shape, plays.shape, flush=True)
 
@@ -527,38 +530,36 @@ def run(myConfig):
     print(asctime(localtime()), flush=True)
     t0 = time()
 
-    model.fit(train, show_progress=myConfig['progressBar'])
+    model.fit(train, show_progress=showProgress)
     print(f"Δt: {time() - t0:5.1f}s", flush=True)
 
     trainTscr = train.T.tocsr()
     testTscr = test.T.tocsr()
 
-    k = myConfig['k']
-
     print(f"Computing p@{k} ...", flush=True)
     t0 = time()
     pAtK = precision_at_k(model, trainTscr, testTscr, K=k,
-                          show_progress=myConfig['progressBar'],
-                          num_threads=myConfig['threadCt'])
-    ex.log_scalar(f"p@{k}: {pAtK:6.4f}")
+                          show_progress=showProgress,
+                          num_threads=threadCt)
+    ex.log_scalar(f"p@{k}", pAtK)
     print(f"Δt: {time() - t0:5.1f}s")
     print(f"Computing MAP@{k} ...", flush=True)
     t0 = time()
     MAPatK = mean_average_precision_at_k(model, trainTscr, testTscr, K=k,
-                                         show_progress=myConfig['progressBar'],
-                                         num_threads=myConfig['threadCt'])
-    ex.log_scalar(f"MAP@{k}: {MAPatK:6.4f}")
+                                         show_progress=showProgress,
+                                         num_threads=threadCt)
+    ex.log_scalar(f"MAP@{k}", MAPatK)
     print(f"Δt: {time() - t0:5.1f}s")
     print(f"Computing NDCG@{k} ...", flush=True)
     t0 = time()
     NDCGatK = ndcg_at_k(model, trainTscr, testTscr, K=k,
-                        show_progress=myConfig['progressBar'],
-                        num_threads=myConfig['threadCt'])
-    ex.log_scalar(f"NDCG@{k}: {NDCGatK:6.4f}")
+                        show_progress=showProgress,
+                        num_threads=threadCt)
+    ex.log_scalar(f"NDCG@{k}", NDCGatK)
     AUCatK = AUC_at_k(model, trainTscr, testTscr, K=k,
-                      show_progress=myConfig['progressBar'],
-                      num_threads=myConfig['threadCt'])
-    ex.log_scalar(f"AUC@{k}: {AUCatK:6.4f}")
+                      show_progress=showProgress,
+                      num_threads=threadCt)
+    ex.log_scalar(f"AUC@{k}", AUCatK)
     print(f"Δt: {time() - t0:5.1f}s")
     print(f"p@{k}: {pAtK:6.4f}, MAP@{k}: {MAPatK:6.4f}"
           f"NDCG@{k}: {NDCGatK:6.4f}, AUC@{k}: {AUCatK:6.4f}", flush=True)
