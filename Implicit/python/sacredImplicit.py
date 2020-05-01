@@ -493,7 +493,7 @@ def cfg():
 def run(modelName, datasetName, factorCt, k, λ, α,
         maxIters, showProgress, useGPU, threadCt):
 
-    if myConfig['model'] == 'als':
+    if modelName == 'als':
         model = getModel(modelName, volubility=2,
                          params={'factors': factorCt,
                                  'regularization': λ,
