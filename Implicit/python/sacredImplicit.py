@@ -484,7 +484,7 @@ def cfg():
     λ = 0.01
     α = 40.0
     maxIters = 15
-    showProgress = True
+    showProgress = False
     useGPU = True
     threadCt = 0
 
