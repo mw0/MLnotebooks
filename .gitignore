@@ -17,6 +17,7 @@ Implicit/similarItems-bm25-lastfm.tsv
 Implicit/similarItems-cosine-lastfm.tsv
 Implicit/similarItems-lmf-lastfm.tsv
 Implicit/similarItems-tfidf-lastfm.tsv
+Implicit/notebooks/UsingImplicitWithALS-Copy2.ipynb
 Implicit/*.stderr
 Implicit/wTranspose/*.stderr
 Implicit/*iters*
@@ -57,6 +58,7 @@ multiClass/rawVIOCOMMENTS.txt
 multiClass/regexedComments.txt
 multiClass/tensorBoardLogs/
 multiClass/tokenSymSpelledComments.txt
+multiClass/notebooks/dask-worker-space
 styleTransfer/images/*.png
 styleTransfer/images/1024pxRenoirPierre-AugusteTheTwoSistersOnTheTerrace256x.png
 styleTransfer/images/1024pxRenoirPierre-AugusteTheTwoSistersOnTheTerrace256x256.png
@@ -74,6 +76,7 @@ styleTransfer/images/ChildrenKolkataIndiaByLorenJosephOnUnsplash*.png
 styleTransfer/images/PortraitOfManHuggingHappyWomanUnderUmbrella.png
 styleTransfer/images/PortraitOfManHuggingHappyWomanUnderUmbrella256*
 styleTransfer/images/PortraitOfManHuggingHappyWomanUnderUmbrella512x.png
+T5summarize
 *.svg
 pdf
 .ipynb_checkpoints
