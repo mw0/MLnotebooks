@@ -21,7 +21,6 @@ Implicit/notebooks/UsingImplicitWithALS-Copy2.ipynb
 Implicit/*.stderr
 Implicit/wTranspose/*.stderr
 Implicit/*iters*
-LightFMMovieLens/*
 KaggleWeather/city_attributes.csv
 KaggleWeather/historical-hourly-weather-data.zip
 KaggleWeather/pressure.csv
@@ -31,7 +30,18 @@ KaggleWeather/wind_direction.csv
 KaggleWeather/wind_speed.csv
 KerasProjects/
 KerasProjects/*
+LightFMMovieLens/*
 MaskR-CNN/
+NationalLynching/AmyKateBailyData/Lynch_Website/*.zip
+NationalLynching/AmyKateBailyData/Lynch_Website/AL
+NationalLynching/AmyKateBailyData/Lynch_Website/AR
+NationalLynching/AmyKateBailyData/Lynch_Website/FL
+NationalLynching/AmyKateBailyData/Lynch_Website/KY
+NationalLynching/AmyKateBailyData/Lynch_Website/LA
+NationalLynching/AmyKateBailyData/Lynch_Website/MS
+NationalLynching/AmyKateBailyData/Lynch_Website/NC
+NationalLynching/AmyKateBailyData/Lynch_Website/SC
+NationalLynching/AmyKateBailyData/Lynch_Website/TN
 SoccerRankingMatrixFactorization/
 SparkProjects/
 SparkProjects/*
