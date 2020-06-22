@@ -12,16 +12,18 @@ summarizer(userText, min_length=25, max_length=65)
 
 st.sidebar.title("About")
 
-st.sidebar.info("This little app uses the default HuggingFace summarization "
-                "pipeline to summarize text that you post.\n\nFor additional"
-                " information, see "
-                "https://github.com/mw0/MLnotebooks/HuggingFace/README.md.")
+st.sidebar.info(
+    "This little app uses the default HuggingFace summarization "
+    "pipeline to summarize text that you post.\n\nFor additional"
+    " information, see "
+    "https://github.com/mw0/MLnotebooks/HuggingFace/README.md."
+)
 
-st.sidebar.header('Set summarization output range (words).')
-minLength = st.sidebar.slider('min. word count', 25, 175, 70)
-maxLength = st.sidebar.slider('max. word count', 50, 310, 90)
+st.sidebar.header("Set summarization output range (words).")
+minLength = st.sidebar.slider("min. word count", 25, 175, 70)
+maxLength = st.sidebar.slider("max. word count", 50, 310, 90)
 
-userText = st.text_input('Input text you want summarized:')
 
-st.write('summary: ', summarizer(userText, min_length=minLength,
-                                 max_length=maxLength))
+
+summary = summarizer(userText, min_length=minLength, max_length=maxLength)
+st.write("summary:\n", summary)
