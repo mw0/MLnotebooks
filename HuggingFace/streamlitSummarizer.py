@@ -18,7 +18,6 @@ NYTimesAPIkey = environ.get("NYTimesAPIkey")
 if NYTimesAPIkey is None:
     raise KeyError("'NYTimesAPIkey' not an environment variable name.")
 
-# nyt = articleAPI(NYTimesAPIkey)
 nyt = NYTAPI(NYTimesAPIkey)
 
 summarizer = pipeline("summarization")
@@ -28,9 +27,10 @@ summarizer = pipeline("summarization")
 st.sidebar.title("About")
 
 st.sidebar.info(
-    "This little app uses the default HuggingFace summarization "
-    "pipeline to summarize text that you post.\n\nFor additional"
-    " information, see "
+    "This streamlit app uses the default HuggingFace summarization "
+    "pipeline to summarize text from selected NY Times articles.\n\n"
+    "The actual summarization time takes on the order of a minute.\n"
+    "\nFor additional information, see "
     "https://github.com/mw0/MLnotebooks/HuggingFace/README.md."
 )
 
@@ -40,7 +40,10 @@ maxLength = st.sidebar.slider("max. word count", 50, 310, 250)
 
 st.sidebar.title("Top 5 New York Times world news articles")
 
+t0 = perf_counter()
 top5WorldStories = nyt.top_stories(section="world")[:5]
+t1 = perf_counter()
+Δt01 = t1 - t0
 
 titles = []
 URLs = dict()
@@ -53,21 +56,22 @@ for i, top in enumerate(top5WorldStories):
     titles.append(title)
     URLs[title] = top["url"]
 
+t2 = perf_counter()
 title = st.sidebar.selectbox(f"at {latest}", titles)
 st.write(f"You selected: {title}, {URLs[title]}")
-
-t0 = perf_counter()
-all = requests.get(URLs[title])
-t1 = perf_counter()
-Δt01 = t1 - t0
-print(f"Δt to fetch article: {Δt01:.1f}s")
-
-t2 = perf_counter()
-doc = BeautifulSoup(all.text, "html.parser")
-soup = doc.findAll("p", {"class", "css-158dogj evys1bk0"})
 t3 = perf_counter()
 Δt23 = t3 - t2
-print(f"Δt to soupify article: {Δt23:.1f}s")
+
+t4 = perf_counter()
+all = requests.get(URLs[title])
+t5 = perf_counter()
+Δt45 = t5 - t4
+
+t6 = perf_counter()
+doc = BeautifulSoup(all.text, "html.parser")
+soup = doc.findAll("p", {"class", "css-158dogj evys1bk0"})
+t7 = perf_counter()
+Δt67 = t7 - t6
 
 story = []
 for paraSoup in soup:
@@ -79,19 +83,28 @@ for paraSoup in soup:
 userText = "\n\n".join(story)
 print(len(userText))
 
-toSummarize = userText[:2000]
+toSummarize = userText[:2500]
 print(len(toSummarize))
 
 st.title("Summary")
-t4 = perf_counter()
+t8 = perf_counter()
 st.write(
     summarizer(toSummarize, min_length=minLength, max_length=maxLength)[0][
         "summary_text"
     ]
 )
-t5 = perf_counter()
-Δt45 = t5 - t4
-print(f"Δt to summarize article: {Δt23:.1f}s")
+t9 = perf_counter()
+Δt89 = t9 - t8
 
+t10 = perf_counter()
 st.title("Full article")
 st.write(userText)
+t11 = perf_counter()
+Δt10 = t11 - t10
+
+print(f"Δt to fetch top 5 article metadatums: {Δt01:4.1f}s")
+print(f"Δt to generate sidebar dropdown: {Δt23:4.1f}s")
+print(f"Δt to fetch article: {Δt45:4.1f}s")
+print(f"Δt to soupify article: {Δt67:4.1f}s")
+print(f"Δt to summarize article: {Δt89:4.1f}s")
+print(f"Δt to write article: {Δt10:4.1f}s")
