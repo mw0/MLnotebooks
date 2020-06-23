@@ -7,13 +7,8 @@ import requests
 import streamlit as st
 import datetime
 from os import environ
-
+from time import perf_counter()
 import re
-
-paraExtract = re.compile(r'<p class="[^"]*">([^<]*)</p>')
-htmlDrop = re.compile(
-    r'([^<]*)<a class=\"[^"]*"\W+href="[^"]*"\W+title="[^"]*">([^<]*)</a>'
-)
 
 from pynytimes import NYTAPI
 
@@ -40,8 +35,8 @@ st.sidebar.info(
 )
 
 st.sidebar.header("Set summarization output range (words).")
-minLength = st.sidebar.slider("min. word count", 25, 175, 70)
-maxLength = st.sidebar.slider("max. word count", 50, 310, 110)
+minLength = st.sidebar.slider("min. word count", 25, 175, 120)
+maxLength = st.sidebar.slider("max. word count", 50, 310, 250)
 
 st.sidebar.title("Top 5 New York Times world news articles")
 
@@ -61,7 +56,9 @@ for i, top in enumerate(top5WorldStories):
 title = st.sidebar.selectbox(f"at {latest}", titles)
 st.write(f"You selected: {title}, {URLs[title]}")
 
+t0 = perf_counter()
 all = requests.get(URLs[title])
+t1 = perf_counter()
 doc = BeautifulSoup(all.text, "html.parser")
 soup = doc.findAll("p", {"class", "css-158dogj evys1bk0"})
 
@@ -72,8 +69,21 @@ for paraSoup in soup:
         story.append(thing)
         print(thing, "\n")
 
-st.write("\n\n".join(story))
+userText = "\n\n".join(story)
+print(len(userText))
 
-summarizer("\n\n".join(story), min_length=25, max_length=65)
+toSummarize = userText[:2000]
+print(len(toSummarize))
 
-st.write("summary: ", summarizer(userText, min_length=minLength, max_length=maxLength))
+st.title("Summary")
+t0 = perf_counter()
+st.write(
+    summarizer(toSummarize, min_length=minLength, max_length=maxLength)[0][
+        "summary_text"
+    ]
+)
+t1 = perf_counter()
+print(f"t summarize: {t1 - t0:.1f}s")
+
+st.title('Full article')
+st.write(userText)
