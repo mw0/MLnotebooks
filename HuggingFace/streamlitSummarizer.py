@@ -38,7 +38,6 @@ st.sidebar.info(
     " information, see "
     "https://github.com/mw0/MLnotebooks/HuggingFace/README.md."
 )
-<<<<<<< HEAD
 
 st.sidebar.header("Set summarization output range (words).")
 minLength = st.sidebar.slider("min. word count", 25, 175, 70)
@@ -78,14 +77,3 @@ st.write("\n\n".join(story))
 summarizer("\n\n".join(story), min_length=25, max_length=65)
 
 st.write("summary: ", summarizer(userText, min_length=minLength, max_length=maxLength))
-=======
-
-st.sidebar.header("Set summarization output range (words).")
-minLength = st.sidebar.slider("min. word count", 25, 175, 70)
-maxLength = st.sidebar.slider("max. word count", 50, 310, 90)
-
-
-
-summary = summarizer(userText, min_length=minLength, max_length=maxLength)
-st.write("summary:\n", summary)
->>>>>>> 8f39b2902247588c876bc13d4ee9095d09ccf1b3
