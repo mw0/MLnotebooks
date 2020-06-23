@@ -7,7 +7,7 @@ import requests
 import streamlit as st
 import datetime
 from os import environ
-from time import perf_counter()
+from time import perf_counter
 import re
 
 from pynytimes import NYTAPI
@@ -93,5 +93,5 @@ t5 = perf_counter()
 Δt45 = t5 - t4
 print(f"Δt to summarize article: {Δt23:.1f}s")
 
-st.title('Full article')
+st.title("Full article")
 st.write(userText)
