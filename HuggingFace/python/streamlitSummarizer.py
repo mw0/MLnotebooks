@@ -14,13 +14,22 @@ from pynytimes import NYTAPI
 
 from transformers import pipeline
 
+summarizer = pipeline("summarization")
+
+
+def getSummary(story):
+    return summarizer(story, min_length=minLength, max_length=maxLength)[0][
+        "summary_text"
+    ]
+
+
+# NY Times API
+
 NYTimesAPIkey = environ.get("NYTimesAPIkey")
 if NYTimesAPIkey is None:
     raise KeyError("'NYTimesAPIkey' not an environment variable name.")
 
 nyt = NYTAPI(NYTimesAPIkey)
-
-summarizer = pipeline("summarization")
 
 # Now for the Streamlit interface:
 
@@ -29,12 +38,12 @@ st.sidebar.title("About")
 st.sidebar.info(
     "This streamlit app uses the default HuggingFace summarization "
     "pipeline to summarize text from selected NY Times articles.\n\n"
-    "The actual summarization time takes on the order of a minute.\n"
-    "\nFor additional information, see "
-    "https://github.com/mw0/MLnotebooks/HuggingFace/README.md."
+    "The actual summarization time takes on the order of a half minute.\n"
+    "\nFor additional information, see the "
+    "[README.md](https://github.com/mw0/MLnotebooks/HuggingFace/README.md)."
 )
 
-st.sidebar.header("Set summarization output range (words).")
+st.sidebar.header("Set summarization output range (words)")
 minLength = st.sidebar.slider("min. word count", 25, 175, 120)
 maxLength = st.sidebar.slider("max. word count", 50, 310, 250)
 
@@ -88,11 +97,9 @@ print(len(toSummarize))
 
 st.title("Summary")
 t8 = perf_counter()
-st.write(
-    summarizer(toSummarize, min_length=minLength, max_length=maxLength)[0][
-        "summary_text"
-    ]
-)
+
+summary = getSummary(toSummarize)
+st.write(summary)
 t9 = perf_counter()
 Δt89 = t9 - t8
 
