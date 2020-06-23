@@ -59,8 +59,15 @@ st.write(f"You selected: {title}, {URLs[title]}")
 t0 = perf_counter()
 all = requests.get(URLs[title])
 t1 = perf_counter()
+Δt01 = t1 - t0
+print(f"Δt to fetch article: {Δt01:.1f}s")
+
+t2 = perf_counter()
 doc = BeautifulSoup(all.text, "html.parser")
 soup = doc.findAll("p", {"class", "css-158dogj evys1bk0"})
+t3 = perf_counter()
+Δt23 = t3 - t2
+print(f"Δt to soupify article: {Δt23:.1f}s")
 
 story = []
 for paraSoup in soup:
@@ -76,14 +83,15 @@ toSummarize = userText[:2000]
 print(len(toSummarize))
 
 st.title("Summary")
-t0 = perf_counter()
+t4 = perf_counter()
 st.write(
     summarizer(toSummarize, min_length=minLength, max_length=maxLength)[0][
         "summary_text"
     ]
 )
-t1 = perf_counter()
-print(f"t summarize: {t1 - t0:.1f}s")
+t5 = perf_counter()
+Δt45 = t5 - t4
+print(f"Δt to summarize article: {Δt23:.1f}s")
 
 st.title('Full article')
 st.write(userText)
