@@ -41,7 +41,7 @@ st.sidebar.info(
     "NY Times articles.\n\n"
     "The actual summarization time takes on the order of a half minute.\n"
     "\nFor additional information, see the "
-    "[README.md](https://github.com/mw0/MLnotebooks/HuggingFace/README.md)."
+    "[README.md](https://github.com/mw0/MLnotebooks/tree/master/HuggingFace/README.md)."
 )
 
 st.sidebar.header("Set summarization output range (words)")
@@ -85,16 +85,15 @@ t7 = perf_counter()
 
 story = []
 for paraSoup in soup:
-    if len(paraSoup) >= 1:
-        thing = paraSoup.contents[0]
-        if isinstance(thing, bs4.element.NavigableString):
-            story.append(thing)
-            print(thing, "\n")
+    thing = paraSoup.contents[0]
+    if isinstance(thing, bs4.element.NavigableString):
+        story.append(thing)
+        print(thing, "\n")
 
 userText = "\n\n".join(story)
 print(len(userText))
 
-toSummarize = userText[:2500]
+toSummarize = userText[:2250]
 print(len(toSummarize))
 
 st.title("Summary")
