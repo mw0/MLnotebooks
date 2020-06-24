@@ -93,10 +93,13 @@ for paraSoup in soup:
     story.append(paragraph)
 
 userText = "\n\n".join(story)
-print(len(userText))
-
+print(f"len(userText): {len(userText)}")
+words = userText.split()
+print(f"len(words): {len(words)}")
+if len(words) > 1024:
+    words = words[:1024]
 # toSummarize = userText[:2500]
-toSummarize = userText
+toSummarize = " ".join(words)
 print(len(toSummarize))
 
 st.title("Summary")
