@@ -41,7 +41,7 @@ st.sidebar.info(
     "NY Times articles.\n\n"
     "The actual summarization time takes on the order of a half minute.\n"
     "\nFor additional information, see the "
-    "[README.md](https://github.com/mw0/MLnotebooks/tree/master/HuggingFace/README.md)."
+    "[README.md](https://github.com/mw0/MLnotebooks/tree/master/HuggingFace)."
 )
 
 st.sidebar.header("Set summarization output range (words)")
