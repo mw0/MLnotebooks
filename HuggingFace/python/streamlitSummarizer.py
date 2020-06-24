@@ -90,6 +90,7 @@ story = []
 for paraSoup in soup:
     print(len(paraSoup), paraSoup)
     for thing in paraSoup:
+        print(type(thing), thing, "\n")
         if isinstance(thing, bs4.element.Tag):
             thing = thing.a.text
             story.append(thing)
