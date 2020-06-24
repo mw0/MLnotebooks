@@ -96,9 +96,8 @@ userText = "\n\n".join(story)
 print(f"len(userText): {len(userText)}")
 words = userText.split()
 print(f"len(words): {len(words)}")
-if len(words) > 1024:
-    words = words[:1024]
-# toSummarize = userText[:2500]
+if len(words) > 805:
+    words = words[:805]
 toSummarize = " ".join(words)
 print(len(toSummarize))
 
