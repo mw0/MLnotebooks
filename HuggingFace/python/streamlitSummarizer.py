@@ -89,7 +89,7 @@ anchorTag = re.compile(r'<a class="css-1g7m0tk" href="[^"]*" '
 story = []
 for paraSoup in soup:
     print(len(paraSoup), paraSoup)
-    print("\n".join(paraSoup.text.split()))
+    print(" ".join(paraSoup.text.split()))
     # for thing in paraSoup:
     #     print(type(thing), thing, "\n")
     #     if isinstance(thing, bs4.element.Tag):
