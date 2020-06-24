@@ -90,12 +90,13 @@ story = []
 for paraSoup in soup:
     print(len(paraSoup), paraSoup)
     for thing in paraSoup:
-        if isinstance(thing, bs4.element.NavigableString):
+        if isinstance(thing, bs4.element.Tag):
+            thing = thing.a.text
             story.append(thing)
             print(thing, "\n")
-        elif isinstance(thing, bs4.element.Tag):
-            match = anchorTag.search(thing)
-            print(f"match: {match}")
+        elif isinstance(thing, bs4.element.NavigableString):
+            story.append(thing)
+            print(thing, "\n")
         else:
             print(f"\n!! {type(thing)} !!\n")
 
