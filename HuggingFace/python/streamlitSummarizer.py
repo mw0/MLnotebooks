@@ -45,8 +45,8 @@ st.sidebar.info(
 )
 
 st.sidebar.header("Set summarization output range (words)")
-minLength = st.sidebar.slider("min. word count", 25, 175, 120)
-maxLength = st.sidebar.slider("max. word count", 50, 310, 250)
+minLength = st.sidebar.slider("min. word count", 25, 250, 120)
+maxLength = st.sidebar.slider("max. word count", 45, 310, 250)
 
 st.sidebar.title("Top 5 New York Times world news articles")
 
