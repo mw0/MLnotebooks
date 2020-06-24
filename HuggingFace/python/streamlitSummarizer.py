@@ -85,6 +85,7 @@ t7 = perf_counter()
 
 story = []
 for paraSoup in soup:
+    print(len(paraSoup), paraSoup)
     thing = paraSoup.contents[0]
     if isinstance(thing, bs4.element.NavigableString):
         story.append(thing)
