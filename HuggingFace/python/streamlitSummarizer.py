@@ -8,7 +8,7 @@ import streamlit as st
 import datetime
 from os import environ
 from time import perf_counter
-import re
+# import re
 
 from pynytimes import NYTAPI
 
@@ -83,31 +83,20 @@ soup = doc.findAll("p", {"class", "css-158dogj evys1bk0"})
 t7 = perf_counter()
 Δt67 = t7 - t6
 
-anchorTag = re.compile(r'<a class="css-1g7m0tk" href="[^"]*" '
-                       'title="[^"]*">([^<]*)<\/a>')
+# anchorTag = re.compile(r'<a class="css-1g7m0tk" href="[^"]*" '
+#                        'title="[^"]*">([^<]*)<\/a>')
 
 story = []
 for paraSoup in soup:
-    # print(len(paraSoup), paraSoup)
     paragraph = " ".join(paraSoup.text.split()) + "\n"
     print(paragraph)
     story.append(paragraph)
-    # for thing in paraSoup:
-    #     print(type(thing), thing, "\n")
-    #     if isinstance(thing, bs4.element.Tag):
-    #         thing = thing.a.text
-    #         story.append(thing)
-    #         print(thing, "\n")
-    #     elif isinstance(thing, bs4.element.NavigableString):
-    #         story.append(thing)
-    #         print(thing, "\n")
-    #     else:
-    #         print(f"\n!! {type(thing)} !!\n")
 
 userText = "\n\n".join(story)
 print(len(userText))
 
-toSummarize = userText[:2500]
+# toSummarize = userText[:2500]
+toSummarize = userText
 print(len(toSummarize))
 
 st.title("Summary")
