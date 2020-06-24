@@ -95,8 +95,8 @@ print(f"len(userText): {len(userText)}")
 # kludge, which truncates the story, seems to work:
 words = userText.split()
 print(f"len(words): {len(words)}")
-if len(words) > 800:
-    words = words[:800]
+if len(words) > 720:
+    words = words[:720]
 toSummarize = " ".join(words)
 print(len(toSummarize))
 
