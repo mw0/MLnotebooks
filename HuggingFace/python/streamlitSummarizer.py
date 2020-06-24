@@ -90,6 +90,8 @@ for paraSoup in soup:
         if isinstance(thing, bs4.element.NavigableString):
             story.append(thing)
             print(thing, "\n")
+        else:
+            print(f"\n!! {type(thing)} !!\n")
 
 userText = "\n\n".join(story)
 print(len(userText))
