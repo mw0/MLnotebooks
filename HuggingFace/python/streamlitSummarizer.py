@@ -85,10 +85,11 @@ t7 = perf_counter()
 
 story = []
 for paraSoup in soup:
-    thing = paraSoup.contents[0]
-    if isinstance(thing, bs4.element.NavigableString):
-        story.append(thing)
-        print(thing, "\n")
+    if len(paraSoup) >= 1:
+        thing = paraSoup.contents[0]
+        if isinstance(thing, bs4.element.NavigableString):
+            story.append(thing)
+            print(thing, "\n")
 
 userText = "\n\n".join(story)
 print(len(userText))
