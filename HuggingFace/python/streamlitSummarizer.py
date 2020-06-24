@@ -86,15 +86,16 @@ t7 = perf_counter()
 story = []
 for paraSoup in soup:
     print(len(paraSoup), paraSoup)
-    thing = paraSoup.contents[0]
-    if isinstance(thing, bs4.element.NavigableString):
-        story.append(thing)
-        print(thing, "\n")
+    if len(paraSoup) > 0:
+        thing = paraSoup.contents[0]
+        if isinstance(thing, bs4.element.NavigableString):
+            story.append(thing)
+            print(thing, "\n")
 
 userText = "\n\n".join(story)
 print(len(userText))
 
-toSummarize = userText[:2250]
+toSummarize = userText[:2500]
 print(len(toSummarize))
 
 st.title("Summary")
