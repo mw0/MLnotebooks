@@ -2,10 +2,12 @@
 
 ### Contents
 
-* [Summarization](summarization)
+* [Summarization](#summarization)
 * []()
 
 ### Summarization
+
+Applies Facebook's Bart model, as implemented by HuggingFace, to summarize articles from the NY Times.
 
 This is a streamlit app that does several things:
 
@@ -18,4 +20,4 @@ This is a streamlit app that does several things:
   * prints the resulting summary
   * prints content of full article
 
-See [streamlitSummarizer.py](https://github.com/mw0/MLnotebooks/blob/master/HuggingFace/python/streamlitSummarizer.py)
+See [streamlitSummarizer.py](https://github.com/mw0/MLnotebooks/blob/master/HuggingFace/python/streamlitSummarizer.py) for source code.
