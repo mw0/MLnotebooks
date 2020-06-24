@@ -79,7 +79,8 @@ t5 = perf_counter()
 
 t6 = perf_counter()
 doc = BeautifulSoup(all.text, "html.parser")
-soup = doc.findAll("p", {"class", "css-158dogj evys1bk0"})
+# soup = doc.findAll("p", {"class", "css-158dogj evys1bk0"})
+soup = doc.findAll("p", class="css-158dogj evys1bk0")
 t7 = perf_counter()
 Δt67 = t7 - t6
 
@@ -89,6 +90,7 @@ anchorTag = re.compile(r'<a class="css-1g7m0tk" href="[^"]*" '
 story = []
 for paraSoup in soup:
     print(len(paraSoup), paraSoup)
+    
     for thing in paraSoup:
         print(type(thing), thing, "\n")
         if isinstance(thing, bs4.element.Tag):
