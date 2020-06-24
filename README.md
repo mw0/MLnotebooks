@@ -1,5 +1,7 @@
 ## Machine Learning Notebooks
 
+* [HuggingFace](https://github.com/mw0/MLnotebooks/tree/master/HuggingFace)
+  * Apps derived from HuggingFace implementation of NLU transformer models
 * [InterpretableML](https://github.com/mw0/MLnotebooks/tree/master/InterpretableML)
   * tutorial, originating from Domino Data Labs, for application of `LIME` and `shap` (Shapley values) for estimating contributions of features to a given instance prediction
 * [multiClass](https://github.com/mw0/MLnotebooks/tree/master/multiClass)
