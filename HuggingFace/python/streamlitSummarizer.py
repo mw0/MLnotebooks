@@ -83,14 +83,19 @@ soup = doc.findAll("p", {"class", "css-158dogj evys1bk0"})
 t7 = perf_counter()
 Δt67 = t7 - t6
 
+anchorTag = re.compile(r'<a class="css-1g7m0tk" href="[^"]*" '
+                       'title="[^"]*">([^<]*)<\/a>')
+
 story = []
 for paraSoup in soup:
     print(len(paraSoup), paraSoup)
     for thing in paraSoup:
-        if (isinstance(thing, bs4.element.NavigableString)
-            or isinstance(thing, bs4.element.Tag)):
+        if isinstance(thing, bs4.element.NavigableString):
             story.append(thing)
             print(thing, "\n")
+        elif isinstance(thing, bs4.element.Tag):
+            match = anchorTag.search(thing)
+            print(f"match: {match}")
         else:
             print(f"\n!! {type(thing)} !!\n")
 
