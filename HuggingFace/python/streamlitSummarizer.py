@@ -8,7 +8,6 @@ import streamlit as st
 import datetime
 from os import environ
 from time import perf_counter
-# import re
 
 from pynytimes import NYTAPI
 
@@ -39,7 +38,7 @@ st.sidebar.info(
     "This streamlit app uses the default HuggingFace summarization "
     "pipeline (Facebook's Bart model) to summarize text from selected "
     "NY Times articles.\n\n"
-    "The actual summarization time takes on the order of a half minute.\n"
+    "The actual summarization time takes on the order of 45 seconds.\n"
     "\nFor additional information, see the "
     "[README.md](https://github.com/mw0/MLnotebooks/tree/master/HuggingFace)."
 )
@@ -83,9 +82,6 @@ soup = doc.findAll("p", {"class", "css-158dogj evys1bk0"})
 t7 = perf_counter()
 Δt67 = t7 - t6
 
-# anchorTag = re.compile(r'<a class="css-1g7m0tk" href="[^"]*" '
-#                        'title="[^"]*">([^<]*)<\/a>')
-
 story = []
 for paraSoup in soup:
     paragraph = " ".join(paraSoup.text.split()) + "\n"
@@ -94,6 +90,9 @@ for paraSoup in soup:
 
 userText = "\n\n".join(story)
 print(f"len(userText): {len(userText)}")
+
+# Ensure that there are not too many tokens for Bart model. The following
+# kludge, which truncates the story, seems to work:
 words = userText.split()
 print(f"len(words): {len(words)}")
 if len(words) > 805:
