@@ -87,7 +87,8 @@ story = []
 for paraSoup in soup:
     print(len(paraSoup), paraSoup)
     for thing in paraSoup:
-        if isinstance(thing, bs4.element.NavigableString):
+        if (isinstance(thing, bs4.element.NavigableString)
+            or isinstance(thing, bs4.element.Tag)):
             story.append(thing)
             print(thing, "\n")
         else:
