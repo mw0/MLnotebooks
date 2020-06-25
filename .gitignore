@@ -6,6 +6,7 @@ __pycache__/
 */.ipynb_checkpoints
 FederalistPapers/*
 GAN-tutorial/*
+HuggingFace/data/fakeRealNews.zip
 InterpretableML/breast-cancer-wisconsin-data.zip
 InterpretableML/data.csv
 InterpretableML/heartbeat.zip
