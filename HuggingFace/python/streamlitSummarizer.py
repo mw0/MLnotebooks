@@ -36,7 +36,7 @@ st.sidebar.title("About")
 
 st.sidebar.info(
     "This streamlit app uses the default HuggingFace summarization "
-    "pipeline (Facebook's Bart model) to summarize text from selected "
+    "pipeline (Facebook's BART model) to summarize text from selected "
     "NY Times articles.\n\n"
     "The actual summarization time takes on the order of 45 seconds.\n"
     "\nFor additional information, see the "
