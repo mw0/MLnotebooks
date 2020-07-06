@@ -99,7 +99,7 @@ st.sidebar.info(
     "This streamlit app uses the default HuggingFace summarization "
     "pipeline (Facebook's BART model) to summarize text from selected "
     "NY Times articles.\n\n"
-    "The actual summarization time takes on the order of 20 seconds, although"
+    "The actual summarization time takes on the order of 40 seconds, although"
     " increasing the summary length will extend this significantly.\n"
     "\nFor additional information, see the "
     "[README.md](https://github.com/mw0/MLnotebooks/tree/master/HuggingFace)."
@@ -164,11 +164,17 @@ print(f"Δt to summarize article: {Δt89:4.1f}s")
 print(f"Δt to write article: {Δt10:4.1f}s")
 
 if not st.sidebar.button('Hide profiling information'):
-    st.sidebar.info(f"* initialize summarizer Δt: {Δt01:4.1f}s\n"
-                    f"* fetch top 5 article metada Δt: {Δt23:4.1f}s\n"
-                    f"* fetch selected article Δt: {Δt45:4.1f}s\n"
-                    f"* soupify article Δt: {Δt67:4.1f}s\n"
-                    f"* summarize article Δt: {Δt89:4.1f}s")
+    cudaDetected = torch.cuda.is_available()
+    sbInfoStr = (f"* initialize summarizer Δt: {Δt01:4.1f}s\n"
+                 f"* fetch top 5 article metada Δt: {Δt23:4.1f}s\n"
+                 f"* fetch selected article Δt: {Δt45:4.1f}s\n"
+                 f"* soupify article Δt: {Δt67:4.1f}s\n"
+                 f"* summarize article Δt: {Δt89:4.1f}s")
+    if cudaDetected:
+        sbInfoStr += ("\n\nUsing GPU {os.environ['CUDA_VISIBLE_DEVICES']}\nMemory Usage:\nAllocated: "
+                      f"{round(torch.cuda.memory_allocated(0)/1024**3,1)} GB"
+                      f"\nCached: {round(torch.cuda.memory_cached(0)/1024**3,1)} GB")
+    st.sidebar.info(sbInfoStr)
 
 
 # if __name__ == "__main__":
