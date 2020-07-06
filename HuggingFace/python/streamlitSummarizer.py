@@ -171,7 +171,8 @@ if not st.sidebar.button('Hide profiling information'):
                  f"* soupify article Δt: {Δt67:4.1f}s\n"
                  f"* summarize article Δt: {Δt89:4.1f}s")
     if cudaDetected:
-        sbInfoStr += ("\n\nUsing GPU {os.environ['CUDA_VISIBLE_DEVICES']}\nMemory Usage:\nAllocated: "
+        cudaDevice = environ['CUDA_VISIBLE_DEVICES']
+        sbInfoStr += ("\n\nUsing GPU {cudaDevice}\nMemory Usage:\nAllocated: "
                       f"{round(torch.cuda.memory_allocated(0)/1024**3,1)} GB"
                       f"\nCached: {round(torch.cuda.memory_cached(0)/1024**3,1)} GB")
     st.sidebar.info(sbInfoStr)
