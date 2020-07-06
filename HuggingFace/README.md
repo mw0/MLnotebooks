@@ -16,7 +16,8 @@ This is a streamlit app that does several things:
 * when user selects a title:
   * fetches the full article directly from the Times website
   * extracts body of article using BeautifulSoup
-  * submits first 2500 characters of body to HuggingFace's summarizer
+  * NY Times articles are typically too long for the summarizer, so the body is truncated to a maximum of 720 words
+  * truncated text is sent to HuggingFace's summarizer
   * prints the resulting summary
   * prints content of full article
 
