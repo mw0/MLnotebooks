@@ -178,9 +178,10 @@ if not st.sidebar.button('Hide profiling information'):
         for i in range(cudaDeviceCt):
             allocated = round(torch.cuda.memory_allocated(i)/1024**3,1)
             cached = round(torch.cuda.memory_cached(i)/1024**3,1)
-            sbInfoStr += (f"\ncuda device[{i}]: {torch.cuda.get_device_name(i)}"
-                          f"\nAllocated memory: {allocated} GB\n"
-                          f"Cached memory: {cached} GB")
+            sbInfoStr += (f"\n* cuda device[{i}]:\n"
+                          # f"{torch.cuda.get_device_name(i)}\n"
+                          f"  * Allocated memory: {allocated} GB\n"
+                          f"  * Cached memory: {cached} GB")
     print(sbInfoStr)
     st.sidebar.info(sbInfoStr)
 
