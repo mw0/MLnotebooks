@@ -99,14 +99,15 @@ st.sidebar.info(
     "This streamlit app uses the default HuggingFace summarization "
     "pipeline (Facebook's BART model) to summarize text from selected "
     "NY Times articles.\n\n"
-    "The actual summarization time takes on the order of 20 seconds.\n"
+    "The actual summarization time takes on the order of 20 seconds, although"
+    " increasing the summary length will extend this significantly.\n"
     "\nFor additional information, see the "
     "[README.md](https://github.com/mw0/MLnotebooks/tree/master/HuggingFace)."
 )
 
 st.sidebar.header("Set summarization output range (words)")
-minLength = st.sidebar.slider("min. word count", 25, 250, 175)
-maxLength = st.sidebar.slider("max. word count", 45, 310, 250)
+minLength = st.sidebar.slider("min. word count", 25, 250, 125)
+maxLength = st.sidebar.slider("max. word count", 45, 310, 175)
 st.sidebar.header("Article truncation size (words)")
 truncateWords = st.sidebar.slider("truncate size", 300, 720, 500)
 
@@ -164,8 +165,8 @@ print(f"Δt to write article: {Δt10:4.1f}s")
 
 if not st.sidebar.button('Hide profiling information'):
     st.sidebar.info(f"* initialize summarizer Δt: {Δt01:4.1f}s\n"
-                    f"* fetch top 5 article metadatums Δt: {Δt23:4.1f}s\n"
-                    f"* fetch article Δt: {Δt45:4.1f}s\n"
+                    f"* fetch top 5 article metada Δt: {Δt23:4.1f}s\n"
+                    f"* fetch selected article Δt: {Δt45:4.1f}s\n"
                     f"* soupify article Δt: {Δt67:4.1f}s\n"
                     f"* summarize article Δt: {Δt89:4.1f}s")
 
