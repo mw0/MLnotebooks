@@ -1,0 +1,26 @@
+[I 12:02:31.662 NotebookApp] Writing notebook server cookie secret to /run/user/1001/jupyter/notebook_cookie_secret
+[I 12:02:33.833 NotebookApp] [jupyter_nbextensions_configurator] enabled 0.4.1
+[W 12:02:33.834 NotebookApp] Error loading server extension jupyter_notebook_gist
+    Traceback (most recent call last):
+      File "/usr/local/lib/python3.7/site-packages/notebook/notebookapp.py", line 1572, in init_server_extensions
+        mod = importlib.import_module(modulename)
+      File "/usr/lib64/python3.7/importlib/__init__.py", line 127, in import_module
+        return _bootstrap._gcd_import(name[level:], package, level)
+      File "<frozen importlib._bootstrap>", line 1006, in _gcd_import
+      File "<frozen importlib._bootstrap>", line 983, in _find_and_load
+      File "<frozen importlib._bootstrap>", line 965, in _find_and_load_unlocked
+    ModuleNotFoundError: No module named 'jupyter_notebook_gist'
+[I 12:02:38.602 NotebookApp] JupyterLab extension loaded from /usr/local/lib/python3.7/site-packages/jupyterlab
+[I 12:02:38.602 NotebookApp] JupyterLab application directory is /usr/local/share/jupyter/lab
+[I 12:02:38.609 NotebookApp] Serving notebooks from local directory: /home/wilber/work/MLnotebooks/KingCountyCovid
+[I 12:02:38.609 NotebookApp] The Jupyter Notebook is running at:
+[I 12:02:38.609 NotebookApp] http://localhost:500000/?token=6d40c4c057d9e3ab7916fb4602276de82a192c8c8c5a0878
+[I 12:02:38.609 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[C 12:02:38.647 NotebookApp] 
+    
+    To access the notebook, open this file in a browser:
+        file:///run/user/1001/jupyter/nbserver-10972-open.html
+    Or copy and paste one of these URLs:
+        http://localhost:500000/?token=6d40c4c057d9e3ab7916fb4602276de82a192c8c8c5a0878
+[I 12:03:45.302 NotebookApp] Interrupted...
+[I 12:03:45.302 NotebookApp] Shutting down 0 kernels
