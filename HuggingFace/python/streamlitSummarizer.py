@@ -14,8 +14,12 @@ from pynytimes import NYTAPI
 from transformers import pipeline
 import torch
 
-print(f"torch sees cuda: {torch.cuda.is_available()}")
-print(f"torch device named: {torch.cuda.get_device_name(0)}")
+cudaDetected = torch.cuda.is_available()
+print(f"torch sees cuda: {cudaDetected}")
+if cudaDetected:
+    cudaDeviceCt = torch.cuda.device_count()
+for i in range(cudaDeviceCt):
+    print(f"cuda device[{i}]: {torch.cuda.get_device_name(i)}")
 
 @st.cache(allow_output_mutation=True)
 def initializeSummarizer():
@@ -106,8 +110,8 @@ st.sidebar.info(
 )
 
 st.sidebar.header("Set summarization output range (words)")
-minLength = st.sidebar.slider("min. word count", 25, 250, 125)
-maxLength = st.sidebar.slider("max. word count", 45, 310, 175)
+minLength = st.sidebar.slider("min. word count", 25, 250, 150)
+maxLength = st.sidebar.slider("max. word count", 45, 310, 185)
 st.sidebar.header("Article truncation size (words)")
 truncateWords = st.sidebar.slider("truncate size", 300, 720, 500)
 
@@ -164,17 +168,20 @@ print(f"Δt to summarize article: {Δt89:4.1f}s")
 print(f"Δt to write article: {Δt10:4.1f}s")
 
 if not st.sidebar.button('Hide profiling information'):
-    cudaDetected = torch.cuda.is_available()
     sbInfoStr = (f"* initialize summarizer Δt: {Δt01:4.1f}s\n"
                  f"* fetch top 5 article metada Δt: {Δt23:4.1f}s\n"
                  f"* fetch selected article Δt: {Δt45:4.1f}s\n"
                  f"* soupify article Δt: {Δt67:4.1f}s\n"
                  f"* summarize article Δt: {Δt89:4.1f}s")
     if cudaDetected:
-        cudaDevice = environ['CUDA_VISIBLE_DEVICES']
-        sbInfoStr += ("\n\nUsing GPU {cudaDevice}\nMemory Usage:\nAllocated: "
-                      f"{round(torch.cuda.memory_allocated(0)/1024**3,1)} GB"
-                      f"\nCached: {round(torch.cuda.memory_cached(0)/1024**3,1)} GB")
+        sbInfoStr += "\n"
+        for i in range(cudaDeviceCt):
+            allocated = round(torch.cuda.memory_allocated(i)/1024**3,1)
+            cached = round(torch.cuda.memory_cached(i)/1024**3,1)
+            sbInfoStr += (f"\ncuda device[{i}]: {torch.cuda.get_device_name(i)}"
+                          f"\nAllocated memory: {allocated} GB\n"
+                          f"Cached memory: {cached} GB")
+    print(sbInfoStr)
     st.sidebar.info(sbInfoStr)
 
 
