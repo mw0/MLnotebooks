@@ -110,8 +110,8 @@ st.sidebar.info(
 )
 
 st.sidebar.header("Set summarization output range (words)")
-minLength = st.sidebar.slider("min. word count", 25, 250, 150)
-maxLength = st.sidebar.slider("max. word count", 45, 310, 185)
+minLength = st.sidebar.slider("min. word count", 25, 250, 165)
+maxLength = st.sidebar.slider("max. word count", 45, 310, 190)
 st.sidebar.header("Article truncation size (words)")
 truncateWords = st.sidebar.slider("truncate size", 300, 720, 500)
 
@@ -178,10 +178,10 @@ if not st.sidebar.button('Hide profiling information'):
         for i in range(cudaDeviceCt):
             allocated = round(torch.cuda.memory_allocated(i)/1024**3,1)
             cached = round(torch.cuda.memory_cached(i)/1024**3,1)
-            sbInfoStr += (f"\n* cuda device[{i}]:\n"
-                          # f"{torch.cuda.get_device_name(i)}\n"
-                          f"  * Allocated memory: {allocated} GB\n"
-                          f"  * Cached memory: {cached} GB")
+            sbInfoStr += (f"\n\ncuda device[{i}]:"
+                          # f" {torch.cuda.get_device_name(i)}\n"
+                          f"* Allocated memory: {allocated} GB\n"
+                          f"* Cached memory: {cached} GB")
     print(sbInfoStr)
     st.sidebar.info(sbInfoStr)
 
