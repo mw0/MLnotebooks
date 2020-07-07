@@ -28,3 +28,5 @@ See [streamlitSummarizer.py](https://github.com/mw0/MLnotebooks/blob/master/Hugg
 </td><td> ![image](https://github.com/mw0/MLnotebooks/blob/master/HuggingFace/SummarizerAppScreenshot.png) </td>
 </tr>
 </table>
+
+![image](https://github.com/mw0/MLnotebooks/blob/master/HuggingFace/SummarizerAppScreenshot.png)
