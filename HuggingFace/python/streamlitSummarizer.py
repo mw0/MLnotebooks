@@ -92,6 +92,8 @@ nyt = NYTAPI(NYTimesAPIkey)
 
 t0 = perf_counter()
 summarizer = initializeSummarizer()
+if cudaDetected:
+    summarizer.to('cuda')
 t1 = perf_counter()
 Δt01 = t1 - t0
 
