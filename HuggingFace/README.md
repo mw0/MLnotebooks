@@ -13,13 +13,13 @@ Applies Facebook's BART model, as implemented by HuggingFace, to summarize artic
 <tr valign="top">
 <td>This is a streamlit app that does several things:
 
-* uses the NY Times Top Stories API to get metadata for the current top stories
-* extracts URLs and titles for the top 5, creates dropdown in sidebar
+* uses the <em>NY Times</em> Top Stories API to get metadata for the current top stories
+* extracts URLs and titles for the top 5, creates sidebar dropdown
 * when user selects a title:
-  * fetches the full article directly from the Times website
+  * fetches the article directly from <em>Times</em> website
   * extracts body of article using BeautifulSoup
-  * NY Times articles are typically too long for the summarizer, so the body is truncated to a maximum of 720 words
-  * truncated text is sent to HuggingFace's summarizer
+  * <em>NY Times</em> articles are typically too long for the summarizer, so body is truncated to a maximum of 720 words
+  * applies summarizer to truncated text
   * prints the resulting summary
   * prints content of full article
 * Using streamlit's caching capabilities, most steps (fetching and extracting text from an article, for example) are repeated only as needed.
