@@ -168,6 +168,7 @@ print(f"Δt to summarize article: {Δt89:4.1f}s")
 print(f"Δt to write article: {Δt10:4.1f}s")
 
 if not st.sidebar.button('Hide profiling information'):
+    st.sidebar.header('Profiling information')
     sbInfoStr = (f"* initialize summarizer Δt: {Δt01:4.1f}s\n"
                  f"* fetch top 5 article metada Δt: {Δt23:4.1f}s\n"
                  f"* fetch selected article Δt: {Δt45:4.1f}s\n"
@@ -179,8 +180,8 @@ if not st.sidebar.button('Hide profiling information'):
             allocated = round(torch.cuda.memory_allocated(i)/1024**3,1)
             cached = round(torch.cuda.memory_cached(i)/1024**3,1)
             sbInfoStr += (f"\n\ncuda device[{i}]:"
-                          # f" {torch.cuda.get_device_name(i)}\n"
-                          f"* Allocated memory: {allocated} GB\n"
+                          # f" {torch.cuda.get_device_name(i)}"
+                          f"\n* Allocated memory: {allocated} GB\n"
                           f"* Cached memory: {cached} GB")
     print(sbInfoStr)
     st.sidebar.info(sbInfoStr)
