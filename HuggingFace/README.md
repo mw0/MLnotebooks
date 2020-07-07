@@ -25,7 +25,7 @@ Applies Facebook's BART model, as implemented by HuggingFace, to summarize artic
 * Using streamlit's caching capabilities, most steps (fetching and extracting text from an article, for example) are repeated only as needed.
 
 See [streamlitSummarizer.py](https://github.com/mw0/MLnotebooks/blob/master/HuggingFace/python/streamlitSummarizer.py) for source code.
-</td><td> ![image](https://github.com/mw0/MLnotebooks/blob/master/HuggingFace/SummarizerAppScreenshot.png) </td>
+</td><td><img src="SummarizerAppScreenshot.png" width="743" height="982"</td>
 </tr>
 </table>
 
