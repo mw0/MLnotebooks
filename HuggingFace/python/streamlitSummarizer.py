@@ -23,7 +23,7 @@ for i in range(cudaDeviceCt):
 
 @st.cache(allow_output_mutation=True)
 def initializeSummarizer():
-    return pipeline("summarization")
+    return pipeline("summarization", device=0)
 
 
 # @st.cache(suppress_st_warning=True)
