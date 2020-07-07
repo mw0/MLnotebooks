@@ -7,7 +7,7 @@
 
 ### Summarization
 
-Applies Facebook's Bart model, as implemented by HuggingFace, to summarize articles from the NY Times.
+Applies Facebook's BART model, as implemented by HuggingFace, to summarize articles from the NY Times.
 
 This is a streamlit app that does several things:
 
@@ -20,5 +20,6 @@ This is a streamlit app that does several things:
   * truncated text is sent to HuggingFace's summarizer
   * prints the resulting summary
   * prints content of full article
+* Using streamlit's caching capabilities, most steps (fetching and extracting text from an article, for example) are repeated only as needed.
 
 See [streamlitSummarizer.py](https://github.com/mw0/MLnotebooks/blob/master/HuggingFace/python/streamlitSummarizer.py) for source code.
