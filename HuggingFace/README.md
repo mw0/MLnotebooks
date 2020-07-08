@@ -18,12 +18,12 @@ Applies Facebook's BART model, as implemented by HuggingFace, to summarize artic
 * when user selects a title:
   * fetches the article from <em>Times</em> website
   * extracts body of article using BeautifulSoup
-  * article is truncated to a 720 words max<sup>&dagger;</sup>
+  * article is truncated to 720 words maximum<sup>&dagger;</sup>
   * applies summarizer
   * displays summary
   * displays full article
   * displays profiling info
-* Using streamlit's caching capabilities, most steps (e.g., fetching and extracting text from an article) are invoked only as needed.
+* Streamlit's caching capabilities obviate repeating steps &mdash; e.g., fetching and extracting text from an article already parsed.
 
 <sup>&dagger;</sup>Summarizer can fail if text is too long.
 
