@@ -27,7 +27,7 @@ def initializeSummarizer():
     return pipeline("summarization", device=0)
 
 
-@st.cache(ttl=180)		# clear cache every 3 minutes
+@st.cache(ttl=60.0*3.0, max_entries=20)		# clear cache every 3 minutes
 def fetchTop5TitlesURLs():
     top5WorldStories = nyt.top_stories(section="world")[:5]
 
