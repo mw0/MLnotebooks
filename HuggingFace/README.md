@@ -20,9 +20,7 @@ Applies Facebook's BART model, as implemented by HuggingFace, to summarize artic
   * extracts body of article using BeautifulSoup
   * article is truncated to 720 words maximum<sup>&dagger;</sup>
   * applies summarizer
-  * displays summary
-  * displays full article
-  * displays profiling info
+  * displays summary, full article, profiling info
 * Streamlit's caching capabilities obviate repeating steps &mdash; e.g., fetching and extracting text from an article already parsed.
 
 <sup>&dagger;</sup>Summarizer can fail if text is too long.
