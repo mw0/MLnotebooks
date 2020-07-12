@@ -28,6 +28,6 @@ Applies Facebook's BART model, as implemented by HuggingFace, to summarize artic
 <sup>&dagger;</sup>Summarizer can fail if text is too long.
 
 See [streamlitSummarizer.py](https://github.com/mw0/MLnotebooks/blob/master/HuggingFace/python/streamlitSummarizer.py) for source code.
-</td><td width="743"><img src="SummarizerAppScreenshot1.png" width="743" height="982"</td>
+</td><td width="700"><img src="SummarizerAppScreenshot1.png" width="700" height="1215"</td>
 </tr>
 </table>
