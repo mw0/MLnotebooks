@@ -42,10 +42,10 @@ def initializeSymspell():
                                                  resourceNames[2])
     print("dictionaryPath created")
     symspell.load_dictionary(dictionaryPath, 0, 1)
-    print(list(islice(sym_spell.words.items(), 5)))
+    print(list(islice(symspell.words.items(), 5)))
     print("symspell.load_ditionary() done")
     symspell.load_bigram_dictionary(bigramPath, 0, 1)
-    print(list(islice(sym_spell.bigrams.items(), 5)))
+    print(list(islice(symspell.bigrams.items(), 5)))
     print("symspell.load_bigram_ditionary() done")
     return symspell
 
