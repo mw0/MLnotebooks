@@ -117,9 +117,10 @@ st.sidebar.info(
 st.sidebar.checkbox("Autocorrect", ['yes', 'no'])
 
 # print(help(st.sidebar.file_uploader))
-myBytesIO = st.file_uploader('Upload a local scan file for text extraction',
-                             encoding='auto',
-                             key='userFile')
+myBytesIO = st.sidebar.file_uploader('Upload a local scan file for'
+                                     ' text extraction',
+                                     encoding='auto',
+                                     key='userFile')
 print(type(myBytesIO))
 print(myBytesIO)
 image = Image.open(myBytesIO)		# .convert('RBGA')
@@ -135,8 +136,8 @@ print(f"width: {width}, height: {height}")
 # else:
 #     plt.imshow(image)
 # st.pyplot()
-st.image(image, caption='Scanned image (raw)')  #,
-         # use_column_width=True)
+st.image(image, caption='Scanned image (raw)',
+         use_column_width=True)
 
 
 # t2 = perf_counter()
