@@ -138,7 +138,7 @@ if showBoundingBoxes:
     print(f"extractBoundingBoxDatums() Δt23: {Δt23: 4.1f}s")
 
     t4 = perf_counter()
-    drawBoxesOnCopy(df, copy)
+    drawBoxesOnCopy(df, draw)
     t5 = perf_counter()
     Δt45 = t5 - t4
     print(f"drawBoxesOnCopy() Δt45: {Δt45: 4.1f}s")
