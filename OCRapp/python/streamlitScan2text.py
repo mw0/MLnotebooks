@@ -39,7 +39,38 @@ pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 #	.
 #     return titles, URLs, latest
 
-# @st.cache(suppress_st_warning=True)
+@st.cache(suppress_st_warning=True)
+def extractBoundingBoxDatums(image):
+    data = pytesseract.image_to_data(image).split('\n')
+    df = pd.DataFrame([x.split('\t') for x in data[1:]],
+                  columns=data[0].split('\t'))
+
+    print(df.head(20))
+
+    # convert to int, replace -1 conf values with pd.NA, remove boxes that
+    # contain no text:
+
+    cols = df.columns
+    print(cols)
+    for col in cols[:-1]:
+        df[col] = df[col].astype(int)
+    print(df.info())
+
+    df.loc[df.conf == -1, 'conf'] = pd.NA
+    df = df[~df.conf.isna()].reset_index()
+    print(df.head(10))
+
+    return df
+
+@st.cache(suppress_st_warning=True)
+def drawBoxesOnCopy(df, copy):
+    # Draw boxes surrounding text on copy
+    for ind, row in df.iterrows():
+        xy = [(row['left'], row['top']),
+              (row['left'] + row['width'], row['top'] + row['height'])]
+        # print(xy)
+        draw.rectangle(xy, fill=None, width=3, outline='#FF0000')
+
 # def getArticle(URLs, title):
 #     return requests.get(URLs[title])
 
@@ -70,7 +101,8 @@ st.sidebar.info(
     "[README.md](https://github.com/mw0/MLnotebooks/tree/master/OCRapp)."
 )
 
-st.sidebar.checkbox("Autocorrect", ['yes', 'no'])
+autocorrect = st.sidebar.checkbox("Autocorrect", ['yes', 'no'])
+showBoundingBoxes = st.sidebar.checkbox("Show bounding boxes", ['yes', 'no'])
 
 # print(help(st.sidebar.file_uploader))
 myBytesIO = st.sidebar.file_uploader('Upload a local scan file for'
@@ -91,44 +123,28 @@ st.image(image, caption='Scanned image (raw)',
          use_column_width=True)
 
 # Create a copies to prevent overwriting of original image
-# t2 = perf_counter()
 copy = image.copy()
 draw = ImageDraw.Draw(copy)
 
-data = pytesseract.image_to_data(image).split('\n')
-df = pd.DataFrame([x.split('\t') for x in data[1:]],
-                  columns=data[0].split('\t'))
-# t3 = perf_counter()
-# Δt23 = t3 - t2
-print(df.head(20))
+if showBoundingBoxes:
+    t2 = perf_counter()
+    df = extractBoundingBoxDatums(image)
+    t2 = perf_counter()
+    t3 = perf_counter()
+    Δt23 = t3 - t2
 
-# convert to int, replace -1 conf values with pd.NA, remove boxes that contain
-# no text:
+    t4 = perf_counter()
+    drawBoxesOnCopy(df, copy)
+    t5 = perf_counter()
+    Δt45 = t5 - t4
 
-cols = df.columns
-print(cols)
-for col in cols[:-1]:
-    df[col] = df[col].astype(int)
-print(df.info())
+    t6 = perf_counter()
+    st.image(copy, caption='Scanned image (bounding boxes)',
+             use_column_width=True)
+    t7 = perf_counter()
+    Δt67 = t7 - t6
 
-df.loc[df.conf == -1, 'conf'] = pd.NA
-df = df[~df.conf.isna()].reset_index()
-print(df.head(10))
-
-# Draw boxes surrounding text on copy
-for ind, row in df.iterrows():
-    xy = [(row['left'], row['top']),
-          (row['left'] + row['width'], row['top'] + row['height'])]
-    # print(xy)
-    draw.rectangle(xy, fill=None, width=3, outline='#FF0000')
-
-st.image(copy, caption='Scanned image (bounding boxes)',
-         use_column_width=True)
-
-# t4 = perf_counter()
-# all = getArticle(URLs, title)
-# t5 = perf_counter()
-# Δt45 = t5 - t4
+text = pytesseract.image_to_string(image)
 
 # t6 = perf_counter()
 # story = soupifyArticle(all)
