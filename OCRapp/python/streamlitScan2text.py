@@ -102,9 +102,9 @@ pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 
 st.title('scan2text')
 
-st.title("About")
+st.sidebar.title("About")
 
-st.info(
+st.sidebar.info(
     "This streamlit app uses tesseract to extract text from scanned "
     "documents that you upload. Your image is displayed with overlays "
     "of boxes showing where tesseract infers text.\n\n"
@@ -114,7 +114,7 @@ st.info(
     "[README.md](https://github.com/mw0/MLnotebooks/tree/master/OCRapp)."
 )
 
-st.checkbox("Autocorrect", ['yes', 'no'])
+st.sidebar.checkbox("Autocorrect", ['yes', 'no'])
 
 # print(help(st.sidebar.file_uploader))
 myBytesIO = st.file_uploader('Upload a local scan file for text extraction',
