@@ -44,9 +44,12 @@ def initializeSymspell():
                                                  resourceNames[2])
     print("dictionaryPath created")
     symspell.load_dictionary(dictionaryPath, 0, 1)
+    symspell.create_dictionary_entry(key='ap', count=500000000)
     print(list(islice(symspell.words.items(), 5)))
     print("symspell.load_ditionary() done")
     symspell.load_bigram_dictionary(bigramPath, 0, 1)
+    symspell.create_bigram_dictionary_entry(key='ap headline', count=100000000)
+    symspell.create_bigram_dictionary_entry(key='actual ap', count=100000000)
     print(list(islice(symspell.bigrams.items(), 5)))
     print("symspell.load_bigram_ditionary() done")
     return symspell
@@ -54,10 +57,8 @@ def initializeSymspell():
 # @st.cache(ttl=60.0*3.0, max_entries=20)  # clear cache every 3 minutes
 @st.cache(suppress_st_warning=True)
 def correctSpellingUsingSymspell(symSpell, text):
-    # sentences = sent_tokenize(text)
-    # print(type(sentences), type(sentences[0]))
-    # suggestions = symSpell.lookup_compound(sentences, max_edit_distance=2)
-    suggestions = symSpell.lookup_compound(text, max_edit_distance=2)
+    suggestions = symSpell.lookup_compound(text, max_edit_distance=2,
+                                           transfer_casing=True)
     for i, suggestion in enumerate(suggestions):
         print(f"{i:02d}: {suggestion}")
     return " ".join(suggestions)
