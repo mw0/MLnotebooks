@@ -119,8 +119,10 @@ print(df.head(10))
 for ind, row in df.iterrows():
     xy = [(row['left'], row['top']),
           (row['left'] + row['width'], row['top'] + row['height'])]
-    print(xy)
+    # print(xy)
     draw.rectangle(xy, fill=None)
+    if ind == 0:
+        break
 print(type(image), type(draw))
 
 st.image(copy, caption='Scanned image (bounding boxes)',
