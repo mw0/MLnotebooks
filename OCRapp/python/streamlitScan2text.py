@@ -6,7 +6,7 @@
 
 import streamlit as st
 import datetime
-# from os import environ
+from os import environ
 from time import perf_counter
 
 import pandas as pd
