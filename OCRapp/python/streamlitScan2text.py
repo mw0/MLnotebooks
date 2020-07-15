@@ -252,5 +252,4 @@ if not st.sidebar.button("Hide profiling information"):
     if autocorrect:
         sbInfoStr += (f"\n* initialize symspell: {Δt10: 4.1f}s\n"
                       f"* spell correct with symspell: {Δt12: 4.1f}s")
-    )
     st.sidebar.info(sbInfoStr)
