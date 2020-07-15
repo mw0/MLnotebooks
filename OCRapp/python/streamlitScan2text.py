@@ -163,8 +163,9 @@ print(df.head(10))
 for ind, row in df.iterrows():
     xy = [(row['left'], row['top']),
           (row['left'] + row['width'], row['top'] + row['height'])]
+    print(xy)
     draw.rectangle(xy, fill=None)
-
+print(type(image), type(draw))
 st.image(draw, caption='Scanned image (bounding boxes)',
          use_column_width=True)
 
