@@ -18,7 +18,7 @@ from PIL import Image, ImageDraw
 import io
 
 import pytesseract
-from nltk.tokenize import sent_tokenize
+from nltk.tokenize import word_tokenize, sent_tokenize
 
 from symspellpy.symspellpy import SymSpell
 import pkg_resources
@@ -50,11 +50,36 @@ def initializeSymspell():
     symspell.load_bigram_dictionary(bigramPath, 0, 1)
     print(list(islice(symspell.bigrams.items(), 5)))
     print("symspell.load_bigram_ditionary() done")
-    return symspell
+
+    # Create vocab
+    vocab = set([w for w, f in symspell.words.items()])
+
+    return symspell, vocab
 
 # @st.cache(ttl=60.0*3.0, max_entries=20)  # clear cache every 3 minutes
 @st.cache(suppress_st_warning=True)
-def correctSpellingUsingSymspell(symSpell, text):
+def correctSpellingUsingSymspell(symSpell, vocab, text):
+    sentences = sent_tokenize(text)
+    lines = []
+    for sent in sentences:
+        OK = True
+        words = word_tokenize(sent)
+        for word in word:
+            if word not in vocab:
+                OK = False
+                break
+        if OK:
+            lines.append(sent)
+        else:
+            suggestions = symSpell.lookup_compound(sent, max_edit_distance=2,
+                                                   transfer_casing=True)
+            lines.append(suggestions._term)
+
+    return " ".join(lines)
+
+
+@st.cache(suppress_st_warning=True)
+def correctSpellingUsingSymspellOri(symSpell, vocab, text):
     suggestions = symSpell.lookup_compound(text, max_edit_distance=2,
                                            transfer_casing=True)
     lines = []
@@ -62,6 +87,7 @@ def correctSpellingUsingSymspell(symSpell, text):
         lines.append(suggestion._term)
         print(f"{i:02d}: {type(suggestion)}\t{suggestion}")
     return " ".join(lines)
+
 
 @st.cache(suppress_st_warning=True)
 def extractBoundingBoxDatums(image):
@@ -128,7 +154,7 @@ st.sidebar.info(
     "[README.md](https://github.com/mw0/MLnotebooks/tree/master/OCRapp)."
 )
 
-autocorrect = st.sidebar.checkbox("Autocorrect (with Symspell — slow!)", ['yes', 'no'])
+autocorrect = st.sidebar.checkbox("Autocorrect (slow!)", ['yes', 'no'])
 showBoundingBoxes = st.sidebar.checkbox("Show bounding boxes)", ['yes', 'no'])
 
 # print(help(st.sidebar.file_uploader))
@@ -189,13 +215,13 @@ print(text)
 
 if autocorrect:
     t10 = perf_counter()
-    symSpell = initializeSymspell()
+    symSpell, vocab = initializeSymspell()
     t11 = perf_counter()
     Δt10 = t11 - t10
     print(f"initializeSymspell() Δt10: {Δt10: 4.1f}")
 
     t12 = perf_counter()
-    corrected = correctSpellingUsingSymspell(symSpell, text)
+    corrected = correctSpellingUsingSymspell(symSpell, vocab, text)
     t13 = perf_counter()
     Δt12 = t13 - t12
     print(f"symSpell.lookup_compound() Δt12: {Δt12: 4.1f}")
