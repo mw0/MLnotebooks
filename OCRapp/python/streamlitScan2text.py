@@ -151,9 +151,10 @@ st.sidebar.info(
     "[README.md](https://github.com/mw0/MLnotebooks/tree/master/OCRapp)."
 )
 
+showBoundingBoxes = False
 autocorrect = False
 # autocorrect = st.sidebar.checkbox("Autocorrect (slow!)", ['yes', 'no'])
-showBoundingBoxes = st.sidebar.checkbox("Show bounding boxes)", ['yes', 'no'])
+showBoundingBoxes = st.sidebar.checkbox("Show bounding boxes", ['yes', 'no'])
 
 # print(help(st.sidebar.file_uploader))
 st.sidebar.markdown('## Upload a local scan file')
