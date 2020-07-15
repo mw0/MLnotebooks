@@ -64,7 +64,7 @@ def correctSpellingUsingSymspell(symSpell, vocab, text):
     for sent in sentences:
         OK = True
         words = word_tokenize(sent)
-        for word in word:
+        for word in words:
             if word not in vocab:
                 OK = False
                 break
