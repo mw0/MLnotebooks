@@ -53,6 +53,10 @@ def initializeSymspell():
 @st.cache(suppress_st_warning=True)
 def correctSpellingUsingSymspell(symSpell, text):
     suggestions = symSpell.lookup_compound(text, max_edit_distance=2)
+    if len(suggestions) == 1:
+        print(suggestions)
+        return suggestions
+
     for i, suggestion in enumerate(suggestions):
         print(f"{i:02d}: {suggestion}")
     return suggestion[0]
