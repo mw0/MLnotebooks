@@ -31,16 +31,21 @@ pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 
 @st.cache(allow_output_mutation=True)
 def initializeSymspell():
+    print("inside initializeSymspell()")
     symspell = SymSpell(max_dictionary_edit_distance=2, prefix_length=7)
+    print("symspell created")
     resourceNames = ["symspellpy", "frequency_dictionary_en_82_765.txt",
                      "frequency_bigramdictionary_en_243_342.txt"]
     dictionaryPath = pkg_resources.resource_filename(resourceNames[0],
                                                      resourceNames[1],
                                                      resourceNames[2])
+    print("dictionaryPath created")
     symspell.load_dictionary(dictionaryPath[0], 0, 1)
     print(list(islice(sym_spell.words.items(), 5)))
+    print("symspell.load_ditionary() done")
     symspell.load_bigram_dictionary(dictionaryPath[2], 0, 1)
     print(list(islice(sym_spell.bigrams.items(), 5)))
+    print("symspell.load_bigram_ditionary() done")
     return symspell
 
 # @st.cache(ttl=60.0*3.0, max_entries=20)  # clear cache every 3 minutes
