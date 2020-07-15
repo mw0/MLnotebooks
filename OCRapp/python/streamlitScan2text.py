@@ -57,9 +57,11 @@ def initializeSymspell():
 def correctSpellingUsingSymspell(symSpell, text):
     suggestions = symSpell.lookup_compound(text, max_edit_distance=2,
                                            transfer_casing=True)
+    lines = []
     for i, suggestion in enumerate(suggestions):
+        lines.append(suggestion._term)
         print(f"{i:02d}: {type(suggestion)}\t{suggestion}")
-    return " ".join(suggestions)
+    return " ".join(lines)
 
 @st.cache(suppress_st_warning=True)
 def extractBoundingBoxDatums(image):
