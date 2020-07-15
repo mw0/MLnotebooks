@@ -48,8 +48,6 @@ def initializeSymspell():
     print(list(islice(symspell.words.items(), 5)))
     print("symspell.load_ditionary() done")
     symspell.load_bigram_dictionary(bigramPath, 0, 1)
-    # symspell.create_bigram_dictionary_entry(key='ap headline', count=100000000)
-    # symspell.create_bigram_dictionary_entry(key='actual ap', count=100000000)
     print(list(islice(symspell.bigrams.items(), 5)))
     print("symspell.load_bigram_ditionary() done")
     return symspell
@@ -60,7 +58,7 @@ def correctSpellingUsingSymspell(symSpell, text):
     suggestions = symSpell.lookup_compound(text, max_edit_distance=2,
                                            transfer_casing=True)
     for i, suggestion in enumerate(suggestions):
-        print(f"{i:02d}: {suggestion}")
+        print(f"{i:02d}: {type(suggestion)}\t{suggestion")
     return " ".join(suggestions)
 
 @st.cache(suppress_st_warning=True)
