@@ -4,10 +4,10 @@
 __pycache__/
 */__pycache__/
 */.ipynb_checkpoints
-*/nohup.out
 FederalistPapers/*
 GAN-tutorial/*
 HuggingFace/data/fakeRealNews.zip
+HuggingFace/python/nohup.out
 InterpretableML/breast-cancer-wisconsin-data.zip
 InterpretableML/data.csv
 InterpretableML/heartbeat.zip
@@ -44,6 +44,7 @@ NationalLynching/AmyKateBailyData/Lynch_Website/MS
 NationalLynching/AmyKateBailyData/Lynch_Website/NC
 NationalLynching/AmyKateBailyData/Lynch_Website/SC
 NationalLynching/AmyKateBailyData/Lynch_Website/TN
+OCRapp/python/nohup.out
 SoccerRankingMatrixFactorization/
 SparkProjects/
 SparkProjects/*
