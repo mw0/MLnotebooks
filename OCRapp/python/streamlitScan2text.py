@@ -130,23 +130,43 @@ print(type(image.size), image.size)
 
 width, height = image.size
 print(f"width: {width}, height: {height}")
-# # plt.figure(figsize=(width/72, height/72))		# , dpi=72)
-# if image.mode == 'L':
-#     plt.imshow(image, cmap='gray', vmin=0, vmax=255)
-# else:
-#     plt.imshow(image)
-# st.pyplot()
+
 st.image(image, caption='Scanned image (raw)',
          use_column_width=True)
 
-
+# Create a copies to prevent overwriting of original image
 # t2 = perf_counter()
-# titles, URLs, latest = fetchTop5TitlesURLs()
+copy = image.copy()
+draw = ImageDraw.Draw(copy)
+
+data = pytesseract.image_to_data(image).split('\n')
+df = pd.DataFrame([x.split('\t') for x in data[1:]],
+                  columns=data[0].split('\t'))
 # t3 = perf_counter()
 # Δt23 = t3 - t2
+print(df.head(20))
 
-# title = st.sidebar.selectbox(f"at {latest}", titles)
-# st.write(f"You selected: {title}, {URLs[title]}")
+# convert to int, replace -1 conf values with pd.NA, remove boxes that contain
+# no text:
+
+cols = df.columns
+print(cols)
+for col in cols[:-1]:
+    df[col] = df[col].astype(int)
+print(df.info())
+
+df.loc[df.conf == -1, 'conf'] = pd.NA
+df = df[~df.conf.isna()].reset_index()
+print(df.head(10))
+
+# Draw boxes surrounding text on copy
+for ind, row in df.iterrows():
+    xy = [(row['left'], row['top']),
+          (row['left'] + row['width'], row['top'] + row['height'])]
+    draw.rectangle(xy, fill=None)
+
+st.image(draw, caption='Scanned image (bounding boxes)',
+         use_column_width=True)
 
 # t4 = perf_counter()
 # all = getArticle(URLs, title)
