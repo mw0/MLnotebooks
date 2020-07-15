@@ -48,8 +48,8 @@ def initializeSymspell():
     print(list(islice(symspell.words.items(), 5)))
     print("symspell.load_ditionary() done")
     symspell.load_bigram_dictionary(bigramPath, 0, 1)
-    symspell.create_bigram_dictionary_entry(key='ap headline', count=100000000)
-    symspell.create_bigram_dictionary_entry(key='actual ap', count=100000000)
+    # symspell.create_bigram_dictionary_entry(key='ap headline', count=100000000)
+    # symspell.create_bigram_dictionary_entry(key='actual ap', count=100000000)
     print(list(islice(symspell.bigrams.items(), 5)))
     print("symspell.load_bigram_ditionary() done")
     return symspell
@@ -128,8 +128,8 @@ st.sidebar.info(
     "[README.md](https://github.com/mw0/MLnotebooks/tree/master/OCRapp)."
 )
 
-autocorrect = st.sidebar.checkbox("Autocorrect (with Symspell)", ['yes', 'no'])
-showBoundingBoxes = st.sidebar.checkbox("Show bounding boxes (slow!)", ['yes', 'no'])
+autocorrect = st.sidebar.checkbox("Autocorrect (with Symspell — slow!)", ['yes', 'no'])
+showBoundingBoxes = st.sidebar.checkbox("Show bounding boxes)", ['yes', 'no'])
 
 # print(help(st.sidebar.file_uploader))
 myBytesIO = st.sidebar.file_uploader('Upload a local scan file for'
