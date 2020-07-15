@@ -150,13 +150,14 @@ st.sidebar.info(
     "If the 'Show bounding boxes' checkbox is selected, will shows a "
     "copy of the image with all of the text bounding boxes found by "
     "tesseract. Displaying each bounding box takes a lot of time!\n\n"
-    "If the 'Autocorrect' checkbox is selected, Symspell is applied "
-    "to the text in an attempt to remove character and spacing misreads."
-    "\nFor additional information, see the "
+    # "If the 'Autocorrect' checkbox is selected, Symspell is applied "
+    # "to the text in an attempt to remove character and spacing misreads.\n\n"
+    "For additional information, see the "
     "[README.md](https://github.com/mw0/MLnotebooks/tree/master/OCRapp)."
 )
 
-autocorrect = st.sidebar.checkbox("Autocorrect (slow!)", ['yes', 'no'])
+autocorrect = False
+# autocorrect = st.sidebar.checkbox("Autocorrect (slow!)", ['yes', 'no'])
 showBoundingBoxes = st.sidebar.checkbox("Show bounding boxes)", ['yes', 'no'])
 
 # print(help(st.sidebar.file_uploader))
