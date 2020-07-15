@@ -15,6 +15,8 @@ import numpy as np
 from pathlib import Path
 
 from PIL import Image, ImageDraw
+import io
+
 import pytesseract
 
 import matplotlib.pyplot as plt
@@ -32,60 +34,14 @@ pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 # @st.cache(ttl=60.0*3.0, max_entries=20)		# clear cache every 3 minutes
 # def fetchTop5TitlesURLs():
 #     top5WorldStories = nyt.top_stories(section="world")[:5]
-
-#     titles = []
-#     URLs = dict()
-#     for i, top in enumerate(top5WorldStories):
-#         if i == 0:
-#             latest = top["updated_date"]
-#             date = latest[:10]
-#             date = date.split("-")
-#         title = top["title"]
-#         titles.append(title)
-#         URLs[title] = top["url"]
-
+#	.
+#	.
+#	.
 #     return titles, URLs, latest
 
 # @st.cache(suppress_st_warning=True)
 # def getArticle(URLs, title):
 #     return requests.get(URLs[title])
-
-
-# @st.cache(suppress_st_warning=True)
-# def soupifyArticle(all):
-#     doc = BeautifulSoup(all.text, "html.parser")
-#     soup = doc.findAll("p", {"class", "css-158dogj evys1bk0"})
-
-#     story = []
-#     for paraSoup in soup:
-#         paragraph = " ".join(paraSoup.text.split()) + "\n"
-#         print(paragraph)
-#         story.append(paragraph)
-
-#     return story
-
-
-# @st.cache(suppress_st_warning=True)
-# def soupifyArticle(all):
-#     doc = BeautifulSoup(all.text, "html.parser")
-#     soup = doc.findAll("p", {"class", "css-158dogj evys1bk0"})
-
-#     story = []
-#     for paraSoup in soup:
-#         paragraph = " ".join(paraSoup.text.split()) + "\n"
-#         print(paragraph)
-#         story.append(paragraph)
-
-#     return story
-
-
-# @st.cache(suppress_st_warning=True)
-# def summarizeArticle(toSummarize, minLength, maxLength):
-#     return summarizer(toSummarize, min_length=minLength,
-#                       max_length=maxLength)[0]["summary_text"]
-
-
-# # NY Times API
 
 # NYTimesAPIkey = environ.get("NYTimesAPIkey")
 # if NYTimesAPIkey is None:
@@ -166,7 +122,8 @@ for ind, row in df.iterrows():
     print(xy)
     draw.rectangle(xy, fill=None)
 print(type(image), type(draw))
-st.image(draw, caption='Scanned image (bounding boxes)',
+
+st.image(copy, caption='Scanned image (bounding boxes)',
          use_column_width=True)
 
 # t4 = perf_counter()
