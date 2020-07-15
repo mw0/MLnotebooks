@@ -58,7 +58,7 @@ def correctSpellingUsingSymspell(symSpell, text):
     suggestions = symSpell.lookup_compound(text, max_edit_distance=2,
                                            transfer_casing=True)
     for i, suggestion in enumerate(suggestions):
-        print(f"{i:02d}: {type(suggestion)}\t{suggestion")
+        print(f"{i:02d}: {type(suggestion)}\t{suggestion}")
     return " ".join(suggestions)
 
 @st.cache(suppress_st_warning=True)
