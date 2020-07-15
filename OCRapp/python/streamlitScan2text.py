@@ -244,13 +244,13 @@ if not st.sidebar.button("Hide profiling information"):
     sbInfoStr = (
         f"* load, format, display user image: {Δt23: 4.1f}s\n"
         f"* extract text using tesseract: {Δt45: 4.1f}s")
-        if showBoundingBoxes:
-            sbInfoStr += (f"\n* extract bounding boxes: {Δt45: 4.1f}s\n"
-                          f"* draw boxes on image: {Δt67: 4.1f}s\n"
-                          f"* display image with boxes: {Δt89: 4.1f}s\n"
-                          f"* summarize article: {Δt89:5.2f}s")
-        if autocorrect:
-            sbInfoStr += (f"\n* initialize symspell: {Δt10: 4.1f}s\n"
-                          f"* spell correct with symspell: {Δt12: 4.1f}s")
+    if showBoundingBoxes:
+        sbInfoStr += (f"\n* extract bounding boxes: {Δt45: 4.1f}s\n"
+                      f"* draw boxes on image: {Δt67: 4.1f}s\n"
+                      f"* display image with boxes: {Δt89: 4.1f}s\n"
+                      f"* summarize article: {Δt89:5.2f}s")
+    if autocorrect:
+        sbInfoStr += (f"\n* initialize symspell: {Δt10: 4.1f}s\n"
+                      f"* spell correct with symspell: {Δt12: 4.1f}s")
     )
     st.sidebar.info(sbInfoStr)
