@@ -54,9 +54,10 @@ def initializeSymspell():
 # @st.cache(ttl=60.0*3.0, max_entries=20)  # clear cache every 3 minutes
 @st.cache(suppress_st_warning=True)
 def correctSpellingUsingSymspell(symSpell, text):
-    sentences = sent_tokenize(text)
-    print(type(sentences), type(sentences[0]))
-    suggestions = symSpell.lookup_compound(sentences, max_edit_distance=2)
+    # sentences = sent_tokenize(text)
+    # print(type(sentences), type(sentences[0]))
+    # suggestions = symSpell.lookup_compound(sentences, max_edit_distance=2)
+    suggestions = symSpell.lookup_compound(text, max_edit_distance=2)
     for i, suggestion in enumerate(suggestions):
         print(f"{i:02d}: {suggestion}")
     return " ".join(suggestions)
