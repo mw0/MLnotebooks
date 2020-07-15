@@ -142,9 +142,10 @@ st.sidebar.info(
     "This streamlit app uses tesseract to extract text from scanned "
     "documents that you upload. Your image is displayed with overlays "
     "of boxes showing where tesseract infers text.\n\n"
+    "Start by uploading local scan file (below).\n\n"
     "If the 'Show bounding boxes' checkbox is selected, will shows a "
     "copy of the image with all of the text bounding boxes found by "
-    "tesseract. Displaying each bounding box takes a lot of time!\n\n"
+    "tesseract. Note: displaying bounding boxes takes a lot of time!\n\n"
     # "If the 'Autocorrect' checkbox is selected, Symspell is applied "
     # "to the text in an attempt to remove character and spacing misreads.\n\n"
     "For additional information, see the "
@@ -161,75 +162,78 @@ st.sidebar.markdown('## Upload a local scan file')
 myBytesIO = st.sidebar.file_uploader(' ',
                                      encoding='auto',
                                      key='userFile')
-
 st.markdown('### Original image')
 
-if myBytesIO is not None:
-
+if myBytesIO is None:
+    localImageLocation = environ.get("LocalImageLocation")
+    t0 = perf_counter()
+    image = Image.open(localImageLocation)
+else:
     t0 = perf_counter()
     print(type(myBytesIO))
     print(myBytesIO)
     image = Image.open(myBytesIO)		# .convert('RBGA')
-    print(image)
-    print(image.format, image.mode, image.size, image.palette)
-    print(type(image.size), image.size)
 
-    width, height = image.size
-    print(f"width: {width}, height: {height}")
+print(image)
+print(image.format, image.mode, image.size, image.palette)
+print(type(image.size), image.size)
 
-    st.image(image, use_column_width=True)
-    t1 = perf_counter()
-    Δt01 = t1 - t0
+width, height = image.size
+print(f"width: {width}, height: {height}")
 
-    # Create a copies to prevent overwriting of original image
-    copy = image.copy()
+st.image(image, use_column_width=True)
+t1 = perf_counter()
+Δt01 = t1 - t0
 
-    # Extract text from image:
-    t2 = perf_counter()
-    text = pytesseract.image_to_string(image)
-    t3 = perf_counter()
-    Δt23 = t3 - t2
+# Create a copies to prevent overwriting of original image
+copy = image.copy()
 
-    if showBoundingBoxes:
-        draw = ImageDraw.Draw(copy)
+# Extract text from image:
+t2 = perf_counter()
+text = pytesseract.image_to_string(image)
+t3 = perf_counter()
+Δt23 = t3 - t2
 
-        t4 = perf_counter()
-        df = extractBoundingBoxDatums(image)
-        t5 = perf_counter()
-        Δt45 = t5 - t4
+if showBoundingBoxes:
+    draw = ImageDraw.Draw(copy)
 
-        t6 = perf_counter()
-        drawBoxesOnCopy(df, draw)
-        t7 = perf_counter()
-        Δt67 = t7 - t6
+    t4 = perf_counter()
+    df = extractBoundingBoxDatums(image)
+    t5 = perf_counter()
+    Δt45 = t5 - t4
 
-        t8 = perf_counter()
-        st.markdown('### Image with bounding boxes')
-        st.image(copy, caption='Scanned image (bounding boxes)',
-                 use_column_width=True)
-        t9 = perf_counter()
-        Δt89 = t9 - t8
+    t6 = perf_counter()
+    drawBoxesOnCopy(df, draw)
+    t7 = perf_counter()
+    Δt67 = t7 - t6
 
-        st.markdown('### Extracted text')
-        st.write(text)
-        print(text)
+    t8 = perf_counter()
+    st.markdown('### Image with bounding boxes')
+    st.image(copy, caption='Scanned image (bounding boxes)',
+             use_column_width=True)
+    t9 = perf_counter()
+    Δt89 = t9 - t8
 
-        if autocorrect:
-            t10 = perf_counter()
-            symSpell, vocab = initializeSymspell()
-            t11 = perf_counter()
-            Δt10 = t11 - t10
+    st.markdown('### Extracted text')
+    st.write(text)
+    print(text)
 
-            t12 = perf_counter()
-            corrected = correctSpellingUsingSymspell(symSpell, vocab, text)
-            t12 = perf_counter()
-            Δt12 = t13 - t12
+    if autocorrect:
+        t10 = perf_counter()
+        symSpell, vocab = initializeSymspell()
+        t11 = perf_counter()
+        Δt10 = t11 - t10
 
-            st.markdown('### Text corrected with Symspell')
-            st.write(corrected)
-            print(corrected)
+        t12 = perf_counter()
+        corrected = correctSpellingUsingSymspell(symSpell, vocab, text)
+        t12 = perf_counter()
+        Δt12 = t13 - t12
 
-print(f"load, format, display user image: {Δt23: 4.1f}s")
+        st.markdown('### Text corrected with Symspell')
+        st.write(corrected)
+        print(corrected)
+
+print(f"\n\nload, format, display user image: {Δt23: 4.1f}s")
 print(f"extract text using tesseract: {Δt45: 4.1f}s")
 if showBoundingBoxes:
     print(f"extract bounding boxes: {Δt45: 4.1f}s")
