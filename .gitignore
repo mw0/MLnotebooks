@@ -4,6 +4,7 @@
 __pycache__/
 */__pycache__/
 */.ipynb_checkpoints
+*/nohup.out
 FederalistPapers/*
 GAN-tutorial/*
 HuggingFace/data/fakeRealNews.zip
