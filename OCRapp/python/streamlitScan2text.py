@@ -109,6 +109,8 @@ myBytesIO = st.sidebar.file_uploader('Upload a local scan file for'
                                      ' text extraction',
                                      encoding='auto',
                                      key='userFile')
+
+t0 = perf_counter()
 print(type(myBytesIO))
 print(myBytesIO)
 image = Image.open(myBytesIO)		# .convert('RBGA')
@@ -121,6 +123,8 @@ print(f"width: {width}, height: {height}")
 
 st.image(image, caption='Scanned image (raw)',
          use_column_width=True)
+t1 = perf_counter()
+Δt01 = t1 - t0
 
 # Create a copies to prevent overwriting of original image
 copy = image.copy()
@@ -129,27 +133,30 @@ draw = ImageDraw.Draw(copy)
 if showBoundingBoxes:
     t2 = perf_counter()
     df = extractBoundingBoxDatums(image)
-    t2 = perf_counter()
     t3 = perf_counter()
     Δt23 = t3 - t2
+    print(f"extractBoundingBoxDatums() Δt23: {Δt23: 4.1f}s")
 
     t4 = perf_counter()
     drawBoxesOnCopy(df, copy)
     t5 = perf_counter()
     Δt45 = t5 - t4
+    print(f"drawBoxesOnCopy() Δt45: {Δt45: 4.1f}s")
 
     t6 = perf_counter()
     st.image(copy, caption='Scanned image (bounding boxes)',
              use_column_width=True)
     t7 = perf_counter()
     Δt67 = t7 - t6
+    print(f"st.image(copy) Δt67: {Δt67: 4.1f}s")
 
+t8 = perf_counter()
 text = pytesseract.image_to_string(image)
-
-# t6 = perf_counter()
-# story = soupifyArticle(all)
-# t7 = perf_counter()
-# Δt67 = t7 - t6
+t9 = perf_counter()
+Δt89 = t9 - t8
+print(f"pytesseract.image_to_string() Δt89: {Δt89: 4.1f}")
+st.write(text)
+print(text)
 
 # userText = "\n\n".join(story)
 # print(f"len(userText): {len(userText)}")
