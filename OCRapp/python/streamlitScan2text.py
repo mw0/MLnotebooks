@@ -121,9 +121,8 @@ for ind, row in df.iterrows():
           (row['left'] + row['width'], row['top'] + row['height'])]
     # print(xy)
     if ind == 4:
-        draw.rectangle(xy, fill=None)
-
-print(type(image), type(draw))
+        print(xy)
+        draw.rectangle(xy, fill=None, width=1)
 
 st.image(copy, caption='Scanned image (bounding boxes)',
          use_column_width=True)
