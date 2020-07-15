@@ -55,6 +55,7 @@ def initializeSymspell():
 @st.cache(suppress_st_warning=True)
 def correctSpellingUsingSymspell(symSpell, text):
     sentences = sent_tokenize(text)
+    print(type(sentences), type(sentences[0]))
     suggestions = symSpell.lookup_compound(sentences, max_edit_distance=2)
     for i, suggestion in enumerate(suggestions):
         print(f"{i:02d}: {suggestion}")
