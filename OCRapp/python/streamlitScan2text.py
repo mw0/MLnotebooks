@@ -123,19 +123,14 @@ def drawBoxesOnCopy(df, draw):
         # print(xy)
         draw.rectangle(xy, fill=None, width=3, outline='#FF0000')
 
-# def getArticle(URLs, title):
-#     return requests.get(URLs[title])
-
-# NYTimesAPIkey = environ.get("NYTimesAPIkey")
-# if NYTimesAPIkey is None:
-#     raise KeyError("'NYTimesAPIkey' not an environment variable name.")
-
-# nyt = NYTAPI(NYTimesAPIkey)
-
-# t0 = perf_counter()
-# summarizer = initializeSummarizer()
-# t1 = perf_counter()
-# Δt01 = t1 - t0
+Δt01 = 0.0
+Δt23 = 0.0
+Δt45 = 0.0
+Δt67 = 0.0
+Δt89 = 0.0
+Δt10 = 0.0
+Δt12 = 0.0
+Δt14 = 0.0
 
 # # Now for the Streamlit interface:
 
@@ -161,130 +156,101 @@ autocorrect = False
 showBoundingBoxes = st.sidebar.checkbox("Show bounding boxes)", ['yes', 'no'])
 
 # print(help(st.sidebar.file_uploader))
-myBytesIO = st.sidebar.file_uploader('Upload a local scan file for'
-                                     ' text extraction',
+st.sidebar.markdown('## Upload a local scan file')
+myBytesIO = st.sidebar.file_uploader(' ',
                                      encoding='auto',
                                      key='userFile')
 
-t0 = perf_counter()
-print(type(myBytesIO))
-print(myBytesIO)
-image = Image.open(myBytesIO)		# .convert('RBGA')
-print(image)
-print(image.format, image.mode, image.size, image.palette)
-print(type(image.size), image.size)
-
-width, height = image.size
-print(f"width: {width}, height: {height}")
-
 st.markdown('### Original image')
-st.image(image, use_column_width=True)
-t1 = perf_counter()
-Δt01 = t1 - t0
 
-# Create a copies to prevent overwriting of original image
-copy = image.copy()
+if myBytesIO is not None:
 
-if showBoundingBoxes:
-    draw = ImageDraw.Draw(copy)
+    t0 = perf_counter()
+    print(type(myBytesIO))
+    print(myBytesIO)
+    image = Image.open(myBytesIO)		# .convert('RBGA')
+    print(image)
+    print(image.format, image.mode, image.size, image.palette)
+    print(type(image.size), image.size)
+
+    width, height = image.size
+    print(f"width: {width}, height: {height}")
+
+    st.image(image, use_column_width=True)
+    t1 = perf_counter()
+    Δt01 = t1 - t0
+
+    # Create a copies to prevent overwriting of original image
+    copy = image.copy()
+
+    # Extract text from image:
     t2 = perf_counter()
-    df = extractBoundingBoxDatums(image)
+    text = pytesseract.image_to_string(image)
     t3 = perf_counter()
     Δt23 = t3 - t2
-    print(f"extractBoundingBoxDatums() Δt23: {Δt23: 4.1f}s")
 
-    t4 = perf_counter()
-    drawBoxesOnCopy(df, draw)
-    t5 = perf_counter()
-    Δt45 = t5 - t4
-    print(f"drawBoxesOnCopy() Δt45: {Δt45: 4.1f}s")
+    if showBoundingBoxes:
+        draw = ImageDraw.Draw(copy)
 
-    t6 = perf_counter()
-    st.markdown('### Image with bounding boxes')
-    st.image(copy, caption='Scanned image (bounding boxes)',
-             use_column_width=True)
-    t7 = perf_counter()
-    Δt67 = t7 - t6
-    print(f"st.image(copy) Δt67: {Δt67: 4.1f}s")
+        t4 = perf_counter()
+        df = extractBoundingBoxDatums(image)
+        t5 = perf_counter()
+        Δt45 = t5 - t4
 
-t8 = perf_counter()
-text = pytesseract.image_to_string(image)
-t9 = perf_counter()
-Δt89 = t9 - t8
-print(f"pytesseract.image_to_string() Δt89: {Δt89: 4.1f}")
-st.markdown('### Extracted text')
-st.write(text)
-print(text)
+        t6 = perf_counter()
+        drawBoxesOnCopy(df, draw)
+        t7 = perf_counter()
+        Δt67 = t7 - t6
 
+        t8 = perf_counter()
+        st.markdown('### Image with bounding boxes')
+        st.image(copy, caption='Scanned image (bounding boxes)',
+                 use_column_width=True)
+        t9 = perf_counter()
+        Δt89 = t9 - t8
+
+        st.markdown('### Extracted text')
+        st.write(text)
+        print(text)
+
+        if autocorrect:
+            t10 = perf_counter()
+            symSpell, vocab = initializeSymspell()
+            t11 = perf_counter()
+            Δt10 = t11 - t10
+
+            t12 = perf_counter()
+            corrected = correctSpellingUsingSymspell(symSpell, vocab, text)
+            t12 = perf_counter()
+            Δt12 = t13 - t12
+
+            st.markdown('### Text corrected with Symspell')
+            st.write(corrected)
+            print(corrected)
+
+print(f"load, format, display user image: {Δt23: 4.1f}s")
+print(f"extract text using tesseract: {Δt45: 4.1f}s")
+if showBoundingBoxes:
+    print(f"extract bounding boxes: {Δt45: 4.1f}s")
+    print(f"draw boxes on image: {Δt67: 4.1f}s")
+    print(f"display image with boxes: {Δt89: 4.1f}s")
+    print(f"summarize article: {Δt89:5.2f}s")
 if autocorrect:
-    t10 = perf_counter()
-    symSpell, vocab = initializeSymspell()
-    t11 = perf_counter()
-    Δt10 = t11 - t10
-    print(f"initializeSymspell() Δt10: {Δt10: 4.1f}")
+    print(f"initialize symspell: {Δt10: 4.1f}s")
+    print(f"spell correct with symspell: {Δt12: 4.1f}s")
 
-    t12 = perf_counter()
-    corrected = correctSpellingUsingSymspell(symSpell, vocab, text)
-    t13 = perf_counter()
-    Δt12 = t13 - t12
-    print(f"symSpell.lookup_compound() Δt12: {Δt12: 4.1f}")
-    st.markdown('### Text corrected with Symspell')
-    st.write(text)
-    st.write(corrected)
-    print(corrected)
-
-# userText = "\n\n".join(story)
-# print(f"len(userText): {len(userText)}")
-
-# # Ensure that there are not too many tokens for BART model. The following
-# # kludge, which truncates the story, seems to work:
-# words = userText.split()
-# print(f"len(words): {len(words)}")
-# if len(words) > truncateWords:
-#     words = words[:truncateWords]
-# toSummarize = " ".join(words)
-# print(len(toSummarize))
-
-# st.title("Summary")
-# t8 = perf_counter()
-# summary = summarizeArticle(toSummarize, minLength, maxLength)
-# st.write(summary)
-# t9 = perf_counter()
-# Δt89 = t9 - t8
-
-# t10 = perf_counter()
-# st.title("Full article")
-# st.write(userText)
-# t11 = perf_counter()
-# Δt10 = t11 - t10
-
-# print(f"Δt to fetch top 5 article meta: {Δt01:5.2f}s")
-# print(f"Δt to generate sidebar dropdown: {Δt23:5.2f}s")
-# print(f"Δt to fetch article: {Δt45:5.2f}s")
-# print(f"Δt to soupify article: {Δt67:5.2f}s")
-# print(f"Δt to summarize article: {Δt89:5.2f}s")
-# print(f"Δt to write article: {Δt10:5.2f}s")
-
-# if not st.sidebar.button("Hide profiling information"):
-#     st.sidebar.header("Profiling information")
-#     sbInfoStr = (
-#         f"* initialize summarizer: {Δt01:5.2f}s\n"
-#         f"* fetch top 5 article metadata: {Δt23:5.2f}s\n"
-#         f"* fetch selected article: {Δt45:5.2f}s\n"
-#         f"* soupify article: {Δt67:5.2f}s\n"
-#         f"* summarize article: {Δt89:5.2f}s"
-#     )
-#     if cudaDetected:
-#         sbInfoStr += "\n"
-#         for i in range(cudaDeviceCt):
-#             allocated = round(torch.cuda.memory_allocated(i) / 1024 ** 3, 1)
-#             cached = round(torch.cuda.memory_cached(i) / 1024 ** 3, 1)
-#             sbInfoStr += (
-#                 f"\n\ncuda device[{i}]:"
-#                 # f" {torch.cuda.get_device_name(i)}"
-#                 f"\n* Allocated memory: {allocated:5.3f} GB\n"
-#                 f"* Cached memory: {cached:5.3f} GB"
-#             )
-#     print(sbInfoStr)
-#     st.sidebar.info(sbInfoStr)
-
+if not st.sidebar.button("Hide profiling information"):
+    st.sidebar.header("Profiling information")
+    sbInfoStr = (
+        f"* load, format, display user image: {Δt23: 4.1f}s\n"
+        f"* extract text using tesseract: {Δt45: 4.1f}s")
+        if showBoundingBoxes:
+            sbInfoStr += (f"\n* extract bounding boxes: {Δt45: 4.1f}s\n"
+                          f"* draw boxes on image: {Δt67: 4.1f}s\n"
+                          f"* display image with boxes: {Δt89: 4.1f}s\n"
+                          f"* summarize article: {Δt89:5.2f}s")
+        if autocorrect:
+            sbInfoStr += (f"\n* initialize symspell: {Δt10: 4.1f}s\n"
+                          f"* spell correct with symspell: {Δt12: 4.1f}s")
+    )
+    st.sidebar.info(sbInfoStr)
