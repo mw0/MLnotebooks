@@ -18,6 +18,9 @@ from PIL import Image, ImageDraw
 import io
 
 import pytesseract
+from symspellpy.symspellpy import SymSpell
+import pkg_resources
+from itertools import islice
 
 import matplotlib.pyplot as plt
 # import matplotlib.image as mpimg
@@ -26,18 +29,24 @@ import matplotlib.pyplot as plt
 
 pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 
-# @st.cache(allow_output_mutation=True)
-# def initializeSummarizer():
-#     return pipeline("summarization", device=0)
+@st.cache(allow_output_mutation=True)
+def initializeSymspell():
+    symspell = SymSpell(max_dictionary_edit_distance=2, prefix_length=7)
+    resourceNames = ["symspellpy", "frequency_dictionary_en_82_765.txt",
+                     "frequency_bigramdictionary_en_243_342.txt"]
+    dictionaryPath = pkg_resources.resource_filename(resourceNames[0],
+                                                     resourceNames[1],
+                                                     resourceNames[2])
+    symspell.load_dictionary(dictionaryPath[0], 0, 1)
+    print(list(islice(sym_spell.words.items(), 5)))
+    symspell.load_bigram_dictionary(dictionaryPath[2], 0, 1)
+    print(list(islice(sym_spell.bigrams.items(), 5)))
+    return symspell
 
-
-# @st.cache(ttl=60.0*3.0, max_entries=20)		# clear cache every 3 minutes
-# def fetchTop5TitlesURLs():
-#     top5WorldStories = nyt.top_stories(section="world")[:5]
-#	.
-#	.
-#	.
-#     return titles, URLs, latest
+# @st.cache(ttl=60.0*3.0, max_entries=20)  # clear cache every 3 minutes
+@st.cache(suppress_st_warning=True)
+def correctSpellingUsingSymspell(symSpell, text):
+    return symSpell.lookup_compound(text, max_edit_distance=2)
 
 @st.cache(suppress_st_warning=True)
 def extractBoundingBoxDatums(image):
@@ -87,7 +96,7 @@ def drawBoxesOnCopy(df, draw):
 
 # # Now for the Streamlit interface:
 
-st.title('scan2text')
+st.markdown('## scan2text')
 
 st.sidebar.title("About")
 
@@ -95,14 +104,17 @@ st.sidebar.info(
     "This streamlit app uses tesseract to extract text from scanned "
     "documents that you upload. Your image is displayed with overlays "
     "of boxes showing where tesseract infers text.\n\n"
+    "If the 'Show bounding boxes' checkbox is selected, will shows a "
+    "copy of the image with all of the text bounding boxes found by "
+    "tesseract. Displaying each bounding box takes a lot of time!\n\n"
     "If the 'Autocorrect' checkbox is selected, Symspell is applied "
     "to the text in an attempt to remove character and spacing misreads."
     "\nFor additional information, see the "
     "[README.md](https://github.com/mw0/MLnotebooks/tree/master/OCRapp)."
 )
 
-autocorrect = st.sidebar.checkbox("Autocorrect", ['yes', 'no'])
-showBoundingBoxes = st.sidebar.checkbox("Show bounding boxes", ['yes', 'no'])
+autocorrect = st.sidebar.checkbox("Autocorrect (with Symspell)", ['yes', 'no'])
+showBoundingBoxes = st.sidebar.checkbox("Show bounding boxes (slow!)", ['yes', 'no'])
 
 # print(help(st.sidebar.file_uploader))
 myBytesIO = st.sidebar.file_uploader('Upload a local scan file for'
@@ -121,8 +133,8 @@ print(type(image.size), image.size)
 width, height = image.size
 print(f"width: {width}, height: {height}")
 
-st.image(image, caption='Scanned image (raw)',
-         use_column_width=True)
+st.markdown('### Original image')
+st.image(image, use_column_width=True)
 t1 = perf_counter()
 Δt01 = t1 - t0
 
@@ -144,6 +156,7 @@ if showBoundingBoxes:
     print(f"drawBoxesOnCopy() Δt45: {Δt45: 4.1f}s")
 
     t6 = perf_counter()
+    st.markdown('### Image with bounding boxes')
     st.image(copy, caption='Scanned image (bounding boxes)',
              use_column_width=True)
     t7 = perf_counter()
@@ -155,8 +168,26 @@ text = pytesseract.image_to_string(image)
 t9 = perf_counter()
 Δt89 = t9 - t8
 print(f"pytesseract.image_to_string() Δt89: {Δt89: 4.1f}")
+st.markdown('### Extracted text')
 st.write(text)
 print(text)
+
+if autocorrect:
+    t10 = perf_counter()
+    symSpell = initializeSymspell()
+    t11 = perf_counter()
+    Δt10 = t11 - t10
+    print(f"initializeSymspell() Δt10: {Δt10: 4.1f}")
+
+    t12 = perf_counter()
+    corrected = correctSpellingUsingSymspell(symSpell, text)
+    t13 = perf_counter()
+    Δt12 = t13 - t12
+    print(f"symSpell.lookup_compound() Δt12: {Δt12: 4.1f}")
+    st.markdown('### Text corrected with Symspell')
+    st.write(text)
+    st.write(corrected)
+    print(corrected)
 
 # userText = "\n\n".join(story)
 # print(f"len(userText): {len(userText)}")
