@@ -62,7 +62,7 @@ def extractBoundingBoxDatums(image):
 
     return df
 
-@st.cache(suppress_st_warning=True)
+# @st.cache(suppress_st_warning=True)
 def drawBoxesOnCopy(df, draw):
     # Draw boxes surrounding text on copy
     for ind, row in df.iterrows():
