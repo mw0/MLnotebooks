@@ -1,0 +1,1 @@
+LocalImageLocation=/home/$(echo $USER)/work/MLnotebooks/OCRapp/images/StudiesAtSmallestScaleNobelPrizes.jpg nohup streamlit run /home/$(echo $USER)/work/MLnotebooks/OCRapp/python/streamlitScan2text.py --server.port 8503

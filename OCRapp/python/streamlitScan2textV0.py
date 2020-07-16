@@ -20,9 +20,6 @@ import io
 import pytesseract
 from nltk.tokenize import word_tokenize, sent_tokenize
 
-import spacy
-import contextualSpellCheck
-
 from symspellpy.symspellpy import SymSpell
 import pkg_resources
 from itertools import islice
@@ -33,14 +30,6 @@ import matplotlib.pyplot as plt
 # widthHeight = re.compile(r"^[^(].\((\d*)\, (\d*)\).*$")
 
 pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
-
-@st.cache(allow_output_mutation=True)
-def initializeContextualSpellCheck():
-    spacy.require_gpu()
-    nlp = spacy.load('en_core_web_sm')
-    contextualSpellCheck.add_to_pipe(nlp)
-    return nlp
-
 
 @st.cache(allow_output_mutation=True)
 def initializeSymspell():
@@ -66,14 +55,6 @@ def initializeSymspell():
     vocab = set([w for w, f in symspell.words.items()])
 
     return symspell, vocab
-
-
-# @st.cache(suppress_st_warning=True)
-def doSpacySpellCheck(nlp, text):
-    doc = nlp(text)
-    test = doc._.performed_spellCheck
-    return doc._outcome_spellCheck
-
 
 # @st.cache(ttl=60.0*3.0, max_entries=20)  # clear cache every 3 minutes
 @st.cache(suppress_st_warning=True)
@@ -172,10 +153,9 @@ st.sidebar.info(
 )
 
 showBoundingBoxes = False
-showBoundingBoxes = st.sidebar.checkbox("Show bounding boxes", ['yes', 'no'])
-
 autocorrect = False
-autocorrect = st.sidebar.checkbox("Autocorrect (slow!)", ['yes', 'no'])
+# autocorrect = st.sidebar.checkbox("Autocorrect (slow!)", ['yes', 'no'])
+showBoundingBoxes = st.sidebar.checkbox("Show bounding boxes", ['yes', 'no'])
 
 # print(help(st.sidebar.file_uploader))
 st.sidebar.markdown('## Upload a local scan file')
@@ -186,7 +166,6 @@ st.markdown('### Original image')
 
 if myBytesIO is None:
     localImageLocation = environ.get("LocalImageLocation")
-    print(f"localImageLocation: {localImageLocation}")
     t0 = perf_counter()
     image = Image.open(localImageLocation)
 else:
@@ -241,14 +220,12 @@ if showBoundingBoxes:
 
     if autocorrect:
         t10 = perf_counter()
-        # symSpell, vocab = initializeSymspell()
-        nlp = initializeContextualSpellCheck()
+        symSpell, vocab = initializeSymspell()
         t11 = perf_counter()
         Δt10 = t11 - t10
 
         t12 = perf_counter()
-        # corrected = correctSpellingUsingSymspell(symSpell, vocab, text)
-        corrected = doSpacySpellCheck(nlp, text)
+        corrected = correctSpellingUsingSymspell(symSpell, vocab, text)
         t12 = perf_counter()
         Δt12 = t13 - t12
 
