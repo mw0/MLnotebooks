@@ -56,6 +56,7 @@ Trupanion/
 USnames/
 UberReprise/*
 firstGAN/
+imageAnomalyDetection/
 multiClass/#*#
 multiClass/*.joblib
 multiClass/*.pdf
