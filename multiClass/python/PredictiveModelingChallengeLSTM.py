@@ -1,46 +1,98 @@
-#!/usr/bin/python3
+#!/usr/bin/env python
 # coding: utf-8
 
 # # Predictive Modeling Challenge LSTM
-
-# **Mark Wilber**
-
+# 
 # The challenge here is to build a classifier for 56 FDA food safety violation
 # categories, which are very unbalanced (sizes spanning more than 3 orders of
 # magnitude). There are two components/features:
 
 # * a boolean, `FDAISCRITICAL`, indicating whether the violation is 'critical'
-#   or not a description of the violation, `VIOCOMMENT`, which can range from 0
-#   to 844 'words'
-# * (It is shown below, that the two instances with no comments can be safely
-#   dropped.)
+#   or not
+# * a description of the violation, `VIOCOMMENT`, which can range from 0 to 844
+#  'words'
+#   * (It is shown below, that the two instances with no comments can be safely
+#     dropped.)
 
-# This notebook generates TF-IDF features after extracting unigrams and
-# bigrams, and trains models using logistic regression, random forest, linear
-# SVC and complement Naive Bayes to compare f1 scores and training times.
+# This notebook uses a bidirectional LSTM model to create state vectors from
+# the text. The boolean FDAISCRITICAL values are concatenated to the state
+# vectors created by the LSTM. The combined vector is run through a softmax
+# classifier.
 
 # ## Preliminaries
 
+# ### Python imports
+
+# `DataSci` contains generally helpful data science stuff, while `plotHelpers`
+# includes plot functions specifically.
+
 import sys
+# sys.path.append('/home/wilber/work/Mlib')
+sys.path.append('/home/mark/work/Mlib')
+from utility import DataSci as util
+from plotHelpers import plotHelpers as ph
 
-from time import time, asctime, gmtime
+from time import time, asctime, localtime
+print(asctime(localtime()))
 
-# t0 = time()
+t0 = time()
 
-# from platform import node
 import os
 from os.path import exists
-# import shutil
-# from glob import glob
 from random import random
 from collections import Counter, OrderedDict
 import gc		# garbage collection module
 import pathlib
 import pprint
-# import pickle
 import timeit
 
-# duVersion = None
+print("Python version: ", sys.version_info[:])
+print("Un-versioned imports:\n")
+prefixStr = ''
+if 'collections' in sys.modules:
+    print(prefixStr + 'collections', end="")
+    prefixStr = ', '
+if 'gc' in sys.modules:
+    print(prefixStr + 'gc', end="")
+    prefixStr = ', '
+if 'glob' in sys.modules:
+    print(prefixStr + 'glob', end="")
+    prefixStr = ', '
+if 'pickle' in sys.modules:
+    print(prefixStr + 'pickle', end="")
+    prefixStr = ', '
+if 'platform' in sys.modules:
+    print(prefixStr + 'platform', end="")
+    prefixStr = ', '
+if 'plotHelpers' in sys.modules:
+    print(prefixStr + 'plotHelpers', end="")
+    prefixStr = ', '
+if 'pprint' in sys.modules:
+    print(prefixStr + 'pprint', end="")
+    prefixStr = ', '
+if 'os' in sys.modules:
+    print(prefixStr + 'os', end="")
+    prefixStr = ', '
+if 'os.path' in sys.modules:
+    print(prefixStr + 'os.path', end="")
+    prefixStr = ', '
+if 'random' in sys.modules:
+    print(prefixStr + 'random', end="")
+    prefixStr = ', '
+if 'shutil' in sys.modules:
+    print(prefixStr + 'shutil', end="")
+    prefixStr = ', '
+if 'sys' in sys.modules:
+    print(prefixStr + 'sys', end="")
+    prefixStr = ', '
+if 'timeit' in sys.modules:
+    print(prefixStr + 'timeit', end="")
+    prefixStr = ', '
+if 'utility' in sys.modules:
+    print(prefixStr + 'utility', end="")
+    # prefixStr = ', '
+
+duVersion = None
 from dateutil import __version__ as duVersion
 from dateutil.parser import parse
 import numpy as np
@@ -48,27 +100,24 @@ import pandas as pd
 import pyreadr
 import pydot_ng
 import graphviz
+import mlflow
+import mlflow.sklearn
+import mlflow.tensorflow
 
-# scVersion = None
+scVersion = None
 from scipy import __version__ as scVersion
 import scipy.sparse as sp
 
-# skVersion = None
+skVersion = None
 from sklearn import __version__ as skVersion
-# from sklearn.feature_extraction import text
-# from sklearn.feature_extraction.text import TfidfVectorizer
-# from sklearn.feature_selection import chi2
-# from sklearn.linear_model import LogisticRegression
-# from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_extraction import text
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
-# from sklearn.svm import LinearSVC, SVC
-# from sklearn.naive_bayes import ComplementNB
 from sklearn.utils import class_weight
 
-# tfVersion = None
+tfVersion = None
 from tensorflow import __version__ as tfVersion
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
@@ -79,68 +128,36 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
 from tensorflow.keras.utils import plot_model
 
+jlVersion = None
 from joblib import __version__ as jlVersion
-# from joblib import dump, load
+from joblib import dump, load
 
 import seaborn as sns
 import colorcet as cc
 
+mpVersion = None
 from matplotlib import __version__ as mpVersion
 import matplotlib.pyplot as plt
-
-print("Python version: ", sys.version_info[:])
-print("Un-versioned imports:\n")
-prefixStr = ''
-if 'collections' in sys.modules:
-    print(prefixStr + 'collections', end="")
-    prefixStr = ',  '
-if 'gc' in sys.modules:
-    print(prefixStr + 'gc', end="")
-    prefixStr = ',  '
-if 'glob' in sys.modules:
-    print(prefixStr + 'glob', end="")
-    prefixStr = ',  '
-if 'pickle' in sys.modules:
-    print(prefixStr + 'pickle', end="")
-    prefixStr = ',  '
-if 'platform' in sys.modules:
-    print(prefixStr + 'platform', end="")
-    prefixStr = ',  '
-if 'pprint' in sys.modules:
-    print(prefixStr + 'pprint', end="")
-    prefixStr = ',  '
-if 'os' in sys.modules:
-    print(prefixStr + 'os', end="")
-    prefixStr = ',  '
-if 'os.path' in sys.modules:
-    print(prefixStr + 'os.path', end="")
-    prefixStr = ',  '
-if 'random' in sys.modules:
-    print(prefixStr + 'random', end="")
-    prefixStr = ',  '
-if 'shutil' in sys.modules:
-    print(prefixStr + 'shutil', end="")
-    prefixStr = ',  '
-if 'sys' in sys.modules:
-    print(prefixStr + 'sys', end="")
-    prefixStr = ',  '
-if 'timeit' in sys.modules:
-    print(prefixStr + 'timeit', end="")
-    prefixStr = ',  '
 
 print("\n")
 if 'colorcet' in sys.modules:
     print(f"colorcet: {cc.__version__}", end="\t")
 if 'dateutil' in sys.modules:
     print(f"dateutil: {duVersion}", end="\t")
+if 'graphviz' in sys.modules:
+    print(f"graphviz: {duVersion}", end="\t")
 if 'joblib' in sys.modules:
     print(f"joblib: {jlVersion}", end="\t")
 if 'matplotlib' in sys.modules:
     print(f"matplotlib: {mpVersion}", end="\t")
+if 'mlflow' in sys.modules:
+    print(f": {mlflow.__version__}", end="\t")
 if 'numpy' in sys.modules:
     print(f"numpy: {np.__version__}", end="\t")
 if 'pandas' in sys.modules:
     print(f"pandas: {pd.__version__}", end="\t")
+if 'pydot' in sys.modules:
+    print(f"pydot: {pd.__version__}", end="\t")
 if 'pyreader' in sys.modules:
     print(f"pyreader: {pyreader.__version__}", end="\t")
 if 'scipy' in sys.modules:
@@ -153,29 +170,21 @@ if 'tensorflow' in sys.modules:
     print(f"tensorflow: {tfVersion}", end="\t")
 # if '' in sys.modules:
 #     print(f": {.__version__}", end="\t")
+Δt = time() - t0
+print(f"\n\nΔt: {Δt: 4.1f}s.")
 
-print("\n\n\t<<< !!! ------------------ !!! >>>\n\n"
-      + "If next line breaks this script, invoke using:\n"
-      + f"PYTHONPATH=$PYTHONPATH:/home/mark/work/Mlib {sys.argv[0]}\n\n"
-      + "\t<<< !!! ------------------ !!! >>>\n")
-# sys.path.append('/home/wilber/work/Mlib')
-# sys.path.append('/home/mark/work/Mlib')
-from utility import DataSci as util
-from plotHelpers import plotHelpers as ph
+get_ipython().run_line_magic('matplotlib', 'inline')
 
-prefixStr = ''
-if 'plotHelpers' in sys.modules:
-    print(prefixStr + 'plotHelpers', end="")
-    prefixStr = ',  '
-if 'utility' in sys.modules:
-    print(prefixStr + 'utility', end="")
 
-print(asctime(gmtime()))
+# ### Helper functions
+
+# <a id="helper-tokenize"></a>
+# #### `tokenize()`
 
 def tokenize(corpus, vocabSz):
     """
     Generates the vocabulary and the list of list of integers for the input
-    corpus
+    corpus.
 
     Help from: https://www.tensorflow.org/tutorials/text/nmt_with_attention
 
@@ -187,8 +196,8 @@ def tokenize(corpus, vocabSz):
     sentence tokenizer object
 
     Usage:
-        listOfListsOfIndices, sentenceTokenizer = \
-            tokenize(mySentences, maxVocabCt)
+        listOfListsOfIndices, sentenceTokenizer = tokenize(mySentences,
+                                                           maxVocabCt)
     """
 
     # Define the sentence tokenizer
@@ -199,11 +208,10 @@ def tokenize(corpus, vocabSz):
                                   oov_token="<unkwn>")
 
     # Keep the double quote, dash, and single quote + & (different from
-    # word2vec training, which did not keep `&`)
-
+    #   word2vec training: didn't keep `&`)
     # oov_token: added to word_index & used to replace out-of-vocab words
-    #            during text_to_sequence calls
-    # num_words: maximum number of words to keep, dropping least frequent
+    #   during text_to_sequence calls
+    # num_words = maximum number of words to keep, dropping least frequent
 
     # Fit the tokenizer on the input corpus
     sentenceTokenizer.fit_on_texts(corpus)
@@ -214,563 +222,632 @@ def tokenize(corpus, vocabSz):
     return listOfIndexLists, sentenceTokenizer
 
 
-def preprocessDatums(df, classColumn, testFrac, myRandomState=None):
+# #### `df2TFdata()`
+# 
+# This is modified from [a TensorFlow tutorial]
+# (https://www.tensorflow.org/tutorials/structured_data/feature_columns),
+# replacing columnar feature with tokenized text for the inputs.
 
-    """
+# def df2TFdata(dataframe, textCol, targetCol, shuffle=True, batchSz=64):
+#     """
+#     dataframe		pd.DataFrame, containing a column with text, and a
+#                       target column with labels
+#     shuffle		bool, indicating whether to shuffle the data,
+#                       default: True
+#     batchSz		int, indicating batch size, default: 64
+#     """
 
-    Splits data into train / test sets
+#     dataframe = dataframe.copy()
+#     labels = dataframe.pop(targetCol)
+#     ds = tf.data.Dataset.from_tensor_slices((dict(dataframe), labels))
+#     if shuffle:
+#         ds = ds.shuffle(buffer_size=len(dataframe))
+#     ds = ds.batch(batch_size)
 
-    Use helper function `tokenizef()`, which invokes Keras Tokenizer, to
-    tokenize sentences
-    * This will return a list of lists, with each of the latter containing an
-      index for each word in a comment
-    * Finally the input text, `XcommentsTr`, is created by padding / truncating
-      each comment index list to a length of 140.
+#     return ds
+
+# ## Handle the data
+
+# ### Read data into a DataFrame
+
+# * Have a very quick look at DataFrame characteristics
+
+cwd = pathlib.Path.cwd()
+basePath = cwd.parent
+dataPath = basePath / 'data'
+dataSourcePath = dataPath / "SelectedInspectionReportData.rds"
+
+t0 = time()
+result = pyreadr.read_r(str(dataSourcePath))
+df = result[None]
+df.fda_q_fixed = df.fda_q_fixed.astype('int')
+df.FDAISCRITICAL = df.FDAISCRITICAL.astype('int')
+Δt = time() - t0
+print(f"\n\nΔt: {Δt: 4.1f}s.\n")
+print(f"df.shape{df.shape}")
+print(f"df.head(6):\n{df.head(6).T}")
+print(f"df.tail(6):\n{df.tail(6).T}")
+
+# #### Basic summary
+print(f"df.info():\n{df.info()}")
+
+myPercentiles = [0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99]
+print(f"df.describe():\n{df.describe(percentiles=myPercentiles)}")
+
+# #### Remove columns from DataFrame which we won't need
+
+df = df[['fda_q_fixed', 'VIOCOMMENT', 'FDAISCRITICAL']]
+print(f"df.info():\n{df.info()}")
+
+# ### Exploratory analysis
+
+# #### Classes and relative balance
+
+# * The stuff using patches is for placing counts above each rectangle in
+# the bar plot
+
+FDAcodes = list(set(df['fda_q_fixed'].values))
+print(f"FDAcodes:\n{FDAcodes}")
+
+# classCts = pd.DataFrame(df['fda_q_fixed'].value_counts())
+# with pd.option_context("display.max_columns", 60):
+#     display(classCts.T)
+
+# ph.plotValueCounts(df, 'fda_q_fixed', titleText='FDA code frequencies',
+#                    saveAs='svg', ylim=[0.0, 187500.0])
+
+# ***The class sizes span nearly 4 orders of magnitude!***
+
+# #### Word frequencies
+
+# t0 = time()
+# df['commentsWords'] = df['VIOCOMMENT'].apply(lambda s: s.split())
+# t1 = time()
+# Δt = t1 - t0
+# print(f"Δt: {Δt % 60.0:4.1f}s.")
+
+comments = list(df['commentsWords'])
+print(comments[0])
+print(comments[-1])
+
+# ##### Distribution of comment lengths
+
+# * Add length of each comment to DataFrame as `wordFreq` column
+
+wordLens = [len(wordList) for wordList in comments]
+df['wordFreq'] = wordLens
+wordFreqMode = df['wordFreq'].mode().values[0]
+
+wordCtSorted = sorted(wordLens)
+print("smallest word counts:\n", wordCtSorted[:100])
+print("largest word counts:\n", wordCtSorted[-101:-1])
+
+# **Detailed histogram**
+
+fig, ax = plt.subplots(1, 1, figsize=(18, 3.5))
+
+# myTitle = f"Word counts (max: {wordCtSorted[-1]}, mode: {wordFreqMode})"
+# ph.detailedHistogram(wordLens, ylabel='frequency',
+#                      volubility=2,
+#                      titleText=myTitle,
+#                      figName="WordCountsHist",
+#                      ax=ax,
+#                      ylim = [0.5, 100000.0],
+#                      ylog=True, saveAs='svg')
+
+# **Make space**
+
+del wordLens
+del wordCtSorted
+del df['commentsWords']
+
+# ##### What FDA codes correspond to those comments having `wordFreq== 0`?
+
+# df[df['wordFreq']==0]
+# print("\n", df.shape)
 
 
-    * create a `numpy.random.RandomState` instance to keep track of the random
-      number initializer, in order to ensure consistent results throughout
+# **Can safely remove a couple of records from the 2nd-most populated category**
 
-    * `splitDataFrameByClasses()` will create two new DataFrames, dfTr, dfTe,
-      according to the desired splits.
-      * Splitting is done on a per-class basis, so that random selection will
-        not, by chance, yield huge imbalances in train-test splits of tiny
-        classes.
+# * Originally there were 1307986 records in `df`, out of which 122314 were in
+#   Class 49
 
-    ** Note that if you just want to do stratified sampling on a numpy array of
-       `X` values, `splitDataFramByClasses()` is not needed.
-       `train_test_split()` accepts the keyword `stratify=myTargetVariable`.
-    **
-    """
+df = df[df['wordFreq']!=0]
+print(f"df.shape:\n{df.shape}")
 
-    if myRandomState is None:
-        randomState = 0
-        myRandomState = np.random.RandomState(randomState)
+# ##### `wordFreq` percentiles
 
-    dfTr, dfTe = util.splitDataFrameByClasses(df, classColumn,
-                                              testFrac=testFrac,
-                                              myRandomState=myRandomState)
-    print(f"dfTr.shape: {dfTr.shape}, dfTe.shape: {dfTe.shape}")
-    print(dfTr.head().to_markdown())
-    print(dfTe.head().to_markdown())
+# * These show that would get 99% coverage of the comments without truncation if were to use, say, 140-element LSTMs
 
-    # ### Create list of lists of word indices, and TensorFlow sentence
-    # ### tokenizer object
-
-    # Use comment strings from `dfTrain` to create vocabulary indices.
-    # See [helper function `tokenize()`](#helper-tokenize)
-
-    ListOfCommentsTr = list(dfTr.VIOCOMMENT)
-
-    listOfListsOfWordIndicesTr, sentenceTokenizer = \
-        tokenize(ListOfCommentsTr, maxVocabCt)
-
-    # ### Pre-pad short comment lists, truncate the ends of long comments
-
-    # padValue = max(max(listOfListsOfWordIndices)) + 1
-    padValue = 0
-    XcommentsTr = pad_sequences(listOfListsOfWordIndicesTr,
-                                maxlen=maxCommentWords,
-                                dtype='int32', padding='pre',
-                                truncating='post', value=padValue)
-
-    print(f"ListOfCommentsTr[0]: {ListOfCommentsTr[0]}")
-    print(f"listOfListsOfWordIndicesTr[0]: {listOfListsOfWordIndicesTr[0]}")
-    print(f"XcommentsTr[0]: {XcommentsTr[0]}")
-
-    # ### Auxiliary (side) data need to be shaped
-
-    XauxTr = dfTr.FDAISCRITICAL.values.reshape(dfTr.shape[0], 1)
-    XauxTr.shape
-
-    # ### Train target data
-
-    FDAcodesTr = dfTr.fda_q_fixed - 1
-    print(f"set(FDAcodesTr): {set(FDAcodesTr)}")
-
-    # ### Tensor of word indices for test
-
-    ListOfCommentsTe = list(dfTe.VIOCOMMENT)
-    listOfListsOfWordIndicesTe = \
-        sentenceTokenizer.texts_to_sequences(ListOfCommentsTe)
-    XcommentsTe = pad_sequences(listOfListsOfWordIndicesTe,
-                                maxlen=maxCommentWords,
-                                dtype='int32', padding='pre',
-                                truncating='post', value=padValue)
-
-    # ### Auxiliary test data
-
-    XauxTe = dfTe.FDAISCRITICAL.values.reshape(dfTe.shape[0], 1)
-    XauxTe.shape
-
-    FDAcodesTe = dfTe.fda_q_fixed - 1
-    print(f"set(FDAcodesTe): {set(FDAcodesTe)}")
-
-    return (dfTr, XcommentsTr, XauxTr, FDAcodesTr,
-            dfTe, XcommentsTe, XauxTe, FDAcodesTe, myRandomState)
+# In[21]:
 
 
-# Model time
+print("df.describe(percentiles=myPercentiles):\n"
+      f"{df.describe(percentiles=myPercentiles)}")
+
+# #### Most-common words
+
+# Flatten list of lists of words:
+allWords = [word for wordList in comments for word in wordList]
+print(len(comments), len(allWords))
+
+print(comments[:5], "\n", allWords[:25])
+
+t0 = time()
+wordCtr = Counter(allWords)
+t1 = time()
+Δt = t1 - t0
+print(f"Δt: {Δt % 60.0:4.1f}s.")
+
+
+# ##### Most common words, after removing stop words
+# 
+# *Result looks very plausible*
+
+stopWords = text.ENGLISH_STOP_WORDS.union(['-'])
+
+wcStops = [k for k in wordCtr if k.lower() in stopWords]
+for k in wcStops:
+    del wordCtr[k]
+print("Most common words (top 40):\n", wordCtr.most_common(40))
+
+# #### Clean up
+
+del allWords
+del wordCtr
+
+# #### `fda_q_fixed` vs. `FDAISCRITICAL`
+
+# What is the relationship between the critical violation boolean and the FDA
+# code?
+
+# dfCrit = df.groupby(['fda_q_fixed', 'FDAISCRITICAL']).count()
+# del dfCrit['VIOCOMMENT']
+# del dfCrit['wordFreq']
+# dfCrit.head(20)
+
+# dfCrit.reset_index(inplace=True)
+# dfCrit.head(20)
+
+# plt.rcParams['xtick.top'] = True
+# plt.rcParams['xtick.labeltop'] = True
+
+# fig, ax = plt.subplots(1, 1, figsize=(12, 4))
+# dfCrit.plot.scatter('fda_q_fixed', 'FDAISCRITICAL', s=4, c='black', ax=ax)
+# for xv in np.linspace(0.5, 56.5, 57):
+#     _ = plt.axvline(x=xv, c="#FFB0FF", linewidth=1)
+# plt.suptitle('Critical violations vs FDA code')
+# ax.set_xlim([0.5, 56.5])
+# plt.tight_layout(rect=[0, 0.03, 1, 0.97])
+# plt.savefig('CriticalViolationVsFDAcode.svg')
+
+# **The critical violations plot shows that `FDAISCRITICAL` should be
+# predictive (and certainly should be included in the model):**
+
+# * **<font color="darkgreen">classes 30, 32, 34 &amp; 46 *never* have
+#   critical violations</font>**
+# * **<font color="darkgreen">classes 7, 26, 27 &amp; 29 *only* have critical
+#   violations</font>**
+
+# ## Model Parameters
+
+# * testFrac			fraction of data set withheld
+# * maxVocabCt			vocabulary size to be returned by Tokenizer,
+#                               dropping least frequent
+# * LSTMlayerUnits		# of units within each activation unit in LSTMs
+# * embeddingDim		size of dimension for generated embeddings
+# * auxFeaturesCt		# of features in auxiliary data
+# * classCt			# of classes (softmax output dim)
+# * dropoutFrac			dropout fraction
+# * LSTMdropoutFrac		dropout fraction within LSTMs
+# * batchSz			size of batches
+# * epochCt			number of epochs to run
+
+testFrac = 0.4
+maxVocabCt = 80000
+maxCommentWords = 140
+LSTMlayerUnits = 64
+embeddingDim = 64
+auxFeaturesCt = 1
+classCt = 56
+dropoutFrac = 0.15
+LSTMdropoutFrac = 0.5
+batchSz = 64
+epochCt = 10
+
+# ## Pre-process data
+
+# * Split data into train / test sets
+# * Use [helper function `tokenize()`](#helper-tokenize), which invokes Keras
+#   Tokenizer, to tokenize sentences
+#   * This will return a list of lists, with each of the latter containing an
+#     index for each word in a comment
+# * Finally the input text, `XcommentsTr`, is created by padding / truncating
+#   each comment index list to a length of 140.
+
+# ### Split DataFrame by classes
+
+# * create a `numpy.random.RandomState` instance to keep track of the random
+#   number initializer, in order to ensure consistent results throughout
+
+# * Splitting is done on a per-class basis, so that random selection will not,
+#   by chance, yield huge imbalances in train-test splits of tiny classes
+
+# `splitDataFrameByClasses()` will create two new DataFrames, dfTr, dfTe,
+# according to the desired splits.
+
+# <font color='darkgreen'><b>Note that if you just want to do stratified
+# sampling on a numpy array of</b> `X` <b>values,</b>
+# `splitDataFramByClasses()` <b>is not needed.</b> `train_test_split()`
+# <b>accepts the keyword</b> `stratify=myTargetVariable`.</b></font>
+
+randomState=0
+myRandomState = np.random.RandomState(randomState)
+
+classColumn = 'fda_q_fixed'
+dfTr, dfTe = util.splitDataFrameByClasses(df, classColumn,
+                                          testFrac=testFrac,
+                                          myRandomState=myRandomState)
+print(f"dfTr.shape: {dfTr.shape}, dfTe.shape: {dfTe.shape}")
+print(f"dfTr.head():\n{dfTr.head()}")
+print(f"dfTe.head():\n{dfTe.head()}")
+
+# **As intended, `splitBalancedDataFrameClasses()` created new test and train
+# DataFrames, each with ~ 1307984/2 = 653992 rows.**
+
+# *The test DataFrame is not an exactly split of the original, since the
+# splitting is done by class and unioned. For a 50% split, sci-kit learn's*
+# `train_test_split()` gives the extra instance in each odd-sized class to the
+# test set.*
+
+# ### Create list of lists of word indices, and TensorFlow sentence tokenizer
+# object
+
+# Use comment strings from `dfTrain` to create vocabulary indices.
+
+# See [helper function `tokenize()`](#helper-tokenize)
+
+ListOfCommentsTr = list(dfTr.VIOCOMMENT)
+
+listOfListsOfWordIndicesTr, sentenceTokenizer \
+    = tokenize(ListOfCommentsTr, maxVocabCt)
+
+# ### Pre-pad short comment lists, truncate the ends of long comments
+
+# padValue = max(max(listOfListsOfWordIndices)) + 1
+padValue = 0
+XcommentsTr = pad_sequences(listOfListsOfWordIndicesTr,
+                            maxlen=maxCommentWords,
+                            dtype='int32', padding='pre',
+                            truncating='post', value=padValue)
+
+ListOfCommentsTr[0]
+listOfListsOfWordIndicesTr[0]
+print(f"XcommentsTr[0]:\n{XcommentsTr[0]}")
+
+# ### Auxiliary (side) data need to be shaped
+
+XauxTr = dfTr.FDAISCRITICAL.values.reshape(dfTr.shape[0], 1)
+print(f"XauxTr.shape: {XauxTr.shape}")
+
+# ### Train target data
+
+FDAcodesTr = dfTr.fda_q_fixed - 1
+print(set(FDAcodesTr))
+
+# ### Tensor of word indices for test
+
+ListOfCommentsTe = list(dfTe.VIOCOMMENT)
+listOfListsOfWordIndicesTe \
+    = sentenceTokenizer.texts_to_sequences(ListOfCommentsTe)
+XcommentsTe = pad_sequences(listOfListsOfWordIndicesTe,
+                            maxlen=maxCommentWords,
+                            dtype='int32', padding='pre',
+                            truncating='post', value=padValue)
+
+# ### Auxiliary test data
+
+XauxTe = dfTe.FDAISCRITICAL.values.reshape(dfTe.shape[0], 1)
+print(f"XauxTe.shape:\n{XauxTe.shape}")
+
+# ### Test target data
+
+FDAcodesTe = dfTe.fda_q_fixed - 1
+print(set(FDAcodesTe))
+
+# ## Model time
 
 # ### Define the model
 
-def buildModel0(sequenceLength, vocabSz, auxFeatureCount,
-                LSTMinternalLayerSz, embedLayerDim,
-                LSTMdropoutFrac=0.40,
-                denseLayerDim=64,
-                dropoutFrac=0.15,
-                softMaxCt=16):
+# This follows, to some degree, [Keras Multi-Input and multi-output models](https://keras.io/getting-started/functional-api-guide/#multi-input-and-multi-output-models)
+
+# * In this case, we only have a single output
+# * Here, Bidirectional LSTMs are used
+
+def buildModel(sequence_length, vocabSz, auxFeatureCount, LSTMinternalLayerSz,
+               embedLayerDim, densLayerDim=64, softMaxCt=16, dropoutFrac=0.15,
+               LSTMdropoutFrac=0.40):
 
     """
-
     INPUTS:
-    sequenceLength		int, number of LSTM units
-    vocabSz			int, size of vocabulary
-    auxFeatureCount		int, count of auxiliary (side) features
+    sequence_length			int, number of LSTM units
+    vocabSz					int, size of vocabulary
+    auxFeatureCount			int, count of auxiliary (side) features
     LSTMinternalLayerSz		int, size of layers within LSTM units
-    embedLayerDim		int, dimension of embedding layer
-    denseLayerDim		int, dimension of dense layers, default: 64
-    softMaxCt			int, dimension of softmax output, default: 16
-    dropoutFrac			int, dropout rate, default: 0.15
-    LSTMdropoutFrac		int, dropout rate for LSTMs, default: 0.40
-
-    This follows, to some degree, [Keras Multi-Input and multi-output models]
-    (https://keras.io/getting-started/.
-    ./functional-api-guide/#multi-input-and-multi-output-models)
-
-    • In this case, we only have a single output
-    • Here, Bidirectional LSTMs are used, but no secondary LSTM layer
+    embedLayerDim			int, dimension of embedding layer
+    densLayerDim			int, dimension of dense layers, default: 64
+    softMaxCt				int, dimension of softmax output, default: 16
+    dropoutFrac				int, dropout rate, default: 0.15
+    LSTMdropoutFrac			int, dropout rate for LSTMs, default: 0.40
     """
 
-    # • MainInput: meant to receive sequences of `sequenceLength` integers,
-    #   between 1 and `vocabSz`. (O index reserved for padding.)
-    # • Note that we can name any layer by passing it a "name" argument.
-
-    mainInput = Input(shape=(sequenceLength,), dtype='int32',
-                       name='MainInput')
+    # Headline input: meant to receive sequences of *sequence_length* integers, between 1 and *vocabSz*.
+    # Note that we can name any layer by passing it a "name" argument.
+    main_input = Input(shape=(sequence_length,), dtype='int32', name='main_input')
 
     # This embedding layer will encode the input sequence
     # into a sequence of dense 64-dimensional vectors.
-
     x = Embedding(output_dim=embedLayerDim, input_dim=vocabSz,
-                  input_length=sequenceLength, trainable=True,
-                  name='EmbedLayer')(mainInput)
+                  input_length=sequence_length, trainable=True, name="embed_layer")(main_input)
 
     # A LSTM will transform the vector sequence into a single vector,
     # containing information about the entire sequence
+    lstm_out_1 = Bidirectional(LSTM(LSTMinternalLayerSz,
+                                    dropout=dropoutFrac,
+                                    recurrent_dropout=LSTMdropoutFrac,
+                                    return_sequences=True))(x)
+    lstm_out = LSTM(LSTMinternalLayerSz,
+                    dropout=dropoutFrac,
+                    recurrent_dropout=LSTMdropoutFrac)(lstm_out_1)
 
-    LSTMout = Bidirectional(LSTM(LSTMinternalLayerSz,
-                                  dropout=dropoutFrac,
-                                  recurrent_dropout=LSTMdropoutFrac,
-                                  return_sequences=False,
-                                  name='BidirectionalLSTM'))(x)
-    print(f"LSTMout.shape: {LSTMout.shape}")
+    auxiliary_input = Input(shape=(auxFeatureCount,), name='numerical_input')
+    x = concatenate([lstm_out, auxiliary_input])
 
-    # • NumericalFeatures: 'side features' to be concatenated with
-    #   `LSTMinternalLayerSz` features coming out of LSTM layer.
+    # We stack a deep densely-connected network on top
+    x = Dense(densLayerDim, activation='relu')(x)
+    x = Dense(densLayerDim, activation='relu')(x)
 
-    auxiliaryInput = Input(shape=(auxFeatureCount,), name='NumericalFeatures')
-    x = concatenate([LSTMout, auxiliaryInput])
-
-    # We stack a shallow densely-connected network on top
-
-    x = Dense(denseLayerDim, activation='relu')(x)
-    x = Dense(denseLayerDim, activation='relu')(x)
-
-    # Finish with a softmax layer to predict classes
-
-    main_output = Dense(denseLayerDim, activation='softmax',
-                        name='SoftmaxOutput')(x)
-    model = Model(inputs=[mainInput, auxiliaryInput], outputs=main_output)
-
+    # And finally we add the main logistic regression layer
+    main_output = Dense(56, activation='softmax', name='main_output')(x)
+    model = Model(inputs=[main_input, auxiliary_input], outputs=main_output)
+    
     return model
 
 
-# This version adds a second LSTM layer
-def buildModel1(sequenceLength, vocabSz, auxFeatureCount,
-                LSTMinternalLayerSz, embedLayerDim,
-                LSTMdropoutFrac=0.40,
-                denseLayerDim=64,
-                dropoutFrac=0.15,
-                softMaxCt=16):
-
-    """
-    INPUTS:
-    sequenceLength		int, number of LSTM units
-    vocabSz			int, size of vocabulary
-    auxFeatureCount		int, count of auxiliary (side) features
-    LSTMinternalLayerSz		int, size of layers within LSTM units
-    embedLayerDim		int, dimension of embedding layer
-    denseLayerDim		int, dimension of dense layers, default: 64
-    softMaxCt			int, dimension of softmax output, default: 16
-    dropoutFrac			int, dropout rate, default: 0.15
-    LSTMdropoutFrac		int, dropout rate for LSTMs, default: 0.40
-
-    This follows, to some degree, [Keras Multi-Input and multi-output models]
-    (https://keras.io/getting-started/.
-    ./functional-api-guide/#multi-input-and-multi-output-models)
-
-    • In this case, we only have a single output
-    • Here, Bidirectional LSTMs are used, as well as a secondary LSTM layer
-    """
-
-    # • MainInput: meant to receive sequences of `sequenceLength` integers,
-    #   between 1 and `vocabSz`. (O index reserved for padding.)
-    # • Note that we can name any layer by passing it a "name" argument.
-
-    mainInput = Input(shape=(sequenceLength,), dtype='int32',
-                      name='MainInput')
-
-    # This embedding layer will encode the input sequence
-    # into a sequence of dense 64-dimensional vectors.
-
-    x = Embedding(output_dim=embedLayerDim, input_dim=vocabSz,
-                  input_length=sequenceLength, trainable=True,
-                  name='EmbedLayer')(mainInput)
-
-    # A LSTM can transform the vector sequence into a single vector,
-    # containing information about the entire sequence. In the first instance
-    # a transformed *sequence* is passed along to the second LSTM.
-
-    LSTMbidir = Bidirectional(LSTM(LSTMinternalLayerSz,
-                                   dropout=dropoutFrac,
-                                   recurrent_dropout=LSTMdropoutFrac,
-                                   return_sequences=True,
-                                   name='BidirectionalLSTM'))(x)
-    print(f"LSTMbidir.shape: {LSTMbidir.shape}")
-    LSTMout = LSTM(LSTMinternalLayerSz,
-                   dropout=dropoutFrac,
-                   recurrent_dropout=LSTMdropoutFrac,
-                   name='LSTM2')(LSTMbidir)
-    print(f"LSTMout.shape: {LSTMout.shape}")
-
-    # • NumericalFeatures: 'side features' to be concatenated with
-    #   `LSTMinternalLayerSz` features coming out of LSTM layer.
-
-    auxiliaryInput = Input(shape=(auxFeatureCount,), name='NumericalFeatures')
-    x = concatenate([LSTMout, auxiliaryInput])
-
-    # We stack a shallow densely-connected network on top
-
-    x = Dense(denseLayerDim, activation='relu')(x)
-    x = Dense(denseLayerDim, activation='relu')(x)
-
-    # Finish with a softmax layer to predict classes
-
-    main_output = Dense(denseLayerDim, activation='softmax',
-                        name='SoftmaxOutput')(x)
-    model = Model(inputs=[mainInput, auxiliaryInput], outputs=main_output)
-
-    return model
-
-
-if __name__ == "__main__":
-
-    # ## Model Parameters
-
-    # * testFrac		fraction of data set withheld
-    # * maxVocabCt		vocabulary size to be returned by Tokenizer
-    # * LSTMlayerUnits		# units within each activation unit in LSTMs]
-    # * embeddingDim		size of dimension for generated embeddings
-    # * auxFeaturesCt		# of features in auxiliary data
-    # * classCt			# classes (softmax output dim)
-    # * dropoutFrac		dropout fraction
-    # * LSTMdropoutFrac		dropout fraction within LSTMs
-    # * batchSz			size of batches
-    # * epochCt			number of epochs to run
-
-    testFrac = 0.4
-    maxVocabCt = 80000
-    maxCommentWords = 40		# 40|60|80|140
-    LSTMlayerUnits = 64
-    embeddingDim = 64
-    auxFeaturesCt = 1
-    classCt = 56
-    dropoutFrac = 0.20			# 0.20|0.30
-    LSTMdropoutFrac = 0.50		# 0.35|0.50
-    batchSz = 64
-    epochCt = 10
-    denseLayerDim = 64
+# ### Instantiate the model
 
-    classColumn = 'fda_q_fixed'
-    useModel = 1
+np.random.seed(0)  # Set a random seed for reproducibility
+modelLSTM = buildModel(maxCommentWords, maxVocabCt, auxFeaturesCt,
+                       LSTMlayerUnits, embeddingDim, softMaxCt=classCt)
+modelLSTM.summary()
 
-    tensorBoardLogDir = './tensorBoardLogs'
-    os.makedirs(tensorBoardLogDir, exist_ok=True)
 
-    modelInstanceDir = \
-        (f"{useModel}vocabCt{maxVocabCt:06d}"
-         + f"maxCommentLen{maxCommentWords:03d}"
-         + f"auxFeaturesCt{auxFeaturesCt:02d}"
-         + f"classCt{classCt:02d}"
-         + f"embedDim{embeddingDim:03d}"
-         + f"LSTMlayerSz{LSTMlayerUnits:03d}batchSz{batchSz:03d}"
-         + f"dropoutFrac{dropoutFrac:4.2f}"
-         + f"LSTMdropoutFrac{LSTMdropoutFrac:4.2f}")
+# ### Compute weights for each class
 
-    # Redirect stdout to modelInstanceDir/stdout:
+# In[41]:
 
-    os.makedirs(tensorBoardLogDir + '/' + modelInstanceDir, exist_ok=True)
-    stdoutFile = os.path.join(tensorBoardLogDir, modelInstanceDir, 'stdout')
-    sys.stdout = open(stdoutFile, 'w')
 
-    # Redirect stderr to modelInstanceDir/stderr:
-    stderrFile = os.path.join(tensorBoardLogDir, modelInstanceDir, 'stderr')
-    sys.stderr = open(stderrFile, 'w')
+dfTr.fda_q_fixed.unique() - 1
 
-    fname = "SelectedInspectionReportData.rds"
 
-    t0 = time()
-    result = pyreadr.read_r(fname)
-    df = result[None]
-    df.fda_q_fixed = df.fda_q_fixed.astype('int')
-    df.FDAISCRITICAL = df.FDAISCRITICAL.astype('int')
-    Δt = time() - t0
-    print(f"\n\nTime to read data Δt: {Δt: 4.1f}s.")
+# In[42]:
 
-    print("df.shape: ", df.shape)
 
-    print("df.head(6):\n", df.head(6).T.to_markdown())
-    print("df.tail(6):\n", df.tail(6).T.to_markdown())
+classWeights = class_weight.compute_class_weight('balanced',
+                                                 dfTr.fda_q_fixed.unique() - 1,
+                                                 dfTr.fda_q_fixed - 1)
+print("classWeights:\n", classWeights)
 
-    # ### Basic summary
 
-    print(df.info())
+# ### Define callbacks for model checkpoints and TensorBoard
 
-    print(df.describe().to_markdown())
+# In[43]:
 
-    # ### Remove columns not needed
-    df = df[['fda_q_fixed', 'VIOCOMMENT', 'FDAISCRITICAL']]
-    print(df.info())
 
-    classCts = df.fda_q_fixed.value_counts()
-    print("classCts:\n", pd.DataFrame(classCts).to_markdown())
+modelInstanceDir = (f"vocabCt{maxVocabCt:06d}maxCommentLen{maxCommentWords:03d}"
+                    + f"auxFeaturesCt{auxFeaturesCt:02d}classCt{classCt:02d}"
+                    + f"embedDim{embeddingDim:03d}"
+                    + f"LSTMlayerSz{LSTMlayerUnits:03d}batchSz{batchSz:03d}"
+                    + f"dropoutFrac{dropoutFrac:4.2f}"
+                    + f"LSTMdropoutFrac{dropoutFrac:4.2f}")
 
-    # ### Word frequencies
+checkpointDir = './checkpoints'
 
-    t0 = time()
-    df['commentsWords'] = df['VIOCOMMENT'].apply(lambda s: s.split())
-    t1 = time()
-    Δt = t1 - t0
-    print(f"Time to split words Δt: {Δt % 60.0:4.1f}s.")
+checkpointPrefix = os.path.join(checkpointDir, modelInstanceDir,
+                                "ckpt{epoch:03d}")
+checkpointCallback=ModelCheckpoint(filepath=checkpointPrefix,
+                                   save_weights_only=True)
 
-    comments = list(df['commentsWords'])
-    print("First comment tokens:\n", comments[0])
-    print("Last comment tokens:\n", comments[-1])
+tensorBoardLogDir = './tensorBoardLogs'
+os.makedirs(tensorBoardLogDir, exist_ok=True)                       
 
-    # * Add length of each comment to DataFrame as `wordFreq` column
+logsDir = os.path.join(tensorBoardLogDir, modelInstanceDir)
 
-    wordLens = [len(wordList) for wordList in comments]
-    df['commentLen'] = wordLens
-    commentLenMode = df['commentLen'].mode().values[0]
+os.makedirs(logsDir, exist_ok=True)
+tensorboardCallback = TensorBoard(log_dir=logsDir, histogram_freq=1)
 
-    # wordCtSorted = sorted(wordLens)
-    # print("smallest word counts:\n", wordCtSorted[:50])
-    # print("largest word counts:\n", wordCtSorted[-51:-1])
 
-    # **Make space in memory**
+# #### Where to stuff plots
 
-    del wordLens
-    # del wordCtSorted
-    del df['commentsWords']
+# In[44]:
 
-    # ### What FDA codes correspond to those comments having `wordFreq== 0`?
 
-    print("\ndf.shape: ", df.shape)
-    print(df[df['commentLen'] == 0].to_markdown())
+plotDir = logsDir
+print(plotDir)
 
-    # **Can safely remove a couple of records from the 2nd-most populated
-    # category**
 
-    # * Originally there were 1307986 records in `df`, out of which 122314
-    #   were in Class 49
+# #### Create model graph plot
 
-    df = df[df['commentLen'] != 0]
-    print("df.shape: ", df.shape)
+# In[45]:
 
-    print(df.describe(percentiles=[0.01, 0.05, 0.15, 0.25, 0.5,
-                                   0.75, 0.85, 0.95, 0.99]).to_markdown())
-    FDAcodes = list(set(df['fda_q_fixed'].values))
-    print(f"FDAcodes: {FDAcodes}")
 
-    (dfTr, XcommentsTr, XauxTr, FDAcodesTr,
-     dfTe, XcommentsTe, XauxTe,  FDAcodesTe, myRandomState) = \
-        preprocessDatums(df, classColumn, testFrac)
+plot_model(modelLSTM, to_file=os.path.join(plotDir, 'modelGraph.png'))
 
-    print("Back from preprocessDatums().")
 
-    # ### Create the Model, compile it, run it
+# ### Compile the model
 
-    np.random.seed(0)  # Set a random seed for reproducibility
+# In[46]:
 
-    if useModel == 0:
-        modelLSTM = buildModel0(maxCommentWords, maxVocabCt, auxFeaturesCt,
-                                LSTMlayerUnits, embeddingDim,
-                                denseLayerDim=denseLayerDim, softMaxCt=classCt)
-    elif useModel == 1:
-        modelLSTM = buildModel1(maxCommentWords, maxVocabCt, auxFeaturesCt,
-                                LSTMlayerUnits, embeddingDim,
-                                denseLayerDim=denseLayerDim, softMaxCt=classCt)
-    else:
-        raise ValueError(f"You've set useModel: {useModel}, but must be one "
-                         + "of [0, 1].")
 
-    print(modelLSTM.summary())
+modelLSTM.compile(optimizer='rmsprop',
+                  loss='sparse_categorical_crossentropy',
+                  metrics = ['accuracy', 'categorical_crossentropy'])
 
-    # ### Compute weights for each class
 
-    dfTr.fda_q_fixed.unique() - 1
+# ### Run the model
 
-    classWeights = \
-        class_weight.compute_class_weight('balanced',
-                                          dfTr.fda_q_fixed.unique() - 1,
-                                          dfTr.fda_q_fixed - 1)
-    print("classWeights:\n", classWeights)
+# In[47]:
 
-    # ### Define callbacks for model checkpoints and TensorBoard
 
-    checkpointDir = './checkpoints'
+history = modelLSTM.fit(x=[XcommentsTr, XauxTr],
+                        y= FDAcodesTr,
+                        epochs=epochCt, batch_size=batchSz,
+                        shuffle=True,
+                        class_weight=classWeights,
+                        validation_split=0.2,
+                        callbacks=[checkpointCallback, tensorboardCallback], verbose=1)
 
-    checkpointPrefix = os.path.join(checkpointDir, modelInstanceDir,
-                                    "ckpt{epoch:03d}")
-    checkpointCallback = ModelCheckpoint(filepath=checkpointPrefix,
-                                         save_weights_only=True)
 
-    logsDir = os.path.join(tensorBoardLogDir, modelInstanceDir)
+# In[48]:
 
-    os.makedirs(logsDir, exist_ok=True)
-    tensorboardCallback = TensorBoard(log_dir=logsDir, histogram_freq=1)
 
-    # ### Compile the model
+# history = modelLSTM.fit({'main_input': paddedSequences, 'numerical_input': bools},
+#                         {'main_output': FDAcodes}, epochs=5, batch_size=batchSz)
 
-    modelLSTM.compile(optimizer='rmsprop',
-                      loss='sparse_categorical_crossentropy',
-                      metrics=['accuracy', 'categorical_crossentropy'])
 
-    # Place hardcopy plots in logsDir
+# In[49]:
 
-    plotDir = logsDir
-    print(f"\nplotDir: {plotDir}")
 
-    # Create model graph plot
-    plot_model(modelLSTM, to_file=os.path.join(plotDir, 'modelGraph.png'))
+modelLSTM.save(logsDir + '/save.h5', save_format='tf')
 
-    # ### Run the model
 
-    # verbose=2 setting prints 1 line per epoch, while verbose=1 prints a line
-    # every second or so!
-    history = modelLSTM.fit(batch_size=batchSz,
-                            callbacks=[checkpointCallback,
-                                       tensorboardCallback],
-                            class_weight=classWeights,
-                            epochs=epochCt,
-                            shuffle=True,
-                            validation_split=0.2,
-                            verbose=2,
-                            x=[XcommentsTr, XauxTr],
-                            y=FDAcodesTr)
+# ### Do inference on test
 
-    # history = modelLSTM.fit({'MainInput': paddedSequences,
-    #                          'NumericalFeatures': bools},
-    #                         {'SoftmaxOutput': FDAcodes},
-    #                         epochs=5, batch_size=batchSz)
+# In[50]:
 
-    modelLSTM.save(logsDir + '/save.h5')
 
-    # ### Do inference on test
+softmaxOut = modelLSTM.predict(x=[XcommentsTe, XauxTe])
 
-    softmaxOut = modelLSTM.predict(x=[XcommentsTe, XauxTe])
 
-    yPred = np.argmax(softmaxOut, axis=1) + 1
+# In[51]:
 
-    print(dfTe.head(3))
-    print(f"dfTe.shape: {dfTe.shape}")
 
-    # ### Overall accuracy, precision, recall
+yPred = np.argmax(softmaxOut, axis=1) + 1
 
-    yTe = dfTe.fda_q_fixed
-    confusionMat = confusion_matrix(yTe, yPred)
-    print("confusion matrix:\n", confusionMat)
 
-    # np.where(np.sum(confusionMat, axis=0) == 0)
+# In[52]:
 
-    accuracy = np.trace(confusionMat)/np.sum(confusionMat)
-    recall = np.diag(confusionMat)/np.sum(confusionMat, axis=1)
-    precision = np.diag(confusionMat)/np.sum(confusionMat, axis=0)
-    print(f"accuracy: {accuracy:0.3f}, "
-          f"<precision>: {np.mean(precision):0.3f}, "
-          f"<recall>: {np.mean(recall):0.3f}")
 
-    # ### Recall, precision by class
+dfTe.head(3)
+dfTe.shape
 
-    print(metrics.classification_report(yTe, yPred,
-                                        target_names=[str(c)
-                                                      for c in FDAcodes]))
 
-    classCts = dfTe['fda_q_fixed'].value_counts()
+# #### Overall accuracy, precision, recall
 
-    recall = np.diag(confusionMat)/np.sum(confusionMat, axis=1)
-    precision = np.diag(confusionMat)/np.sum(confusionMat, axis=0)
-    f1 = 2.0*precision*recall/(precision + recall)
-    print("class\tprecision\trecall\tf1\tsize")
+# In[53]:
 
-    for FDAcode, classCt in classCts.iteritems():
-        print(f"{FDAcode}\t{precision[FDAcode - 1]:0.3f}\t\t"
-              + f"{recall[FDAcode - 1]:0.3f}\t{f1[FDAcode - 1]:0.3f}"
-              + f"\t\t{classCt:d}")
 
-    # ### Plot confusion matrices
+yTe = dfTe.fda_q_fixed
+confusionMat = confusion_matrix(yTe, yPred)
+print(confusionMat)
 
-    labelFontSz = 16
-    tickFontSz = 13
-    titleFontSz = 20
 
-    fig, ax = plt.subplots(1, 1, figsize=(25, 25))
-    ph.plotConfusionMatrix(confusionMat,
-                           ax=ax,
-                           dir=plotDir,
-                           saveAs='pdf',
-                           titleFontSz=titleFontSz,
-                           titleText='LSTM',
-                           xlabelFontSz=labelFontSz,
-                           xlabels=FDAcodes,
-                           xtickFontSz=tickFontSz,
-                           ylabelFontSz=labelFontSz,
-                           ylabels=FDAcodes,
-                           ytickFontSz=tickFontSz)
+# In[54]:
 
-    # ### Plot recall confusion matrix (normalized by row)
-    # * diagonal elements now represent the *recall* for each class
 
-    fig, ax = plt.subplots(1, 1, figsize=(25, 25))
-    ph.plotConfusionMatrix(confusionMat,
-                           ax=ax,
-                           dir=plotDir,
-                           saveAs='pdf',
-                           titleFontSz=titleFontSz,
-                           titleText='LSTM',
-                           type='recall',
-                           xlabelFontSz=labelFontSz,
-                           xlabels=FDAcodes,
-                           xtickFontSz=tickFontSz,
-                           ylabelFontSz=labelFontSz,
-                           ylabels=FDAcodes,
-                           ytickFontSz=tickFontSz)
+np.where(np.sum(confusionMat, axis=0) == 0)
 
-    # ### Plot precision confusion matrix (normalized by column)
-    # * diagonal elements now represent the *precision* for each class
 
-    fig, ax = plt.subplots(1, 1, figsize=(25, 25))
-    ph.plotConfusionMatrix(confusionMat,
-                           ax=ax,
-                           dir=plotDir,
-                           saveAs='pdf',
-                           titleFontSz=titleFontSz,
-                           titleText='LSTM',
-                           type='precision',
-                           xlabelFontSz=labelFontSz,
-                           xlabels=FDAcodes,
-                           xtickFontSz=tickFontSz,
-                           ylabelFontSz=labelFontSz,
-                           ylabels=FDAcodes,
-                           ytickFontSz=tickFontSz)
+# In[55]:
+
+
+accuracy = np.trace(confusionMat)/np.sum(confusionMat)
+recall = np.diag(confusionMat)/np.sum(confusionMat, axis=1)
+precision = np.diag(confusionMat)/np.sum(confusionMat, axis=0)
+print(f"accuracy: {accuracy:0.3f}, "
+      f"<precision>: {np.mean(precision):0.3f}, "
+      f"<recall>: {np.mean(recall):0.3f}")
+
+
+# ##### Recall, precision by class
+# 
+# Note:
+# 
+# * `macro avg`: $\frac{1}{K}\sum_k m_k$, where $K$ is count of classes and $m_k$ is a given metric for class $k$
+# * `weighted avg`: $\frac{1}{N}\sum_k n_k \cdot m_k$, where $N$ is count of data instance, $n_k$ is the count of points in class $k$ and $m_k$ is a given metric for class $k$.
+
+# In[56]:
+
+
+print(metrics.classification_report(yTe, yPred, target_names=[str(c)for c in FDAcodes]))
+
+
+# In[57]:
+
+
+classCts = dfTe['fda_q_fixed'].value_counts()
+
+recall = np.diag(confusionMat)/np.sum(confusionMat, axis = 1)
+precision = np.diag(confusionMat)/np.sum(confusionMat, axis = 0)
+f1 = 2.0*precision*recall/(precision + recall)
+print("class\tprecision\trecall\tf1\tsize")
+
+for FDAcode, classCt in classCts.iteritems():
+    print(f"{FDAcode}\t{precision[FDAcode - 1]:0.3f}\t\t{recall[FDAcode - 1]:0.3f}\t{f1[FDAcode - 1]:0.3f}\t\t{classCt:d}")
+
+
+# ### Confusion matrix plots
+
+# #### Plot confusion matrix
+# 
+# * As this is a straight confusion matrix, diagonal elements mostly reflect class size in test set
+# * *This is hard to interpret by visual inspection alone*
+
+# In[58]:
+
+
+labelFontSz = 16
+tickFontSz = 13
+titleFontSz = 20
+
+
+# In[59]:
+
+
+fig, ax = plt.subplots(1, 1, figsize=(25, 25))
+ph.plotConfusionMatrix(confusionMat, saveAs='pdf', xlabels=FDAcodes,
+                       ylabels=FDAcodes, titleText = 'Logistic Regression',
+                       ax = ax,  xlabelFontSz=labelFontSz, dir=plotDir,
+                       ylabelFontSz=labelFontSz, xtickFontSz=tickFontSz,
+                       ytickFontSz=tickFontSz, titleFontSz=titleFontSz)
+
+
+# #### Plot recall confusion matrix (normalized by row)
+# 
+# * diagonal elements now represent the *recall* for each class
+
+# In[60]:
+
+
+fig, ax = plt.subplots(1, 1, figsize=(25, 25))
+ph.plotConfusionMatrix(confusionMat, saveAs='pdf', xlabels=FDAcodes, type='recall',
+                       ylabels=FDAcodes, titleText = 'Logistic Regression',
+                       ax = ax,  xlabelFontSz=labelFontSz, dir=plotDir,
+                       ylabelFontSz=labelFontSz, xtickFontSz=tickFontSz,
+                       ytickFontSz=tickFontSz, titleFontSz=titleFontSz)
+
+
+# #### Plot precision confusion matrix (normalized by column)
+# 
+# * diagonal elements now represent the *precision* for each class
+
+# In[61]:
+
+
+fig, ax = plt.subplots(1, 1, figsize=(25, 25))
+ph.plotConfusionMatrix(confusionMat, saveAs='pdf', xlabels=FDAcodes, type='precision',
+                       ylabels=FDAcodes, titleText = 'Logistic Regression',
+                       ax = ax,  xlabelFontSz=labelFontSz, dir=plotDir,
+                       ylabelFontSz=labelFontSz, xtickFontSz=tickFontSz,
+                       ytickFontSz=tickFontSz, titleFontSz=titleFontSz)
+
