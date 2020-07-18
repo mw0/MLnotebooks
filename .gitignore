@@ -34,6 +34,7 @@ KerasProjects/
 KerasProjects/*
 LightFMMovieLens/*
 MaskR-CNN/
+MatterportMaskRCNN
 NationalLynching/AmyKateBailyData/Lynch_Website/*.zip
 NationalLynching/AmyKateBailyData/Lynch_Website/AL
 NationalLynching/AmyKateBailyData/Lynch_Website/AR
@@ -44,6 +45,8 @@ NationalLynching/AmyKateBailyData/Lynch_Website/MS
 NationalLynching/AmyKateBailyData/Lynch_Website/NC
 NationalLynching/AmyKateBailyData/Lynch_Website/SC
 NationalLynching/AmyKateBailyData/Lynch_Website/TN
+NationalLynching/AmyKateBailyData/Tolnay_Bailey_Victim_Data/Data for 1880s/.~lock.Lynch1882_1889.csv#
+OCRapp/nohup.out
 OCRapp/python/nohup.out
 SoccerRankingMatrixFactorization/
 SparkProjects/
@@ -72,6 +75,7 @@ multiClass/regexedComments.txt
 multiClass/tensorBoardLogs/
 multiClass/tokenSymSpelledComments.txt
 multiClass/notebooks/dask-worker-space
+multiClass/notebooks/PredictiveModelingChallengeDistilBERT.ipynb
 styleTransfer/images/*.png
 styleTransfer/images/1024pxRenoirPierre-AugusteTheTwoSistersOnTheTerrace256x.png
 styleTransfer/images/1024pxRenoirPierre-AugusteTheTwoSistersOnTheTerrace256x256.png
