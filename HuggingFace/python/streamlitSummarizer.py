@@ -125,7 +125,7 @@ t3 = perf_counter()
 Δt23 = t3 - t2
 
 title = st.sidebar.selectbox(f"at {latest}", titles)
-st.write(f"You selected: <em>{title}</em>, {URLs[title]}")
+st.write(f"You selected: *{title}*, {URLs[title]}")
 
 t4 = perf_counter()
 all = getArticle(URLs, title)
