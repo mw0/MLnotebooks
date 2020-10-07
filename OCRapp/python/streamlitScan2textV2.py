@@ -90,6 +90,9 @@ def symSpellDoc(symSpell, vocab, text):
     Prior to sentence tokenization, requires that at least one word in text is
     in vocab, in an effort to remove blocks originating from smudges on image.
     """
+
+    print("\nExecuting symSpellDoc() ...\n")
+
     lines = []
     blocks = text.split('\n\n')
     for block in blocks:
@@ -102,6 +105,7 @@ def symSpellDoc(symSpell, vocab, text):
                 break
 
         if noWordInBlock:
+            print("wordless block:\n", block)
             continue
 
         sentences = sent_tokenize(block)
