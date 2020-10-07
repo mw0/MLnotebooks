@@ -19,6 +19,7 @@ import io
 
 import pytesseract
 from nltk.tokenize import word_tokenize, sent_tokenize
+from string import punctuation
 
 import spacy
 import contextualSpellCheck
@@ -100,6 +101,7 @@ def symSpellDoc(symSpell, vocab, text):
         noWordInBlock = True
         words = word_tokenize(block)
         for word in words:
+            word = word.strip(punctuation).
             if word.lower() in vocab or word.isnumeric():
                 noWordInBlock = False
                 break
