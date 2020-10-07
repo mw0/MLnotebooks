@@ -305,8 +305,8 @@ print(text)
 
 if autocorrect:
     t10 = perf_counter()
-    # symSpell, vocab = initializeSymspell()
-    nlp = initializeContextualSpellCheck()
+    symSpell, vocab = initializeSymspell()
+    # nlp = initializeContextualSpellCheck()
     t11 = perf_counter()
     Δt10 = t11 - t10
 
