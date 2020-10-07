@@ -1,0 +1,5 @@
+nohup streamlit run /home/$(echo $USER)/work/MLnotebooks/OCRapp/python/streamlitSummarizer.py --server.port 8501
+
+TESTING:
+
+nohup streamlit run /home/$(echo $USER)/work/MLnotebooks/OCRapp/python/streamlitSummarizerV2.py --server.port 8503

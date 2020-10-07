@@ -90,11 +90,41 @@ def symSpellDoc(symSpell, vocab, text):
     Prior to sentence tokenization, requires that at least one word in text is
     in vocab, in an effort to remove blocks originating from smudges on image.
     """
+    lines = []
     blocks = text.split('\n\n')
-    
+    for block in blocks:
 
+        noWordInBlock = True
+        words = word_tokenize(block)
+        for word in words:
+            if word in vocab:
+                noWordInBlock = False
+                break
 
+        if noWordInBlock:
+            continue
 
+        sentences = sent_tokenize(block)
+        for sent in sentences:
+            OK = True
+            words = word_tokenize(sent)
+            for word in words:
+                if word not in vocab:
+                    OK = False
+                    break
+            if OK:
+                lines.append(sent)
+            else:
+                suggestions = symSpell.lookup_compound(sent,
+                                                       max_edit_distance=2,
+                                                       transfer_casing=True)
+                for i, suggestion in enumerate(suggestions):
+                    lines.append(suggestion._term)
+                    print(f"{i:02d}: {type(suggestion)}\t{suggestion}")
+
+        lines.append('\n\n')
+
+    return " ".join(lines)
 
 
 # @st.cache(ttl=60.0*3.0, max_entries=20)  # clear cache every 3 minutes
@@ -130,6 +160,11 @@ def correctSpellingUsingSymspellOri(symSpell, vocab, text):
         lines.append(suggestion._term)
         print(f"{i:02d}: {type(suggestion)}\t{suggestion}")
     return " ".join(lines)
+
+
+@st.cache(suppress_st_warning=True)
+def getTextFromImage(image):
+    return pytesseract.image_to_string(image)
 
 
 @st.cache(suppress_st_warning=True)
@@ -196,10 +231,15 @@ st.sidebar.info(
 )
 
 showBoundingBoxes = False
-showBoundingBoxes = st.sidebar.checkbox("Show bounding boxes (slow)", ['yes', 'no'])
+showBoundingBoxes = st.sidebar.checkbox("Show bounding boxes (slow)", value=False)
 
 autocorrect = False
-autocorrect = st.sidebar.checkbox("Autocorrect (BERT transformer)", ['yes', 'no'])
+# autocorrect = st.sidebar.checkbox("Autocorrect (BERT transformer)",
+#                                   value=True)
+autocorrect = st.sidebar.checkbox("Autocorrect (SymSpell)", value=True)
+
+showProfilingInfo = False
+showProfilingInfo = st.sidebar.checkbox("Show profiling information", value=True)
 
 # print(help(st.sidebar.file_uploader))
 st.sidebar.markdown('## Upload a local scan file')
@@ -235,7 +275,7 @@ copy = image.copy()
 
 # Extract text from image:
 t2 = perf_counter()
-text = pytesseract.image_to_string(image)
+text = getTextFromImage(image)
 t3 = perf_counter()
 Δt23 = t3 - t2
 
@@ -259,50 +299,58 @@ if showBoundingBoxes:
     t9 = perf_counter()
     Δt89 = t9 - t8
 
-    st.markdown('### Extracted text')
-    st.write(text)
-    print(text)
+st.markdown('### Extracted text')
+st.write(text)
+print(text)
 
-    if autocorrect:
-        t10 = perf_counter()
-        # symSpell, vocab = initializeSymspell()
-        nlp = initializeContextualSpellCheck()
-        t11 = perf_counter()
-        Δt10 = t11 - t10
-
-        t12 = perf_counter()
-        # corrected = correctSpellingUsingSymspell(symSpell, vocab, text)
-        corrected = doSpacySpellCheck(nlp, text)
-        t13 = perf_counter()
-        Δt12 = t13 - t12
-
-        # st.markdown('### Text corrected with Symspell')
-        st.markdown('### Text corrected with BERT')
-        st.write(corrected)
-        print(corrected)
-
-print(f"\n\nload, format, display user image: {Δt23: 4.1f}s")
-print(f"extract text using tesseract: {Δt45: 4.1f}s")
-if showBoundingBoxes:
-    print(f"extract bounding boxes: {Δt45: 4.1f}s")
-    print(f"draw boxes on image: {Δt67: 4.1f}s")
-    print(f"display image with boxes: {Δt89: 4.1f}s")
-    print(f"summarize article: {Δt89:5.2f}s")
 if autocorrect:
-    print(f"initialize symspell: {Δt10: 4.1f}s")
-    print(f"spell correct with symspell: {Δt12: 4.1f}s")
+    t10 = perf_counter()
+    # symSpell, vocab = initializeSymspell()
+    nlp = initializeContextualSpellCheck()
+    t11 = perf_counter()
+    Δt10 = t11 - t10
 
-if not st.sidebar.button("Hide profiling information"):
+    t12 = perf_counter()
+    # corrected = correctSpellingUsingSymspell(symSpell, vocab, text)
+    corrected = symSpellDoc(symSpell, vocab, text)
+    # corrected = doSpacySpellCheck(nlp, text)
+    t13 = perf_counter()
+    Δt12 = t13 - t12
+
+    st.markdown('### Text corrected with Symspell')
+    # st.markdown('### Text corrected with BERT')
+    st.write(corrected)
+    print(corrected)
+
+sbInfoStr = (
+    f"• load, convert, display image: {Δt01: 4.1f}s\n"
+    f"• extract text using tesseract: {Δt23: 4.1f}s\n")
+if showBoundingBoxes:
+    sbInfoStr += (f"\n• extract bounding boxes: {Δt45: 4.1f}s\n"
+                  f"• draw boxes on image: {Δt67: 4.1f}s\n"
+                  f"• display image with boxes: {Δt89: 4.1f}s\n")
+if autocorrect:
+    sbInfoStr += (f"\n• initialize Symspell: {Δt10: 4.1f}s\n"
+    f"• correct text with Symspell: {Δt12: 4.1f}s")
+    # sbInfoStr += (f"\n• initialize ContextualSpellCheck (BERT): "
+    #               f"{Δt10: 4.1f}s\n"
+    # f"• correct text with BERT: {Δt12: 4.1f}s")
+
+print("\n", sbInfoStr, "\n")
+
+if showProfilingInfo:
     st.sidebar.header("Profiling information")
     sbInfoStr = (
-        f"* load, format, display user image: {Δt23: 4.1f}s\n"
-        f"* extract text using tesseract: {Δt45: 4.1f}s")
+        f"* load, convert, display image: {Δt01: 4.1f}s\n"
+        f"* extract text using tesseract: {Δt23: 4.1f}s\n")
     if showBoundingBoxes:
         sbInfoStr += (f"\n* extract bounding boxes: {Δt45: 4.1f}s\n"
                       f"* draw boxes on image: {Δt67: 4.1f}s\n"
-                      f"* display image with boxes: {Δt89: 4.1f}s\n"
-                      f"* summarize article: {Δt89:5.2f}s")
+                      f"* display image with boxes: {Δt89: 4.1f}s\n")
     if autocorrect:
-        sbInfoStr += (f"\n* initialize symspell: {Δt10: 4.1f}s\n"
-                      f"* spell correct with symspell: {Δt12: 4.1f}s")
+        sbInfoStr += (f"\n* initialize Symspell: {Δt10: 4.1f}s\n"
+                      f"* correct text with Symspell: {Δt12: 4.1f}s")
+        # sbInfoStr += (f"\n* initialize ContextualSpellCheck (BERT): "
+        #               f"{Δt10: 4.1f}s\n"
+        #               f"* correct text with BERT: {Δt12: 4.1f}s")
     st.sidebar.info(sbInfoStr)

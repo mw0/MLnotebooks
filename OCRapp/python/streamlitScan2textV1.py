@@ -221,7 +221,6 @@ copy = image.copy()
 
 # Extract text from image:
 t2 = perf_counter()
-# text = pytesseract.image_to_string(image)
 text = getTextFromImage(image)
 t3 = perf_counter()
 Δt23 = t3 - t2
@@ -275,12 +274,12 @@ if showBoundingBoxes:
     sbInfoStr += (f"\n• extract bounding boxes: {Δt45: 4.1f}s\n"
                   f"• draw boxes on image: {Δt67: 4.1f}s\n"
                   f"• display image with boxes: {Δt89: 4.1f}s\n")
-# sbInfoStr += f"* summarize article: {Δt89:4.1f}s\n"
 if autocorrect:
-    # sbInfoStr += (f"\n• initialize symspell: {Δt10: 4.1f}s\n"
-    sbInfoStr += (f"\n• initialize ContextualSpellCheck (BERT): {Δt10: 4.1f}s\n"
-    # f"• spell correct with symspell: {Δt12: 4.1f}s")
-    f"• correct text with BERT: {Δt12: 4.1f}s")
+    # sbInfoStr += (f"\n• initialize Symspell: {Δt10: 4.1f}s\n"
+    # f"• correct text with Symspell: {Δt12: 4.1f}s")
+    sbInfoStr += (f"\n• initialize ContextualSpellCheck (BERT): "
+                  f"{Δt10: 4.1f}s\n"
+                  f"• correct text with BERT: {Δt12: 4.1f}s")
 
 print("\n", sbInfoStr, "\n")
 
@@ -293,11 +292,10 @@ if showProfilingInfo:
         sbInfoStr += (f"\n* extract bounding boxes: {Δt45: 4.1f}s\n"
                       f"* draw boxes on image: {Δt67: 4.1f}s\n"
                       f"* display image with boxes: {Δt89: 4.1f}s\n")
-
-    # sbInfoStr += f"* summarize article: {Δt89:4.1f}s\n"
     if autocorrect:
-        # sbInfoStr += (f"\n* initialize symspell: {Δt10: 4.1f}s\n"
-        sbInfoStr += (f"\n* initialize ContextualSpellCheck (BERT): {Δt10: 4.1f}s\n"
-                      # f"* spell correct with symspell: {Δt12: 4.1f}s")
+        # sbInfoStr += (f"\n* initialize Symspell: {Δt10: 4.1f}s\n"
+        #               f"* correct text with Symspell: {Δt12: 4.1f}s")
+        sbInfoStr += (f"\n* initialize ContextualSpellCheck (BERT): "
+                      f"{Δt10: 4.1f}s\n"
                       f"* correct text with BERT: {Δt12: 4.1f}s")
     st.sidebar.info(sbInfoStr)
