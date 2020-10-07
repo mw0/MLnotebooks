@@ -101,7 +101,7 @@ def symSpellDoc(symSpell, vocab, text):
         noWordInBlock = True
         words = word_tokenize(block)
         for word in words:
-            word = word.strip(punctuation).
+            word = word.strip(punctuation)
             if word.lower() in vocab or word.isnumeric():
                 noWordInBlock = False
                 break
