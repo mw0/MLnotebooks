@@ -7,6 +7,7 @@ __pycache__/
 FederalistPapers/*
 GAN-tutorial/*
 HuggingFace/data/fakeRealNews.zip
+HuggingFace/nohup.out
 HuggingFace/python/nohup.out
 InterpretableML/breast-cancer-wisconsin-data.zip
 InterpretableML/data.csv
@@ -71,6 +72,8 @@ multiClass/ldaTrain.model
 multiClass/ldaTrain.model.expElogbeta.npy
 multiClass/ldaTrain.model.id2word
 multiClass/ldaTrain.model.state
+multiClass/notebooks/checkpoints/
+multiClass/notebooks/tensorBoardLogs/
 multiClass/rawVIOCOMMENTS.txt
 multiClass/regexedComments.txt
 multiClass/tensorBoardLogs/
