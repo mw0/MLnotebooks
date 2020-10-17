@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 # coding: utf-8
 
 # ## Setup
@@ -22,8 +22,8 @@ from urllib.request import urlopen
 
 # chart_studio is part of plotly, but does not have a
 # separate __version__ variable
-import chart_studio
-import chart_studio.plotly as py
+# import chart_studio
+# import chart_studio.plotly as py
 
 from dateutil import __version__ as duVersion
 from dateutil.parser import parse
@@ -37,18 +37,17 @@ import pyreadr
 import pydot_ng
 import graphviz
 
-from scipy import __version__ as scVersion
-import scipy.sparse as sp
-
 # Visualizations
 from matplotlib import __version__ as mpVersion
 import matplotlib.pyplot as plt
 
+import json
 from plotly import __version__ as plVersion
 from plotly.subplots import make_subplots
 import plotly.graph_objs as go
 import plotly.express as px
 import plotly.io as pio
+
 from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
 import cufflinks as cf
 # cf.go_offline(connected=True)
@@ -123,22 +122,18 @@ if 'cufflinks' in sys.modules:
     print(f"cufflinks: {cf.__version__}", end="\t")
 if 'dateutil' in sys.modules:
     print(f"dateutil: {duVersion}", end="\t")
-if 'geopandas' in sys.modules:
-    print(f"geopandas: {gpdVersion}", end="\t")
 if 'graphviz' in sys.modules:
-    print(f"graphviz: {duVersion}", end="\t")
+    print(f"graphviz: {graphviz.__version__}", end="\t")
 if 'joblib' in sys.modules:
     print(f"joblib: {jlVersion}", end="\t")
+if 'json' in sys.modules:
+    print(f"json: {json.__version__}", end="\t")
 if 'matplotlib' in sys.modules:
     print(f"matplotlib: {mpVersion}", end="\t")
-if 'modin' in sys.modules:
-    print(f"modin: {mdVersion}", end="\t")
 if 'numpy' in sys.modules:
     print(f"numpy: {np.__version__}", end="\t")
 if 'pandas' in sys.modules:
     print(f"pandas: {pd.__version__}", end="\t")
-if 'pandas_profiling' in sys.modules:
-    print(f"pandas_profiling: {ppVersion}", end="\t")
 if 'plotly' in sys.modules:
     print(f"plotly: {plVersion}", end="\t")
 if 'pydot' in sys.modules:
@@ -147,16 +142,6 @@ if 'pyreader' in sys.modules:
     print(f"pyreader: {pyreader.__version__}", end="\t")
 if 'requests' in sys.modules:
     print(f"requests: {requests.__version__}", end="\t")
-if 'scipy' in sys.modules:
-    print(f"scipy: {scVersion}", end="\t")
-if 'seaborn' in sys.modules:
-    print(f"seaborn: {sns.__version__}", end="\t")
-if 'shapely' in sys.modules:
-    print(f"shapely: {shpVersion}", end="\t")
-if 'sklearn' in sys.modules:
-    print(f"sklearn: {skVersion}", end="\t")
-if 'tensorflow' in sys.modules:
-    print(f"tensorflow: {tfVersion}", end="\t")
 if 'urllib3' in sys.modules:
     print(f"urllib3: {urllib3.__version__}", end="\t")
 
@@ -330,9 +315,9 @@ print(df.columns)
 # * two values are stored as environment variables that are passed to available
 # to jupyter instance
 
-username = os.environ['PlotlyUsername']
-api_key = os.environ['PlotlyAPIkey']
-chart_studio.tools.set_credentials_file(username=username, api_key=api_key)
+# username = os.environ['PlotlyUsername']
+# api_key = os.environ['PlotlyAPIkey']
+# chart_studio.tools.set_credentials_file(username=username, api_key=api_key)
 
 # ### Animated all-data plots
 
@@ -341,6 +326,10 @@ chart_studio.tools.set_credentials_file(username=username, api_key=api_key)
 # * Animations are based upon `weekStr` column values, which are strings
 # containing the first Monday of the week plotted. (Typically, the maximum
 # values taken will arrive later in the week.)
+
+
+# pio.kaleido.scope.default_format = "png"
+pio.orca.config.executable = '/usr/local/bin/orca'
 
 # ## Generate single frames for each week in data file:
 
@@ -355,7 +344,8 @@ for weekStr in weekStrs:
     figCaseCts = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
                                     [-1, 5], 300000.0,
                                     myTitle=weekTitle)
-    figCaseCts.save(fileOut)
+    # figCaseCts.write_image(fileOut, engine="kaleido")
+    pio.write_image(figCaseCts, fileOut)
 
     # #### Death counts
 
@@ -368,7 +358,8 @@ for weekStr in weekStrs:
                                      myHoverDescription='Total deaths',
                                      myHoverVar='deaths',
                                      myTitle=weekTitle)
-    figDeathCts.save(fileOut)
+    # figDeathCts.write_image(fileOut, engine="kaleido")
+    plotly.io.write_image(figDeathCts, fileOut)
 
     # #### Cases per thousand
 
@@ -380,10 +371,11 @@ for weekStr in weekStrs:
                                       myAnimationVar='weekStr',
                                       myColscaleVar='log10casesk',
                                       myZlabel='Total cases per 1000',
-                                      myHoverDescription=myHoverDescr
+                                      myHoverDescription=myHoverDescr,
                                       myHoverVar='casesk',
                                       myTitle=weekTitle)
-    figCasesPerK.save(fileOut)
+    # figCasesPerK.write_image(fileOut, engine="kaleido")
+    plotly.io.write_image(figCasesPerK, fileOut)
 
     # #### Deaths per thousand
 
@@ -399,64 +391,66 @@ for weekStr in weekStrs:
                                        myHoverDescription=myHoverDescr,
                                        myHoverVar='deathsk',
                                        myTitle=myTitle)
+    # figDeathsPerK.write_image(fileOut, engine="kaleido")
+    plotly.io.write_image(figDeathsPerK, fileOut)
 
 Δt = time() - t0
 print(f"\n\nTime to generate single frame images Δt: {Δt: 4.1f}s.")
 
 # ## Generate monolithic JavaScript-fueled animations in HTML documents.
 
-# #### Case counts
+# # #### Case counts
 
-figCaseCts = choroplethCovidUSA(df, counties, [-1, 5], 300000.0,
-                                myAnimationVar='weekStr',
-                                myTitle="Covid-19 Total Cases")
+# figCaseCts = choroplethCovidUSA(df, counties, [-1, 5], 300000.0,
+#                                 myAnimationVar='weekStr',
+#                                 myTitle="Covid-19 Total Cases")
 
-# ##### Export HTML w/ JavaScript
+# # ##### Export HTML w/ JavaScript
 
-# py.plot(figCaseCts, filename='Covid19CaseCtsUScounties', auto_open=True)
-pio.write_html(figCaseCts, file=imgPath / 'Covid19CaseCtsUScounties.html',
-               auto_open=True)
+# # py.plot(figCaseCts, filename='Covid19CaseCtsUScounties', auto_open=True)
+# pio.write_html(figCaseCts, file=imgPath / 'Covid19CaseCtsUScounties.html',
+#                auto_open=True)
 
-# #### Death counts
+# # #### Death counts
 
-figDeathCts = choroplethCovidUSA(df, counties, [-1, 4], 25000.0,
-                                 myAnimationVar='weekStr',
-                                 myColscaleVar='log10deaths',
-                                 myZlabel='Total deaths',
-                                 myHoverDescription='Total deaths',
-                                 myHoverVar='deaths',
-                                 myTitle="Covid-19 Total Deaths")
+# figDeathCts = choroplethCovidUSA(df, counties, [-1, 4], 25000.0,
+#                                  myAnimationVar='weekStr',
+#                                  myColscaleVar='log10deaths',
+#                                  myZlabel='Total deaths',
+#                                  myHoverDescription='Total deaths',
+#                                  myHoverVar='deaths',
+#                                  myTitle="Covid-19 Total Deaths")
 
-# py.plot(figCaseCts, filename='Covid19DeathCtsUScounties', auto_open=True)
-pio.write_html(figDeathCts, file=imgPath / 'Covid19DeathCtsUScounties.html',
-               auto_open=True)
+# # py.plot(figCaseCts, filename='Covid19DeathCtsUScounties', auto_open=True)
+# pio.write_html(figDeathCts, file=imgPath / 'Covid19DeathCtsUScounties.html',
+#                auto_open=True)
 
-# #### Cases per thousand
+# # #### Cases per thousand
 
-figCasesPerK = choroplethCovidUSA(df, counties, [0, 2], 170.0,
-                                  myAnimationVar='weekStr',
-                                  myColscaleVar='log10casesk',
-                                  myZlabel='Total cases per 1000',
-                                  myHoverDescription='Total cases per 1000',
-                                  myHoverVar='casesk',
-                                  myTitle="Covid-19 Total Cases per 1000")
+# figCasesPerK = choroplethCovidUSA(df, counties, [0, 2], 170.0,
+#                                   myAnimationVar='weekStr',
+#                                   myColscaleVar='log10casesk',
+#                                   myZlabel='Total cases per 1000',
+#                                   myHoverDescription='Total cases per 1000',
+#                                   myHoverVar='casesk',
+#                                   myTitle="Covid-19 Total Cases per 1000")
 
-# py.plot(figCaseCts, filename='Covid19DeathCtsUScounties', auto_open=True)
-pio.write_html(figCasesPerK,
-               file=imgPath / 'Covid19CasesPerThousandUScounties.html',
-               auto_open=True)
+# # py.plot(figCaseCts, filename='Covid19DeathCtsUScounties', auto_open=True)
+# pio.write_html(figCasesPerK,
+#                file=imgPath / 'Covid19CasesPerThousandUScounties.html',
+#                auto_open=True)
 
-# #### Deaths per thousand
+# # #### Deaths per thousand
 
-figDeathsPerK = choroplethCovidUSA(df, counties, [-2, 0], 5.2,
-                                   myAnimationVar='weekStr',
-                                   myColscaleVar='log10deathsk',
-                                   myZlabel='Total deaths per 1000',
-                                   myHoverDescription='Total deaths per 1000',
-                                   myHoverVar='deathsk',
-                                   myTitle="Covid-19 Total Deaths per 1000")
+# figDeathsPerK = choroplethCovidUSA(df, counties, [-2, 0], 5.2,
+#                                    myAnimationVar='weekStr',
+#                                    myColscaleVar='log10deathsk',
+#                                    myZlabel='Total deaths per 1000',
+#                                    myHoverDescription='Total deaths per 1000',
+#                                    myHoverVar='deathsk',
+#                                    myTitle="Covid-19 Total Deaths per 1000")
 
-# py.plot(figCaseCts, filename='Covid19DeathCtsUScounties', auto_open=True)
-pio.write_html(figDeathsPerK,
-               file=imgPath / 'Covid19DeathsPerThousandUScounties.html',
-               auto_open=True)
+# # py.plot(figCaseCts, filename='Covid19DeathCtsUScounties', auto_open=True)
+# pio.write_html(figDeathsPerK,
+#                file=imgPath / 'Covid19DeathsPerThousandUScounties.html',
+#                auto_open=True)
