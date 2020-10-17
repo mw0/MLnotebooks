@@ -367,9 +367,9 @@ for weekStr in weekStrs:
     weekTitle = ", ".join(["Covid-19 Cases per Thousand", weekStr])
     # fileOut = imgPath / ".".join(['Covid19CasesPer1000', weekStr, 'png'])
     fileOut = '../img/' +  ".".join(['Covid19CasesPer1000', weekStr, 'png'])
-    myHoverDescr = 'Total cases per 1000',
+    myHoverDescr = 'Total cases per 1000'
     figCasesPerK = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
-                                      [-1, 5], 300000.0,
+                                      [-1, 4], 25000.0,
                                       myColscaleVar='log10casesk',
                                       myZlabel='Total cases per 1000',
                                       myHoverDescription=myHoverDescr,
