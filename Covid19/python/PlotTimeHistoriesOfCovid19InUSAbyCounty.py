@@ -344,7 +344,7 @@ for weekStr in weekStrs:
     figCaseCts = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
                                     [-1, 5], 300000.0,
                                     myTitle=weekTitle)
-    figCaseCts.write_image(fileOut, engine="kaleido")
+    figCaseCts.write_image(fileOut, engine="kaleido", scale=1.6)
     # pio.write_image(figCaseCts, fileOut)
 
     # #### Death counts
@@ -359,7 +359,7 @@ for weekStr in weekStrs:
                                      myHoverDescription='Total deaths',
                                      myHoverVar='deaths',
                                      myTitle=weekTitle)
-    figDeathCts.write_image(fileOut, engine="kaleido")
+    figDeathCts.write_image(fileOut, engine="kaleido", scale=1.6)
     # plotly.io.write_image(figDeathCts, fileOut)
 
     # # #### Cases per thousand
@@ -375,7 +375,7 @@ for weekStr in weekStrs:
                                       myHoverDescription=myHoverDescr,
                                       myHoverVar='casesk',
                                       myTitle=weekTitle)
-    figCasesPerK.write_image(fileOut, engine="kaleido")
+    figCasesPerK.write_image(fileOut, engine="kaleido", scale=1.6)
     # plotly.io.write_image(figCasesPerK, fileOut)
 
     # # #### Deaths per thousand
@@ -392,7 +392,7 @@ for weekStr in weekStrs:
                                        myHoverDescription=myHoverDescr,
                                        myHoverVar='deathsk',
                                        myTitle=myTitle)
-    figDeathsPerK.write_image(fileOut, engine="kaleido")
+    figDeathsPerK.write_image(fileOut, engine="kaleido", scale=1.6)
     # plotly.io.write_image(figDeathsPerK, fileOut)
 
 Δt = time() - t0
