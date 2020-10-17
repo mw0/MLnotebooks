@@ -370,7 +370,6 @@ for weekStr in weekStrs:
     myHoverDescr = 'Total cases per 1000',
     figCasesPerK = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
                                       [-1, 5], 300000.0,
-                                      myAnimationVar='weekStr',
                                       myColscaleVar='log10casesk',
                                       myZlabel='Total cases per 1000',
                                       myHoverDescription=myHoverDescr,
@@ -388,7 +387,6 @@ for weekStr in weekStrs:
     myTitle = "Covid-19 Total Deaths per 1000"
     figDeathsPerK = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
                                        [-1, 5], 300000.0,
-                                       myAnimationVar='weekStr',
                                        myColscaleVar='log10deathsk',
                                        myZlabel='Total deaths per 1000',
                                        myHoverDescription=myHoverDescr,
