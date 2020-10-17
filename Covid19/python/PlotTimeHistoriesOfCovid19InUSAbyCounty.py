@@ -328,8 +328,8 @@ print(df.columns)
 # values taken will arrive later in the week.)
 
 
-# pio.kaleido.scope.default_format = "png"
-pio.orca.config.executable = '/usr/local/bin/orca'
+pio.kaleido.scope.default_format = "png"
+# pio.orca.config.executable = '/usr/local/bin/orca'
 
 # ## Generate single frames for each week in data file:
 
@@ -340,59 +340,60 @@ for weekStr in weekStrs:
     # #### Case counts
 
     weekTitle = ", ".join(["Covid-19 Total Cases", weekStr])
-    fileOut = imgPath / ".".join(['Covid19TotalCases', weekStr, 'png'])
+    # fileOut = imgPath / ".".join(['Covid19TotalCases', weekStr, 'png'])
+    fileOut = '../img/' +  ".".join(['Covid19TotalCases', weekStr, 'png'])
     figCaseCts = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
                                     [-1, 5], 300000.0,
                                     myTitle=weekTitle)
-    # figCaseCts.write_image(fileOut, engine="kaleido")
-    pio.write_image(figCaseCts, fileOut)
+    figCaseCts.write_image(fileOut, engine="kaleido")
+    # pio.write_image(figCaseCts, fileOut)
 
     # #### Death counts
 
-    weekTitle = ", ".join(["Covid-19 Total Deaths", weekStr])
-    fileOut = imgPath / ".".join(['Covid19TotalDeaths', weekStr, 'png'])
-    figDeathCts = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
-                                     [-1, 5], 300000.0,
-                                     myColscaleVar='log10deaths',
-                                     myZlabel='Total deaths',
-                                     myHoverDescription='Total deaths',
-                                     myHoverVar='deaths',
-                                     myTitle=weekTitle)
-    # figDeathCts.write_image(fileOut, engine="kaleido")
-    plotly.io.write_image(figDeathCts, fileOut)
+    # weekTitle = ", ".join(["Covid-19 Total Deaths", weekStr])
+    # fileOut = imgPath / ".".join(['Covid19TotalDeaths', weekStr, 'png'])
+    # figDeathCts = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
+    #                                  [-1, 5], 300000.0,
+    #                                  myColscaleVar='log10deaths',
+    #                                  myZlabel='Total deaths',
+    #                                  myHoverDescription='Total deaths',
+    #                                  myHoverVar='deaths',
+    #                                  myTitle=weekTitle)
+    # # figDeathCts.write_image(fileOut, engine="kaleido")
+    # plotly.io.write_image(figDeathCts, fileOut)
 
-    # #### Cases per thousand
+    # # #### Cases per thousand
 
-    weekTitle = ", ".join(["Covid-19 Cases per Thousand", weekStr])
-    fileOut = imgPath / ".".join(['Covid19CasesPer1000', weekStr, 'png'])
-    myHoverDescr = 'Total cases per 1000',
-    figCasesPerK = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
-                                      [-1, 5], 300000.0,
-                                      myAnimationVar='weekStr',
-                                      myColscaleVar='log10casesk',
-                                      myZlabel='Total cases per 1000',
-                                      myHoverDescription=myHoverDescr,
-                                      myHoverVar='casesk',
-                                      myTitle=weekTitle)
-    # figCasesPerK.write_image(fileOut, engine="kaleido")
-    plotly.io.write_image(figCasesPerK, fileOut)
+    # weekTitle = ", ".join(["Covid-19 Cases per Thousand", weekStr])
+    # fileOut = imgPath / ".".join(['Covid19CasesPer1000', weekStr, 'png'])
+    # myHoverDescr = 'Total cases per 1000',
+    # figCasesPerK = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
+    #                                   [-1, 5], 300000.0,
+    #                                   myAnimationVar='weekStr',
+    #                                   myColscaleVar='log10casesk',
+    #                                   myZlabel='Total cases per 1000',
+    #                                   myHoverDescription=myHoverDescr,
+    #                                   myHoverVar='casesk',
+    #                                   myTitle=weekTitle)
+    # # figCasesPerK.write_image(fileOut, engine="kaleido")
+    # plotly.io.write_image(figCasesPerK, fileOut)
 
-    # #### Deaths per thousand
+    # # #### Deaths per thousand
 
-    weekTitle = ", ".join(["Covid-19 Deaths per Thousand", weekStr])
-    fileOut = imgPath / ".".join(['Covid19DeathsPer1000', weekStr, 'png'])
-    myHoverDescr = 'Total deaths per 1000'
-    myTitle = "Covid-19 Total Deaths per 1000"
-    figDeathsPerK = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
-                                       [-1, 5], 300000.0,
-                                       myAnimationVar='weekStr',
-                                       myColscaleVar='log10deathsk',
-                                       myZlabel='Total deaths per 1000',
-                                       myHoverDescription=myHoverDescr,
-                                       myHoverVar='deathsk',
-                                       myTitle=myTitle)
-    # figDeathsPerK.write_image(fileOut, engine="kaleido")
-    plotly.io.write_image(figDeathsPerK, fileOut)
+    # weekTitle = ", ".join(["Covid-19 Deaths per Thousand", weekStr])
+    # fileOut = imgPath / ".".join(['Covid19DeathsPer1000', weekStr, 'png'])
+    # myHoverDescr = 'Total deaths per 1000'
+    # myTitle = "Covid-19 Total Deaths per 1000"
+    # figDeathsPerK = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
+    #                                    [-1, 5], 300000.0,
+    #                                    myAnimationVar='weekStr',
+    #                                    myColscaleVar='log10deathsk',
+    #                                    myZlabel='Total deaths per 1000',
+    #                                    myHoverDescription=myHoverDescr,
+    #                                    myHoverVar='deathsk',
+    #                                    myTitle=myTitle)
+    # # figDeathsPerK.write_image(fileOut, engine="kaleido")
+    # plotly.io.write_image(figDeathsPerK, fileOut)
 
 Δt = time() - t0
 print(f"\n\nTime to generate single frame images Δt: {Δt: 4.1f}s.")
