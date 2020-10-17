@@ -255,7 +255,7 @@ def choroplethCovidUSA(df, myGeoJSON, myDecimalRange, myTopOfRange,
                                               tickvals=logVals,
                                               ticktext=linVals))
 
-    fig.show("notebook")
+    # fig.show("notebook")
 
     return fig
 
@@ -337,37 +337,35 @@ t0 = time()
 weekStrs = df.weekStr.unique()
 for weekStr in weekStrs:
 
-    # #### Case counts
+    # #### Case counts log
 
     weekTitle = ", ".join(["Covid-19 Total Cases", weekStr])
-    fileOut = '../img/' +  ".".join(['Covid19TotalCases', weekStr, 'png'])
+    fileOut = '../img/' +  ".".join(['Covid19TotalCasesLog', weekStr, 'png'])
     figCaseCts = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
                                     [-1, 5], 300000.0,
+                                    myHoverDescription='log10(total cases)',
+                                    myHoverVar='cases',
                                     myTitle=weekTitle)
     figCaseCts.write_image(fileOut, engine="kaleido", scale=1.6)
-    # pio.write_image(figCaseCts, fileOut)
 
-    # #### Death counts
+    # #### Death counts log
 
     weekTitle = ", ".join(["Covid-19 Total Deaths", weekStr])
-    # fileOut = imgPath / ".".join(['Covid19TotalDeaths', weekStr, 'png'])
-    fileOut = '../img/' +  ".".join(['Covid19TotalDeaths', weekStr, 'png'])
+    fileOut = '../img/' +  ".".join(['Covid19TotalDeathsLog', weekStr, 'png'])
     figDeathCts = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
                                      [-1, 5], 300000.0,
                                      myColscaleVar='log10deaths',
                                      myZlabel='Total deaths',
-                                     myHoverDescription='Total deaths',
+                                     myHoverDescription='log10(total deaths)',
                                      myHoverVar='deaths',
                                      myTitle=weekTitle)
     figDeathCts.write_image(fileOut, engine="kaleido", scale=1.6)
-    # plotly.io.write_image(figDeathCts, fileOut)
 
-    # # #### Cases per thousand
+    # # #### Cases per thousand log
 
     weekTitle = ", ".join(["Covid-19 Cases per Thousand", weekStr])
-    # fileOut = imgPath / ".".join(['Covid19CasesPer1000', weekStr, 'png'])
-    fileOut = '../img/' +  ".".join(['Covid19CasesPer1000', weekStr, 'png'])
-    myHoverDescr = 'Total cases per 1000'
+    fileOut = '../img/' +  ".".join(['Covid19CasesPer1000Log', weekStr, 'png'])
+    myHoverDescr = 'log10(cases per 1000)'
     figCasesPerK = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
                                       [-1, 4], 25000.0,
                                       myColscaleVar='log10casesk',
@@ -376,24 +374,73 @@ for weekStr in weekStrs:
                                       myHoverVar='casesk',
                                       myTitle=weekTitle)
     figCasesPerK.write_image(fileOut, engine="kaleido", scale=1.6)
-    # plotly.io.write_image(figCasesPerK, fileOut)
 
-    # # #### Deaths per thousand
+    # # #### Deaths per thousand log
 
     weekTitle = ", ".join(["Covid-19 Deaths per Thousand", weekStr])
-    # fileOut = imgPath / ".".join(['Covid19DeathsPer1000', weekStr, 'png'])
-    fileOut = '../img/' + ".".join(['Covid19DeathsPer1000', weekStr, 'png'])
-    myHoverDescr = 'Total deaths per 1000'
-    myTitle = "Covid-19 Total Deaths per 1000"
+    fileOut = '../img/' + ".".join(['Covid19DeathsPer1000Log', weekStr, 'png'])
+    myHoverDescr = 'log10(deaths per 1000)'
     figDeathsPerK = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
                                        [-1, 5], 300000.0,
                                        myColscaleVar='log10deathsk',
                                        myZlabel='Total deaths per 1000',
                                        myHoverDescription=myHoverDescr,
                                        myHoverVar='deathsk',
-                                       myTitle=myTitle)
+                                       myTitle=weekTitle)
     figDeathsPerK.write_image(fileOut, engine="kaleido", scale=1.6)
-    # plotly.io.write_image(figDeathsPerK, fileOut)
+
+    # #### Case counts linear
+
+    weekTitle = ", ".join(["Covid-19 Total Cases", weekStr])
+    fileOut = '../img/' +  ".".join(['Covid19TotalCasesLin', weekStr, 'png'])
+    figCaseCts = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
+                                    [-1, 5], 300000.0,
+                                    myColscaleVar='cases',
+                                    myHoverDescription='Total cases',
+                                    myHoverVar='cases',
+                                    myTitle=weekTitle)
+    figCaseCts.write_image(fileOut, engine="kaleido", scale=1.6)
+
+    # #### Death counts linear
+
+    weekTitle = ", ".join(["Covid-19 Total Deaths", weekStr])
+    fileOut = '../img/' +  ".".join(['Covid19TotalDeathsLin', weekStr, 'png'])
+    figDeathCts = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
+                                     [-1, 5], 300000.0,
+                                     myColscaleVar='deaths',
+                                     myZlabel='Total deaths',
+                                     myHoverDescription='Total deaths',
+                                     myHoverVar='deaths',
+                                     myTitle=weekTitle)
+    figDeathCts.write_image(fileOut, engine="kaleido", scale=1.6)
+
+    # # #### Cases per thousand linear
+
+    weekTitle = ", ".join(["Covid-19 Cases per Thousand", weekStr])
+    fileOut = '../img/' +  ".".join(['Covid19CasesPer1000Lin', weekStr, 'png'])
+    myHoverDescr = 'Total cases per 1000'
+    figCasesPerK = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
+                                      [-1, 4], 25000.0,
+                                      myColscaleVar='casesk',
+                                      myZlabel='Total cases per 1000',
+                                      myHoverDescription=myHoverDescr,
+                                      myHoverVar='casesk',
+                                      myTitle=weekTitle)
+    figCasesPerK.write_image(fileOut, engine="kaleido", scale=1.6)
+
+    # # #### Deaths per thousand linear
+
+    weekTitle = ", ".join(["Covid-19 Deaths per Thousand", weekStr])
+    fileOut = '../img/' + ".".join(['Covid19DeathsPer1000Lin', weekStr, 'png'])
+    myHoverDescr = 'Deaths per 1000'
+    figDeathsPerK = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
+                                       [-1, 5], 300000.0,
+                                       myColscaleVar='deathsk',
+                                       myZlabel='Total deaths per 1000',
+                                       myHoverDescription=myHoverDescr,
+                                       myHoverVar='deathsk',
+                                       myTitle=weekTitle)
+    figDeathsPerK.write_image(fileOut, engine="kaleido", scale=1.6)
 
 Δt = time() - t0
 print(f"\n\nTime to generate single frame images Δt: {Δt: 4.1f}s.")
