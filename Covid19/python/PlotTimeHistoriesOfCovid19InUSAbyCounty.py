@@ -334,7 +334,7 @@ pio.kaleido.scope.default_format = "png"
 # ## Generate single frames for each week in data file:
 
 t0 = time()
-weekStrs = df.weekStr
+weekStrs = df.weekStr.unique()
 for weekStr in weekStrs:
 
     # #### Case counts
