@@ -169,7 +169,113 @@ print(asctime(localtime()))
 # (https://plotly.com/python/choropleth-maps/)
 
 
-def choroplethCovidUSA(df, myGeoJSON, myDecimalRange, myTopOfRange,
+def choroplethCovidUSA(df, GeoJSON,
+                       decimalRange=[-1, 5],
+                       topOfRange=300000,
+                       linearRange=None,
+                       animationVar=None,
+                       locs='fips',
+                       colscaleVar='log10cases',
+                       colscale='Portland',
+                       scope='usa',
+                       zlabel='Total cases',
+                       hoverDescription='log10(cases)',
+                       hoverVar='cases',
+                       title='Covid-19 Total Cases to Date'):
+    """
+    INPUT:
+        df		pd.DataFrame, containing data to be plotted
+        GeoJSON		plotly shape file dict containing county shapes
+        decimalRange	list type(int), containing decimal orders of magnitude
+                        for color bar range. (E.g., [-1, 3] for 0.1–1000.),
+                        set to None if using linearRange, default: [-1, 5]
+        topOfRange	float, containing 'extra' range on top of decimal
+                        scale. (E.g. 2500 to extend decimalRange by less than
+                        an order of magnitude.) If None, entire range will be
+                        specified by decimalRange (or linearRange),
+                        default: 25000
+        linearRange	list(type=int|float), if not None, fix range of color-
+                        bar using linear scale, e.g., [0, 200], default: None.
+                        If not None, overrides decimalRange and topOfRange.
+        animationVar	str, feature to use to select individual animation
+                        frames (typically a time-based variable, such as
+                        'weekStr'). If None, no animation, default: None
+        locs		str, feature used to select shapes from GeoJSON dict,
+                        default: 'fips'
+        colscaleVar	str, column name in df for z-scale,
+                        default: 'log10cases'.
+        colscale	str, valid Plotly color scale name, default: 'Portland'
+        scope		str, identifier for geographic range, default: 'usa'
+        zlabel		tr, label on top of color bar
+        hoverDescription	str, label, in addition to locs, to describe
+                        values in DataFrame column used for colorbar intensity,
+                        default: 'Total cases'
+        hoverVar	str, feature values to be shown when hovering over a
+                        region.
+        title		str, figure title,
+                        default: "Covid-19 Total Cases to Date"
+    """
+
+    minval = df[colscaleVar].replace(0, np.nan).min()
+    maxval = np.max(df[colscaleVar])
+    print(f"minval: {minval}, maxval: {maxval}")
+
+    if linearRange is not None:
+        bottomOfRange = linearRange[0]
+        topOfRange = linearRange[-1]
+    else:
+        bottomOfRange = 10**decimalRange[0]
+    if maxval > topOfRange:
+        print("WARNING: maximum value exceeds top of your range."
+              f" {maxval} > {topOfRange}.")
+    if minval < bottomOfRange:
+        print("WARNING: minimum value is below bottom of your range."
+              f" {minval} < {bottomOfRange}.")
+
+    if linearRange is not None:
+        tickVals = [round(lv, 4) for lv in linearRange]
+        colorAxisVals = [str(lv) for lv in tickVals]
+    else:
+        linVals = np.logspace(decimalRange[0], decimalRange[1],
+                              int(decimalRange[1] - decimalRange[0]) + 1)
+        if topOfRange is not None:
+            linVals = np.append(linVals, topOfRange)
+        linVals = [round(lv, 4) for lv in linVals]
+        tickVals = [round(lv, 4) for lv in np.log10(linVals)]
+
+        # coloraxis_colorbar dict needs ticktext to an array of strings:
+        colorAxisVals = [str(lv) for lv in linVals]
+    print(colorAxisVals)
+    print(tickVals)
+
+    fig = px.choropleth(df,
+                        animation_frame=animationVar,
+                        geojson=GeoJSON,
+                        locations=locs,
+                        color=colscaleVar,
+                        color_continuous_scale=colscale,
+                        range_color=(tickVals[0], tickVals[-1]),
+                        scope=scope,
+                        hover_name=hoverVar,
+                        labels={colscaleVar: hoverDescription}
+                       )
+    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0},
+                      title={'text': title,
+                             'x': 0.5, 'xanchor': 'center',
+                             'y': 0.97, 'yanchor': 'top'},
+                      coloraxis_colorbar=dict(title=zlabel,
+                                              tickvals=tickVals,
+                                              ticktext=colorAxisVals)
+                     )
+    fig.update_traces(marker_line_width=0, marker_opacity=0.8)
+    fig.update_geos(showsubunits=True, subunitcolor="black")
+
+    # fig.show("notebook")
+
+    return fig
+
+
+def choroplethCovidUSAOri(df, myGeoJSON, myDecimalRange, myTopOfRange,
                        myAnimationVar=None,
                        myLocs='fips',
                        myColscaleVar='log10cases',
@@ -255,7 +361,7 @@ def choroplethCovidUSA(df, myGeoJSON, myDecimalRange, myTopOfRange,
                                               tickvals=logVals,
                                               ticktext=linVals))
 
-    # fig.show("notebook")
+    fig.show()
 
     return fig
 
@@ -343,9 +449,9 @@ for weekStr in weekStrs:
     fileOut = '../img/' +  ".".join(['Covid19TotalCasesLog', weekStr, 'png'])
     figCaseCts = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
                                     [-1, 5], 300000.0,
-                                    myHoverDescription='log10(total cases)',
-                                    myHoverVar='cases',
-                                    myTitle=weekTitle)
+                                    hoverDescription='log10(total cases)',
+                                    hoverVar='cases',
+                                    title=weekTitle)
     figCaseCts.write_image(fileOut, engine="kaleido", scale=1.6)
 
     # #### Death counts log
@@ -354,11 +460,11 @@ for weekStr in weekStrs:
     fileOut = '../img/' +  ".".join(['Covid19TotalDeathsLog', weekStr, 'png'])
     figDeathCts = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
                                      [-1, 5], 300000.0,
-                                     myColscaleVar='log10deaths',
-                                     myZlabel='Total deaths',
-                                     myHoverDescription='log10(total deaths)',
-                                     myHoverVar='deaths',
-                                     myTitle=weekTitle)
+                                     colscaleVar='log10deaths',
+                                     zlabel='Total deaths',
+                                     hoverDescription='log10(total deaths)',
+                                     hoverVar='deaths',
+                                     title=weekTitle)
     figDeathCts.write_image(fileOut, engine="kaleido", scale=1.6)
 
     # # #### Cases per thousand log
@@ -368,11 +474,11 @@ for weekStr in weekStrs:
     myHoverDescr = 'log10(cases per 1000)'
     figCasesPerK = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
                                       [-1, 4], 25000.0,
-                                      myColscaleVar='log10casesk',
-                                      myZlabel='Total cases per 1000',
-                                      myHoverDescription=myHoverDescr,
-                                      myHoverVar='casesk',
-                                      myTitle=weekTitle)
+                                      colscaleVar='log10casesk',
+                                      zlabel='Total cases per 1000',
+                                      hoverDescription=myHoverDescr,
+                                      hoverVar='casesk',
+                                      title=weekTitle)
     figCasesPerK.write_image(fileOut, engine="kaleido", scale=1.6)
 
     # # #### Deaths per thousand log
@@ -382,50 +488,63 @@ for weekStr in weekStrs:
     myHoverDescr = 'log10(deaths per 1000)'
     figDeathsPerK = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
                                        [-1, 5], 300000.0,
-                                       myColscaleVar='log10deathsk',
-                                       myZlabel='Total deaths per 1000',
-                                       myHoverDescription=myHoverDescr,
-                                       myHoverVar='deathsk',
-                                       myTitle=weekTitle)
+                                       colscaleVar='log10deathsk',
+                                       zlabel='Total deaths per 1000',
+                                       hoverDescription=myHoverDescr,
+                                       hoverVar='deathsk',
+                                       title=weekTitle)
     figDeathsPerK.write_image(fileOut, engine="kaleido", scale=1.6)
 
     # #### Case counts linear
 
+choroplethCovidUSA(df[df.weekStart == '2020-10-05'],
+                   counties,
+                   linearRange=[0, 25000, 50000, 75000, 100000, 125000],
+                   colscaleVar='cases',
+                   zlabel='Total cases',
+                   hoverVar='cases',
+                   hoverDescription='total cases',
+                   title="Covid-19 Total Cases as of 2020-10-05"
+                  )
+
     weekTitle = ", ".join(["Covid-19 Total Cases", weekStr])
     fileOut = '../img/' +  ".".join(['Covid19TotalCasesLin', weekStr, 'png'])
+    myRange = [0, 25000, 50000, 75000, 100000, 125000]
     figCaseCts = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
-                                    [-1, 5], 300000.0,
-                                    myColscaleVar='cases',
-                                    myHoverDescription='Total cases',
-                                    myHoverVar='cases',
-                                    myTitle=weekTitle)
+                                    linearRange=myRange,
+                                    colscaleVar='cases',
+                                    hoverDescription='Total cases',
+                                    hoverVar='cases',
+                                    title=weekTitle)
     figCaseCts.write_image(fileOut, engine="kaleido", scale=1.6)
 
     # #### Death counts linear
 
     weekTitle = ", ".join(["Covid-19 Total Deaths", weekStr])
     fileOut = '../img/' +  ".".join(['Covid19TotalDeathsLin', weekStr, 'png'])
+    myRange = [0, 2500, 5000, 7500, 10000]
     figDeathCts = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
-                                     [-1, 5], 300000.0,
-                                     myColscaleVar='deaths',
-                                     myZlabel='Total deaths',
-                                     myHoverDescription='Total deaths',
-                                     myHoverVar='deaths',
-                                     myTitle=weekTitle)
+                                    linearRange=myRange,
+                                     colscaleVar='deaths',
+                                     zlabel='Total deaths',
+                                     hoverDescription='Total deaths',
+                                     hoverVar='deaths',
+                                     title=weekTitle)
     figDeathCts.write_image(fileOut, engine="kaleido", scale=1.6)
 
     # # #### Cases per thousand linear
 
     weekTitle = ", ".join(["Covid-19 Cases per Thousand", weekStr])
     fileOut = '../img/' +  ".".join(['Covid19CasesPer1000Lin', weekStr, 'png'])
+    myRange = [0, 15, 30, 45, 60, 75, 85]
     myHoverDescr = 'Total cases per 1000'
     figCasesPerK = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
-                                      [-1, 4], 25000.0,
-                                      myColscaleVar='casesk',
-                                      myZlabel='Total cases per 1000',
-                                      myHoverDescription=myHoverDescr,
-                                      myHoverVar='casesk',
-                                      myTitle=weekTitle)
+                                      linearRange=myRange,
+                                      colscaleVar='casesk',
+                                      zlabel='Total cases per 1000',
+                                      hoverDescription=myHoverDescr,
+                                      hoverVar='casesk',
+                                      title=weekTitle)
     figCasesPerK.write_image(fileOut, engine="kaleido", scale=1.6)
 
     # # #### Deaths per thousand linear
@@ -434,71 +553,13 @@ for weekStr in weekStrs:
     fileOut = '../img/' + ".".join(['Covid19DeathsPer1000Lin', weekStr, 'png'])
     myHoverDescr = 'Deaths per 1000'
     figDeathsPerK = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
-                                       [-1, 5], 300000.0,
-                                       myColscaleVar='deathsk',
-                                       myZlabel='Total deaths per 1000',
-                                       myHoverDescription=myHoverDescr,
-                                       myHoverVar='deathsk',
-                                       myTitle=weekTitle)
+                                       linearRange=myRange,
+                                       colscaleVar='deathsk',
+                                       zlabel='Total deaths per 1000',
+                                       hoverDescription=myHoverDescr,
+                                       hoverVar='deathsk',
+                                       title=weekTitle)
     figDeathsPerK.write_image(fileOut, engine="kaleido", scale=1.6)
 
 Δt = time() - t0
 print(f"\n\nTime to generate single frame images Δt: {Δt: 4.1f}s.")
-
-# ## Generate monolithic JavaScript-fueled animations in HTML documents.
-
-# # #### Case counts
-
-# figCaseCts = choroplethCovidUSA(df, counties, [-1, 5], 300000.0,
-#                                 myAnimationVar='weekStr',
-#                                 myTitle="Covid-19 Total Cases")
-
-# # ##### Export HTML w/ JavaScript
-
-# # py.plot(figCaseCts, filename='Covid19CaseCtsUScounties', auto_open=True)
-# pio.write_html(figCaseCts, file=imgPath / 'Covid19CaseCtsUScounties.html',
-#                auto_open=True)
-
-# # #### Death counts
-
-# figDeathCts = choroplethCovidUSA(df, counties, [-1, 4], 25000.0,
-#                                  myAnimationVar='weekStr',
-#                                  myColscaleVar='log10deaths',
-#                                  myZlabel='Total deaths',
-#                                  myHoverDescription='Total deaths',
-#                                  myHoverVar='deaths',
-#                                  myTitle="Covid-19 Total Deaths")
-
-# # py.plot(figCaseCts, filename='Covid19DeathCtsUScounties', auto_open=True)
-# pio.write_html(figDeathCts, file=imgPath / 'Covid19DeathCtsUScounties.html',
-#                auto_open=True)
-
-# # #### Cases per thousand
-
-# figCasesPerK = choroplethCovidUSA(df, counties, [0, 2], 170.0,
-#                                   myAnimationVar='weekStr',
-#                                   myColscaleVar='log10casesk',
-#                                   myZlabel='Total cases per 1000',
-#                                   myHoverDescription='Total cases per 1000',
-#                                   myHoverVar='casesk',
-#                                   myTitle="Covid-19 Total Cases per 1000")
-
-# # py.plot(figCaseCts, filename='Covid19DeathCtsUScounties', auto_open=True)
-# pio.write_html(figCasesPerK,
-#                file=imgPath / 'Covid19CasesPerThousandUScounties.html',
-#                auto_open=True)
-
-# # #### Deaths per thousand
-
-# figDeathsPerK = choroplethCovidUSA(df, counties, [-2, 0], 5.2,
-#                                    myAnimationVar='weekStr',
-#                                    myColscaleVar='log10deathsk',
-#                                    myZlabel='Total deaths per 1000',
-#                                    myHoverDescription='Total deaths per 1000',
-#                                    myHoverVar='deathsk',
-#                                    myTitle="Covid-19 Total Deaths per 1000")
-
-# # py.plot(figCaseCts, filename='Covid19DeathCtsUScounties', auto_open=True)
-# pio.write_html(figDeathsPerK,
-#                file=imgPath / 'Covid19DeathsPerThousandUScounties.html',
-#                auto_open=True)
