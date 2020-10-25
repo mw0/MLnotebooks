@@ -12,6 +12,7 @@ from copy import deepcopy
 from pathlib import Path
 import sys
 from urllib.request import urlopen
+import json
 
 # Versioned modules:
 
@@ -34,15 +35,14 @@ from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
 
 from IPython.core.interactiveshell import InteractiveShell
 
-# cf.go_offline(connected=True)
-cf.set_config_file(theme='white')
-cf.set_config_file(offline=True)
-
 print("Python version: ", sys.version_info[:])
 print("Un-versioned imports:\n")
 prefixStr = ''
 if 'copy' in sys.modules:
     print(prefixStr + 'copy', end="")
+    prefixStr = ', '
+if 'json' in sys.modules:
+    print(prefixStr + 'json', end="")
     prefixStr = ', '
 if 'pathlib' in sys.modules:
     print(prefixStr + 'pathlib', end="")
@@ -76,18 +76,6 @@ if 'requests' in sys.modules:
 # Options for pandas
 pd.options.display.max_columns = 30
 pd.options.display.max_rows = 50
-
-# Autoreload extension
-if 'autoreload' not in get_ipython().extension_manager.loaded:
-    get_ipython().run_line_magic('load_ext', 'autoreload')
-
-get_ipython().run_line_magic('autoreload', '2')
-
-
-# **Next two lines are for pretty output for all prints in a Pandas cell, not
-# just the last**
-
-InteractiveShell.ast_node_interactivity = "all"
 
 # ### Get county shape files to be used by plotly.express
 
