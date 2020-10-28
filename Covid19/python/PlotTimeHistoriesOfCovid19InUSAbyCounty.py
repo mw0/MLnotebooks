@@ -459,7 +459,7 @@ for weekStr in weekStrs:
     weekTitle = ", ".join(["Covid-19 Total Deaths", weekStr])
     fileOut = '../img/' +  ".".join(['Covid19TotalDeathsLog', weekStr, 'png'])
     figDeathCts = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
-                                     [-1, 5], 300000.0,
+                                     [-1, 4], 25000.0,
                                      colscaleVar='log10deaths',
                                      zlabel='Total deaths',
                                      hoverDescription='log10(total deaths)',
@@ -473,7 +473,7 @@ for weekStr in weekStrs:
     fileOut = '../img/' +  ".".join(['Covid19CasesPer1000Log', weekStr, 'png'])
     myHoverDescr = 'log10(cases per 1000)'
     figCasesPerK = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
-                                      [-1, 4], 25000.0,
+                                      [0, 2], 170.0,
                                       colscaleVar='log10casesk',
                                       zlabel='Total cases per 1000',
                                       hoverDescription=myHoverDescr,
@@ -487,7 +487,7 @@ for weekStr in weekStrs:
     fileOut = '../img/' + ".".join(['Covid19DeathsPer1000Log', weekStr, 'png'])
     myHoverDescr = 'log10(deaths per 1000)'
     figDeathsPerK = choroplethCovidUSA(df[df.weekStr == weekStr], counties,
-                                       [-1, 5], 300000.0,
+                                       [-2, 0], 5.2,
                                        colscaleVar='log10deathsk',
                                        zlabel='Total deaths per 1000',
                                        hoverDescription=myHoverDescr,
@@ -497,15 +497,16 @@ for weekStr in weekStrs:
 
     # #### Case counts linear
 
-choroplethCovidUSA(df[df.weekStart == '2020-10-05'],
-                   counties,
-                   linearRange=[0, 25000, 50000, 75000, 100000, 125000],
-                   colscaleVar='cases',
-                   zlabel='Total cases',
-                   hoverVar='cases',
-                   hoverDescription='total cases',
-                   title="Covid-19 Total Cases as of 2020-10-05"
-                  )
+    weekTitle = ", ".join(["Covid-19 Total Cases", weekStr])
+    fileOut = '../img/' +  ".".join(['Covid19TotalCasesLin', weekStr, 'png'])
+    choroplethCovidUSA(df[df.weekStart == '2020-10-05'],
+                       counties,
+                       linearRange=[0, 25000, 50000, 75000, 100000, 125000],
+                       colscaleVar='cases',
+                       zlabel='Total cases',
+                       hoverVar='cases',
+                       hoverDescription='total cases',
+                       title="Covid-19 Total Cases as of 2020-10-05")
 
     weekTitle = ", ".join(["Covid-19 Total Cases", weekStr])
     fileOut = '../img/' +  ".".join(['Covid19TotalCasesLin', weekStr, 'png'])
