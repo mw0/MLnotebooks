@@ -1,5 +1,0 @@
-nohup streamlit run /home/$(echo $USER)/work/MLnotebooks/HuggingFace/python/streamlitSummarizer.py --server.port 8501 &
-
-TESTING:
-
-streamlit run /home/$(echo $USER)/work/MLnotebooks/HuggingFace/python/streamlitSummarizerV2.py --server.port 8503 &

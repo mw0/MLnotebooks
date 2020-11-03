@@ -7,9 +7,6 @@ __pycache__/
 */HTML
 FederalistPapers/*
 GAN-tutorial/*
-HuggingFace/data/fakeRealNews.zip
-HuggingFace/nohup.out
-HuggingFace/python/nohup.out
 InterpretableML/breast-cancer-wisconsin-data.zip
 InterpretableML/data.csv
 InterpretableML/heartbeat.zip
