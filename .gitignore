@@ -5,6 +5,14 @@ __pycache__/
 */__pycache__/
 */.ipynb_checkpoints
 */HTML
+Covid19/data/dfaggv1.4.ftr
+Covid19/data/dfallv1.2.ftr
+Covid19/data/dfallv1.3.ftr
+Covid19/data/dfallv1.4.ftr
+Covid19/data/dfl3v1.4.ftr
+Covid19/data/MungedCovid19v2.0.ftr
+Covid19/data/MungedCovid19v1.3.ftr
+Covid19/notebooks/NewYorkTimesCovid19DataMungingV0.ipynb
 FederalistPapers/*
 GAN-tutorial/*
 InterpretableML/breast-cancer-wisconsin-data.zip
