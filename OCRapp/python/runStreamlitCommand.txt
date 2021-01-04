@@ -5,4 +5,4 @@ nohup streamlit run /home/$(echo $USER)/work/MLnotebooks/OCRapp/python/streamlit
 TESTING:
 
 LocalImageLocation=/home/$(echo $USER)/work/MLnotebooks/OCRapp/images/StudiesAtSmallestScaleNobelPrizes.jpg \
-streamlit run /home/$(echo $USER)/work/MLnotebooks/OCRapp/python/streamlitScan2textV2.py --server.port 8504 &
+streamlit run /home/$(echo $USER)/work/MLnotebooks/OCRapp/python/streamlitScan2textV2.py --server.port 8505 &

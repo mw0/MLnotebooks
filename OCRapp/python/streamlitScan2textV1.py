@@ -75,7 +75,6 @@ def doSpacySpellCheck(nlp, text):
     return doc._.outcome_spellCheck
 
 
-# @st.cache(ttl=60.0*3.0, max_entries=20)  # clear cache every 3 minutes
 @st.cache(suppress_st_warning=True)
 def correctSpellingUsingSymspell(symSpell, vocab, text):
     sentences = sent_tokenize(text)
@@ -188,6 +187,7 @@ showProfilingInfo = False
 showProfilingInfo = st.sidebar.checkbox("Show profiling information", value=True)
 
 # print(help(st.sidebar.file_uploader))
+st.set_option('deprecation.showfileUploaderEncoding', False)
 st.sidebar.markdown('## Upload a local scan file')
 myBytesIO = st.sidebar.file_uploader(' ',
                                      encoding='auto',
