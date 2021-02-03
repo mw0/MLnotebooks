@@ -30,6 +30,14 @@ from itertools import islice
 import matplotlib.pyplot as plt
 # import matplotlib.image as mpimg
 
+import torch
+cudaDetected = torch.cuda.is_available()
+print(f"torch sees cuda: {cudaDetected}", flush=True)
+if cudaDetected:
+    cudaDeviceCt = torch.cuda.device_count()
+    for i in range(cudaDeviceCt):
+        print(f"cuda device[{i}]: {torch.cuda.get_device_name(i)}", flush=True)
+
 # widthHeight = re.compile(r"^[^(].\((\d*)\, (\d*)\).*$")
 
 pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
